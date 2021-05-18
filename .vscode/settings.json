@@ -1,0 +1,21 @@
+{
+    // vscode
+    "editor.detectIndentation": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+
+    // python specific settings
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.lintOnSave": true,
+    "python.formatting.provider": "autopep8",
+    "python.languageServer": "Microsoft",
+}
