@@ -1,5 +1,6 @@
 import json
 import os
+import pandas as pd
 import requests
 import shutil
 import tqdm
@@ -133,3 +134,12 @@ class XenoCantoDownloader():
                     progress_bar.write(
                         "Could not retrieve file with id {}".format(file_id))
             progress_bar.update(1)
+
+    def download_species_list_data(self, species_list):
+        for species_name in species_list:
+            self.download_species_data(species_name)
+
+    def download_species_csv_file_data(self, csv_file, column_name="Scientific_name"):
+        df = pd.read_csv(csv_file)
+        species_list = df[column_name]
+        self.download_species_list_data(species_list)
