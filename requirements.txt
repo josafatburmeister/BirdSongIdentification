@@ -1,0 +1,6 @@
+librosa
+numpy
+pylint
+pytorch
+skimage
+torchvision
