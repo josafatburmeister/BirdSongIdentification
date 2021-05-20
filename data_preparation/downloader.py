@@ -12,6 +12,16 @@ class XenoCantoDownloader():
         self.xeno_canto_url = "https://www.xeno-canto.org"
         self.xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
+        # Xeno-Canto categories
+        self.xc_quality_levels = set(["A", "B", "C", "D", "E"])
+        self.xc_sound_types = set(["uncertain", "song", "subsong", "call", "alarm call", "flight call",
+                                  "nocturnal flight call", "begging call", "drumming", "duet", "dawn song"])
+        self.xc_sexes = set(["male", "female", "sex uncertain"])
+        self.xc_life_stages = set(["adult", "juvenile",
+                                   "hatchling or nestling", "life stage uncertain"])
+        self.xc_special_cases = set(["aberrant",
+                                     "mimicry/imitation", "bird in hand"])
+
         self.cache_dir = os.path.join(target_dir, "cache")
         self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
         self.label_cache_dir = os.path.join(self.cache_dir, "labels")
@@ -131,7 +141,17 @@ class XenoCantoDownloader():
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list, min_quality="E", test_size=0.3, include_calls=False):
+    def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=["song"], sexes=["male", "female", "sex uncertain"], life_stages=["adult", "juvenile",
+                                                                                                                                                           "hatchling or nestling", "life stage uncertain"], exclude_special_cases=True):
+        if min_quality not in self.xc_quality_levels:
+            raise ValueError("Invalid quality level for Xeno-Canto database")
+        if not set(sound_types).issubset(self.xc_sound_types):
+            raise ValueError("Invalid sound type for Xeno-Canto database")
+        if not set(sexes).issubset(self.xc_sexes):
+            raise ValueError("Invalid sex for Xeno-Canto database")
+        if not set(life_stages).issubset(self.xc_life_stages):
+            raise ValueError("Invalid life stage for Xeno-Canto database")
+
         train_frames = []
         test_frames = []
         val_frames = []
@@ -149,10 +169,32 @@ class XenoCantoDownloader():
             if min_quality < "E":
                 labels = labels[labels["q"] <= min_quality]
 
-            print(labels)
-
             # filter samples by soundtype
-            labels = labels[labels["type"].str.contains("song")]
+            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            if set(sound_types) < self.xc_sound_types:
+                type_search_string = "|".join(sound_types)
+                labels = labels[labels["type"].str.contains(
+                    type_search_string)]
+
+            # filter samples by sex
+            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            if set(sexes) < self.xc_sexes:
+                sex_search_string = "|".join(sexes)
+                labels = labels[labels["type"].str.contains(sex_search_string)]
+
+            # filter samples by life stage
+            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            if set(life_stages) < self.xc_life_stages:
+                life_stage_search_string = "|".join(life_stages)
+                labels = labels[labels["type"].str.contains(
+                    life_stage_search_string)]
+
+            # remove special cases
+            if exclude_special_cases:
+                special_cases_stage_search_string = "|".join(
+                    self.xc_special_cases)
+                labels = labels[~labels["type"].str.contains(
+                    special_cases_stage_search_string)]
 
             # create class labels
             labels["label"] = labels["gen"] + "_" + labels["sp"]
@@ -162,10 +204,10 @@ class XenoCantoDownloader():
 
             # create train, test and val splits
             train_labels, test_labels = train_test_split(
-                labels, test_size=0.35, random_state=12)
+                labels, test_size=test_size, random_state=12)
 
             test_labels, val_labels = train_test_split(
-                test_labels, test_size=0.35, random_state=12)
+                test_labels, test_size=test_size, random_state=12)
 
             train_frames.append(train_labels)
             test_frames.append(test_labels)
