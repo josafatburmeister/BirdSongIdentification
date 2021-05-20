@@ -173,8 +173,12 @@ class XenoCantoDownloader():
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
             if set(sound_types) < self.xc_sound_types:
                 type_search_string = "|".join(sound_types)
-                labels = labels[labels["type"].str.contains(
-                    type_search_string)]
+                type_exclude_string = "|".join(
+                    self.xc_sound_types - set(sound_types))
+
+                labels = labels[(labels["type"].str.contains(
+                    type_search_string)) & (~labels["type"].str.contains(
+                        type_exclude_string))]
 
             # filter samples by sex
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
@@ -197,10 +201,17 @@ class XenoCantoDownloader():
                     special_cases_stage_search_string)]
 
             # create class labels
-            labels["label"] = labels["gen"] + "_" + labels["sp"]
+            labels["sound_type"] = ""
+            for idx, row in labels.iterrows():
+                for sound_type in sound_types:
+                    if sound_type in row["type"]:
+                        row["sound_type"] = sound_type
+                        break
+            labels["label"] = labels["gen"] + "_" + \
+                labels["sp"] + "_" + labels["sound_type"]
 
             # select relevant columns
-            labels = labels[["id", "label", "q"]]
+            labels = labels[["id", "label", "q", "sound_type"]]
 
             # create train, test and val splits
             train_labels, test_labels = train_test_split(
