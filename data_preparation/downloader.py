@@ -142,7 +142,7 @@ class XenoCantoDownloader():
             return metadata, first_page["numRecordings"]
 
     def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=["song"], sexes=["male", "female", "sex uncertain"], life_stages=["adult", "juvenile",
-                                                                                                                                                           "hatchling or nestling", "life stage uncertain"], exclude_special_cases=True):
+                                                                                                                                                           "hatchling or nestling", "life stage uncertain"], exclude_special_cases=True, maximum_number_of_background_species=None):
         if min_quality not in self.xc_quality_levels:
             raise ValueError("Invalid quality level for Xeno-Canto database")
         if not set(sound_types).issubset(self.xc_sound_types):
@@ -200,6 +200,18 @@ class XenoCantoDownloader():
                 labels = labels[~labels["type"].str.contains(
                     special_cases_stage_search_string)]
 
+            labels["background_species"] = labels["also"].apply(
+                lambda x: len(x))
+
+            # remove samples with background species
+            if maximum_number_of_background_species:
+                labels = labels[labels["background_species"]
+                                <= maximum_number_of_background_species]
+
+            if (len(labels) == 0):
+                raise NameError(
+                    "There are no training samples for class {}".format(species_name))
+
             # create class labels
             labels["sound_type"] = ""
             for idx, row in labels.iterrows():
@@ -211,7 +223,8 @@ class XenoCantoDownloader():
                 labels["sp"] + "_" + labels["sound_type"]
 
             # select relevant columns
-            labels = labels[["id", "label", "q", "sound_type"]]
+            labels = labels[["id", "label", "q",
+                             "sound_type", "background_species"]]
 
             # create train, test and val splits
             train_labels, test_labels = train_test_split(
