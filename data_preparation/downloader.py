@@ -230,30 +230,30 @@ class XenoCantoDownloader():
             train_labels, test_labels = train_test_split(
                 labels, test_size=test_size, random_state=12)
 
-            test_labels, val_labels = train_test_split(
+            val_labels, test_labels = train_test_split(
                 test_labels, test_size=test_size, random_state=12)
 
             train_frames.append(train_labels)
-            test_frames.append(test_labels)
             val_frames.append(val_labels)
+            test_frames.append(test_labels)
 
         # save label files
         training_set = pd.concat(train_frames)
-        test_set = pd.concat(test_frames)
         validation_set = pd.concat(val_frames)
+        test_set = pd.concat(test_frames)
         training_set.to_json(os.path.join(
             self.train_dir, "train.json"), "records", indent=4)
-        test_set.to_json(os.path.join(
-            self.test_dir, "test.json"), "records", indent=4)
         validation_set.to_json(os.path.join(
             self.val_dir, "val.json"), "records", indent=4)
+        test_set.to_json(os.path.join(
+            self.test_dir, "test.json"), "records", indent=4)
 
         # download audio files
         self.download_audio_files_by_id(
             self.train_audio_dir, training_set["id"], "Download training set")
 
         self.download_audio_files_by_id(
-            self.test_audio_dir, test_set["id"], "Download test set")
+            self.test_audio_dir, validation_set["id"], "Download validation set")
 
         self.download_audio_files_by_id(
-            self.val_audio_dir, validation_set["id"], "Download validation set")
+            self.val_audio_dir, test_set["id"], "Download test set")
