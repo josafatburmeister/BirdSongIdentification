@@ -1,6 +1,7 @@
 import librosa
 import math
 import numpy
+import pandas as pd
 import os
 from skimage import io
 import tqdm
@@ -12,7 +13,7 @@ warnings.filterwarnings('ignore')
 class SpectrogramCreator():
     def __init__(self, chunk_length, path_manager):
         # parameters for spectorgram creation
-        self.chunk_length = chunk_length  # chunk length in seconds
+        self.chunk_length = chunk_length  # chunk length in milliseconds
         self.sampling_rate = 44100  # number of samples per second
         self.window_length = 1024
         self.n_fft = 1024
@@ -20,7 +21,8 @@ class SpectrogramCreator():
         self.fmin = 500  # minimum frequency
         self.fmax = 15000  # maximum frequency
 
-        self.samples_per_chunk = self.sampling_rate * chunk_length
+        self.samples_per_chunk = math.floor(
+            (self.sampling_rate * chunk_length) / 1000)
 
         self.path = path_manager
 
@@ -89,20 +91,45 @@ class SpectrogramCreator():
 
         if "train" in datasets:
             train_spectrogram_dir = self.path.train_spectrogram_dir(1000)
-            dirs.append([self.path.train_audio_dir,
+            dirs.append([self.path.train_audio_dir, self.path.train_label_file(),
                         train_spectrogram_dir, "training set"])
 
         if "val" in datasets:
             val_spectrogram_dir = self.path.val_spectrogram_dir(1000)
-            dirs.append([self.path.val_audio_dir,
+            dirs.append([self.path.val_audio_dir, self.path.val_label_file(),
                         val_spectrogram_dir, "validation set"])
 
         if "test" in datasets:
             test_spectrogram_dir = self.path.test_spectrogram_dir(1000)
-            dirs.append([self.path.test_audio_dir,
+            dirs.append([self.path.test_audio_dir, self.path.test_label_file(),
                         test_spectrogram_dir, "test set"])
 
-        for audio_dir, spectrogram_dir, desc in dirs:
+        for audio_dir, label_file, spectrogram_dir, desc in dirs:
             self.path.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, desc)
+            self.create_spectrogram_labels(label_file, spectrogram_dir)
+
+    def create_spectrogram_labels(self, label_file, spectrogram_dir):
+        labels = pd.read_json(label_file)
+
+        spectrogram_labels = []
+
+        for file in os.listdir(spectrogram_dir):
+            if file.endswith(".png"):
+                file_id = int(file.split("-")[0])
+                label = labels[labels["id"] == file_id]
+
+                if len(label) != 1:
+                    raise NameError(
+                        "No matching labels found for file with id {}".format(file_id))
+
+                label["file_name"] = file
+
+                spectrogram_labels.append(label)
+
+        spectrogram_labels = pd.concat(spectrogram_labels).sort_values(
+            by=['file_name'])
+
+        spectrogram_labels.to_json(label_file.replace(
+            ".json", "_{}.json".format(self.chunk_length)), "records", indent=4)

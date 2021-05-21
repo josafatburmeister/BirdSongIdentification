@@ -34,6 +34,15 @@ class PathManager():
         for file in os.listdir(dir_path):
             os.remove(os.path.join(dir_path, file))
 
+    def train_label_file(self):
+        return os.path.join(self.train_dir, "train.json")
+
+    def val_label_file(self):
+        return os.path.join(self.val_dir, "val.json")
+
+    def test_label_file(self):
+        return os.path.join(self.test_dir, "test.json")
+
     def train_spectrogram_dir(self, chunk_length):
         return os.path.join(self.train_dir, "spectrograms_{}".format(chunk_length))
 
