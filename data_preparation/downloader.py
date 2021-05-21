@@ -193,7 +193,7 @@ class XenoCantoDownloader():
             for idx, row in labels.iterrows():
                 for sound_type in sound_types:
                     if sound_type in row["type"]:
-                        row["sound_type"] = sound_type
+                        labels.loc[idx, "sound_type"] = sound_type
                         break
             labels["label"] = labels["gen"] + "_" + \
                 labels["sp"] + "_" + labels["sound_type"]
