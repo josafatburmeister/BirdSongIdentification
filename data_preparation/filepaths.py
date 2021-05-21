@@ -3,6 +3,8 @@ import os
 
 class PathManager():
     def __init__(self, data_dir):
+        self.ensure_dir(data_dir)
+
         self.cache_dir = os.path.join(data_dir, "cache")
         self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
         self.label_cache_dir = os.path.join(self.cache_dir, "labels")
