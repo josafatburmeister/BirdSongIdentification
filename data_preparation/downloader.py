@@ -8,7 +8,7 @@ import tqdm
 
 
 class XenoCantoDownloader():
-    def __init__(self, target_dir):
+    def __init__(self, path_manager):
         self.xeno_canto_url = "https://www.xeno-canto.org"
         self.xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
@@ -22,41 +22,17 @@ class XenoCantoDownloader():
         self.xc_special_cases = set(["aberrant",
                                      "mimicry/imitation", "bird in hand"])
 
-        self.cache_dir = os.path.join(target_dir, "cache")
-        self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
-        self.label_cache_dir = os.path.join(self.cache_dir, "labels")
-
-        self.train_dir = os.path.join(target_dir, "train")
-        self.train_audio_dir = os.path.join(self.train_dir, "audio")
-        self.test_dir = os.path.join(target_dir, "test")
-        self.test_audio_dir = os.path.join(self.test_dir, "audio")
-        self.val_dir = os.path.join(target_dir, "val")
-        self.val_audio_dir = os.path.join(self.val_dir, "audio")
-
-        # create outer directories
-        self.ensure_dirs([self.cache_dir, self.train_dir,
-                         self.test_dir, self.val_dir])
-
-        # create nested directories
-        self.ensure_dirs([self.audio_cache_dir, self.label_cache_dir, self.train_audio_dir, self.test_audio_dir,
-                          self.val_audio_dir])
-
-    def ensure_dir(self, dir_path):
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-
-    def ensure_dirs(self, dir_paths):
-        for dir_path in dir_paths:
-            self.ensure_dir(dir_path)
+        self.path = path_manager
 
     def metadata_cache_path(self, species_name):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
-        return os.path.join(self.label_cache_dir, file_name)
+        return os.path.join(self.path.label_cache_dir, file_name)
 
     def download_file(self, url, target_file, cache_dir=None):
         file_name = os.path.basename(target_file)
 
-        cached_file_path = os.path.join(self.audio_cache_dir, file_name)
+        cached_file_path = os.path.join(
+            self.path.audio_cache_dir, file_name)
 
         # check if file is in cache
         if cache_dir and os.path.exists(cached_file_path):
@@ -69,7 +45,7 @@ class XenoCantoDownloader():
                 response.raw.decode_content = True
 
                 with open(target_file, "wb") as f:
-                    shutil.copyfileobj(r.raw, f)
+                    shutil.copyfileobj(response.raw, f)
 
                 # put file copy into cache
                 if cache_dir:
@@ -78,7 +54,7 @@ class XenoCantoDownloader():
                 raise NameError("File couldn\'t be retrieved")
 
     def download_audio_file(self, url, target_file):
-        self.download_file(url, target_file, self.audio_cache_dir)
+        self.download_file(url, target_file, self.path.audio_cache_dir)
 
     def download_audio_files_by_id(self, target_dir, file_ids, desc="Download audio files..."):
         progress_bar = tqdm.tqdm(
@@ -242,18 +218,18 @@ class XenoCantoDownloader():
         validation_set = pd.concat(val_frames)
         test_set = pd.concat(test_frames)
         training_set.to_json(os.path.join(
-            self.train_dir, "train.json"), "records", indent=4)
+            self.path.train_dir, "train.json"), "records", indent=4)
         validation_set.to_json(os.path.join(
-            self.val_dir, "val.json"), "records", indent=4)
+            self.path.val_dir, "val.json"), "records", indent=4)
         test_set.to_json(os.path.join(
-            self.test_dir, "test.json"), "records", indent=4)
+            self.path.test_dir, "test.json"), "records", indent=4)
 
         # download audio files
         self.download_audio_files_by_id(
-            self.train_audio_dir, training_set["id"], "Download training set")
+            self.path.train_audio_dir, training_set["id"], "Download training set")
 
         self.download_audio_files_by_id(
-            self.test_audio_dir, validation_set["id"], "Download validation set")
+            self.path.test_audio_dir, validation_set["id"], "Download validation set")
 
         self.download_audio_files_by_id(
-            self.val_audio_dir, test_set["id"], "Download test set")
+            self.path.val_audio_dir, test_set["id"], "Download test set")
