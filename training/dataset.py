@@ -3,11 +3,19 @@ import pandas as pd
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager, chunk_length=1000, split="train", transform=None):
-        self.transform = transform
+    def __init__(self, path_manager, chunk_length=1000, split="train"):
+
+        normalize = transforms.Normalize(
+            (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+
+        transformations = [transforms.Resize(
+            [224, 224]), transforms.ToTensor(), normalize]
+
+        self.transform = transforms.Compose(transformations)
 
         if split == "train":
             self.data_dir = path_manager.train_spectrogram_dir(chunk_length)
