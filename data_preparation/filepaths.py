@@ -29,3 +29,16 @@ class PathManager():
     def ensure_dirs(self, dir_paths):
         for dir_path in dir_paths:
             self.ensure_dir(dir_path)
+
+    def empty_dir(self, dir_path):
+        for file in os.listdir(dir_path):
+            os.remove(os.path.join(dir_path, file))
+
+    def train_spectrogram_dir(self, chunk_length):
+        return os.path.join(self.train_dir, "spectrograms_{}".format(chunk_length))
+
+    def val_spectrogram_dir(self, chunk_length):
+        return os.path.join(self.val_dir, "spectrograms_{}".format(chunk_length))
+
+    def test_spectrogram_dir(self, chunk_length):
+        return os.path.join(self.test_dir, "spectrograms_{}".format(chunk_length))

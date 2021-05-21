@@ -72,6 +72,9 @@ class SpectrogramCreator():
             self.save_spectrogram(target_file, mel_spectrogram_dB)
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
+        # clean up target dir
+        self.path.empty_dir(target_dir)
+
         progress_bar = tqdm.tqdm(
             total=len(os.listdir(audio_dir)), desc="Create spectrograms for {}".format(desc), position=0)
 
@@ -85,20 +88,17 @@ class SpectrogramCreator():
         dirs = []
 
         if "train" in datasets:
-            train_spectrogram_dir = os.path.join(
-                self.path.train_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            train_spectrogram_dir = self.path.train_spectrogram_dir(1000)
             dirs.append([self.path.train_audio_dir,
                         train_spectrogram_dir, "training set"])
 
         if "val" in datasets:
-            val_spectrogram_dir = os.path.join(
-                self.path.val_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            val_spectrogram_dir = self.path.val_spectrogram_dir(1000)
             dirs.append([self.path.val_audio_dir,
                         val_spectrogram_dir, "validation set"])
 
         if "test" in datasets:
-            test_spectrogram_dir = os.path.join(
-                self.path.test_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            test_spectrogram_dir = self.path.test_spectrogram_dir(1000)
             dirs.append([self.path.test_audio_dir,
                         test_spectrogram_dir, "test set"])
 

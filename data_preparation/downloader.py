@@ -224,6 +224,11 @@ class XenoCantoDownloader():
         test_set.to_json(os.path.join(
             self.path.test_dir, "test.json"), "records", indent=4)
 
+        # clear data folders
+        self.path.empty_dir(self.path.train_audio_dir)
+        self.path.empty_dir(self.path.test_audio_dir)
+        self.path.empty_dir(self.path.val_audio_dir)
+
         # download audio files
         self.download_audio_files_by_id(
             self.path.train_audio_dir, training_set["id"], "Download training set")
