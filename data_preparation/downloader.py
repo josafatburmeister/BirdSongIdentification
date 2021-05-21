@@ -234,7 +234,7 @@ class XenoCantoDownloader():
             self.path.train_audio_dir, training_set["id"], "Download training set")
 
         self.download_audio_files_by_id(
-            self.path.test_audio_dir, validation_set["id"], "Download validation set")
+            self.path.val_audio_dir, validation_set["id"], "Download validation set")
 
         self.download_audio_files_by_id(
-            self.path.val_audio_dir, test_set["id"], "Download test set")
+            self.path.test_audio_dir, test_set["id"], "Download test set")
