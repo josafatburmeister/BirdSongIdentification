@@ -3,13 +3,14 @@ import math
 import numpy
 import os
 from skimage import io
+import tqdm
 import warnings
 
 warnings.filterwarnings('ignore')
 
 
 class SpectrogramCreator():
-    def __init__(self, chunk_length, data_dir):
+    def __init__(self, chunk_length, path_manager):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in seconds
         self.sampling_rate = 44100  # number of samples per second
@@ -21,15 +22,7 @@ class SpectrogramCreator():
 
         self.samples_per_chunk = self.sampling_rate * chunk_length
 
-        self.data_dir = data_dir
-
-        self.audio_dir = os.path.join(self.data_dir, "audio")
-        self.label_dir = os.path.join(self.data_dir, "label")
-        self.spectrogram_dir = os.path.join(
-            self.data_dir, "spectrograms", str(self.chunk_length * 1000))
-
-        if not os.path.exists(self.spectrogram_dir):
-            os.mkdir(self.spectrogram_dir)
+        self.path = path_manager
 
     def scale_min_max(self, x, min=0.0, max=1.0):
         x_std = (x - x.min()) / (x.max() - x.min())
@@ -78,25 +71,38 @@ class SpectrogramCreator():
 
             self.save_spectrogram(target_file, mel_spectrogram_dB)
 
-    def create_species_spectrograms(self, species_name):
-        species_name = species_name.replace(" ", "_")
-        species_audio_dir = os.path.join(self.audio_dir, species_name)
-        species_spectrogram_dir = os.path.join(
-            self.spectrogram_dir, species_name)
+    def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
+        progress_bar = tqdm.tqdm(
+            total=len(os.listdir(audio_dir)), desc="Create spectrograms for {}".format(desc), position=0)
 
-        if not os.path.exists(species_spectrogram_dir):
-            os.mkdir(species_spectrogram_dir)
+        for file in os.listdir(audio_dir):
+            if file.endswith(".mp3"):
+                audio_path = os.path.join(audio_dir, file)
+                self.create_spectrograms_from_file(audio_path, target_dir)
+            progress_bar.update(1)
 
-        for file in os.listdir(species_audio_dir):
-            audio_file_path = os.path.join(species_audio_dir, file)
-            self.create_spectrograms_from_file(
-                audio_file_path, species_spectrogram_dir)
+    def create_spectrograms_for_datasets(self, datasets=["train", "val", "test"]):
+        dirs = []
 
-    def create_species_list_spectrograms(self, species_list):
-        for species_name in species_list:
-            self.create_species_spectrograms(species_name)
+        if "train" in datasets:
+            train_spectrogram_dir = os.path.join(
+                self.path.train_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            dirs.append([self.path.train_audio_dir,
+                        train_spectrogram_dir, "training set"])
 
-    def create_all_spectrograms(self):
-        for file in os.listdir(self.audio_dir):
-            if os.path.isdir(os.path.join(self.audio_dir, file)):
-                self.create_species_spectrograms(file)
+        if "val" in datasets:
+            val_spectrogram_dir = os.path.join(
+                self.path.val_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            dirs.append([self.path.val_audio_dir,
+                        val_spectrogram_dir, "validation set"])
+
+        if "test" in datasets:
+            test_spectrogram_dir = os.path.join(
+                self.path.test_dir,  "spectrograms_{}".format(self.chunk_length * 1000))
+            dirs.append([self.path.test_audio_dir,
+                        test_spectrogram_dir, "test set"])
+
+        for audio_dir, spectrogram_dir, desc in dirs:
+            self.path.ensure_dir(spectrogram_dir)
+            self.create_spectrograms_from_dir(
+                audio_dir, spectrogram_dir, desc)
