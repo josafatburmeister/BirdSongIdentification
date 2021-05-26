@@ -7,20 +7,18 @@ from sklearn.model_selection import train_test_split
 import tqdm
 
 
-class XenoCantoDownloader():
+class XenoCantoDownloader:
     def __init__(self, path_manager):
         self.xeno_canto_url = "https://www.xeno-canto.org"
         self.xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
         # Xeno-Canto categories
-        self.xc_quality_levels = set(["A", "B", "C", "D", "E"])
-        self.xc_sound_types = set(["uncertain", "song", "subsong", "call", "alarm call", "flight call",
-                                  "nocturnal flight call", "begging call", "drumming", "duet", "dawn song"])
-        self.xc_sexes = set(["male", "female", "sex uncertain"])
-        self.xc_life_stages = set(["adult", "juvenile",
-                                   "hatchling or nestling", "life stage uncertain"])
-        self.xc_special_cases = set(["aberrant",
-                                     "mimicry/imitation", "bird in hand"])
+        self.xc_quality_levels = {"A", "B", "C", "D", "E"}
+        self.xc_sound_types = {"uncertain", "song", "subsong", "call", "alarm call", "flight call",
+                               "nocturnal flight call", "begging call", "drumming", "duet", "dawn song"}
+        self.xc_sexes = {"male", "female", "sex uncertain"}
+        self.xc_life_stages = {"adult", "juvenile", "hatchling or nestling", "life stage uncertain"}
+        self.xc_special_cases = {"aberrant", "mimicry/imitation", "bird in hand"}
 
         self.path = path_manager
 
@@ -102,7 +100,7 @@ class XenoCantoDownloader():
                 total=number_of_pages, desc="Download label file for {}...".format(species_name), position=0)
             progress_bar.update(1)
 
-            for page in range(2, number_of_pages+1):
+            for page in range(2, number_of_pages + 1):
                 current_page = self.download_xeno_canto_page(
                     species_name, page)
 
@@ -117,8 +115,15 @@ class XenoCantoDownloader():
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=["song"], sexes=["male", "female", "sex uncertain"], life_stages=["adult", "juvenile",
-                                                                                                                                                           "hatchling or nestling", "life stage uncertain"], exclude_special_cases=True, maximum_number_of_background_species=None):
+    def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
+                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None):
+        if life_stages is None:
+            life_stages = ["adult", "juvenile", "hatchling or nestling", "life stage uncertain"]
+        if sexes is None:
+            sexes = ["male", "female", "sex uncertain"]
+        if sound_types is None:
+            sound_types = ["song"]
+
         if min_quality not in self.xc_quality_levels:
             raise ValueError("Invalid quality level for Xeno-Canto database")
         if not set(sound_types).issubset(self.xc_sound_types):
@@ -184,7 +189,7 @@ class XenoCantoDownloader():
                 labels = labels[labels["background_species"]
                                 <= maximum_number_of_background_species]
 
-            if (len(labels) == 0):
+            if len(labels) == 0:
                 raise NameError(
                     "There are no training samples for class {}".format(species_name))
 

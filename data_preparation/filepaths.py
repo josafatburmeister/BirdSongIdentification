@@ -1,7 +1,7 @@
 import os
 
 
-class PathManager():
+class PathManager:
     def __init__(self, data_dir):
         self.ensure_dir(data_dir)
 
@@ -18,7 +18,7 @@ class PathManager():
 
         # create outer directories
         self.ensure_dirs([self.cache_dir, self.train_dir,
-                         self.test_dir, self.val_dir])
+                          self.test_dir, self.val_dir])
 
         # create nested directories
         self.ensure_dirs([self.audio_cache_dir, self.label_cache_dir, self.train_audio_dir, self.test_audio_dir,

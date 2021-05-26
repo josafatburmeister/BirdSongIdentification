@@ -10,7 +10,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class SpectrogramCreator():
+class SpectrogramCreator:
     def __init__(self, chunk_length, path_manager):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in milliseconds
@@ -64,14 +64,14 @@ class SpectrogramCreator():
                                                              win_length=self.window_length, n_mels=112, fmin=self.fmin, fmax=self.fmax)
 
             # convert power spectrogram to dB-scaled spectrogram
-            mel_spectrogram_dB = librosa.power_to_db(
+            mel_spectrogram_db = librosa.power_to_db(
                 mel_spectrogram, ref=numpy.max)
 
             file_name = os.path.splitext(os.path.basename(audio_file))[0]
             target_file = os.path.join(
                 target_dir, "{}-{}.png".format(file_name, i))
 
-            self.save_spectrogram(target_file, mel_spectrogram_dB)
+            self.save_spectrogram(target_file, mel_spectrogram_db)
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
         # clean up target dir
@@ -86,7 +86,9 @@ class SpectrogramCreator():
                 self.create_spectrograms_from_file(audio_path, target_dir)
             progress_bar.update(1)
 
-    def create_spectrograms_for_datasets(self, datasets=["train", "val", "test"]):
+    def create_spectrograms_for_datasets(self, datasets=None):
+        if datasets is None:
+            datasets = ["train", "val", "test"]
         dirs = []
 
         if "train" in datasets:
