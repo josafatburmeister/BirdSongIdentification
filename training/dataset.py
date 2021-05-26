@@ -48,8 +48,11 @@ class XenoCantoSpectrograms(Dataset):
         for idx, class_name in enumerate(class_names):
             self.class_to_idx[class_name] = idx
 
-    def class_mapping(self):
+    def class_to_id_mapping(self):
         return self.class_to_idx
+
+    def id_to_class_mapping(self):
+        return {value: key for key, value in self.class_to_idx.items()}
 
     def __len__(self):
         return len(self.labels)
