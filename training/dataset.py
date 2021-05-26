@@ -9,11 +9,6 @@ from torchvision import transforms
 class XenoCantoSpectrograms(Dataset):
     def __init__(self, path_manager, chunk_length=1000, split="train"):
 
-        self.label_map = {
-            "Petronia_petronia_song": 0,
-            "Galerida_theklae_song": 1
-        }
-
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 
@@ -43,6 +38,18 @@ class XenoCantoSpectrograms(Dataset):
             raise NameError("Data files missing")
 
         self.labels = pd.read_json(self.label_file)
+        self.create_class_indices()
+
+    def create_class_indices(self):
+        self.class_to_idx = {}
+
+        class_names = self.labels.label.unique()
+
+        for idx, class_name in enumerate(class_names):
+            self.class_to_idx[class_name] = idx
+
+    def class_mapping(self):
+        return self.class_to_idx
 
     def __len__(self):
         return len(self.labels)
@@ -56,9 +63,9 @@ class XenoCantoSpectrograms(Dataset):
 
         image = Image.open(img_path).convert('RGB')
         label = self.labels.iloc[idx]["label"]
-        class_id = self.label_map[label]
+        class_id = self.class_to_idx[label]
 
-        label_tensor = torch.zeros(len(self.label_map))
+        label_tensor = torch.zeros(len(self.class_to_idx))
         label_tensor[class_id] = 1
 
         if self.transform:
