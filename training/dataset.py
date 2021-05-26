@@ -9,6 +9,11 @@ from torchvision import transforms
 class XenoCantoSpectrograms(Dataset):
     def __init__(self, path_manager, chunk_length=1000, split="train"):
 
+        self.label_map = {
+            "Petronia_petronia_song": 0,
+            "Galerida_theklae_song": 1
+        }
+
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 
@@ -50,9 +55,13 @@ class XenoCantoSpectrograms(Dataset):
             self.data_dir, self.labels["file_name"].iloc[idx])
 
         image = Image.open(img_path).convert('RGB')
-        label = self.labels.iloc[idx]
+        label = self.labels.iloc[idx]["label"]
+        class_id = self.label_map[label]
+
+        label_tensor = torch.zeros(len(self.label_map))
+        label_tensor[class_id] = 1
 
         if self.transform:
             image = self.transform(image)
 
-        return image, label["label"]
+        return image, label_tensor
