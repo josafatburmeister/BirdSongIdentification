@@ -3,6 +3,7 @@ import math
 import numpy
 import pandas as pd
 import os
+from scipy import ndimage
 from skimage import io
 import tqdm
 import warnings
@@ -30,6 +31,60 @@ class SpectrogramCreator:
         x_std = (x - x.min()) / (x.max() - x.min())
         x_scaled = x_std * (max - min) + min
         return x_scaled
+
+    def filter_noise(self, spectrogram):
+
+        # apply median blur with kernel size 5
+        # each pixel is replaced by the median gray value of the kernel
+        filtered_spectrogram = ndimage.median_filter(spectrogram, size=5)
+
+        # apply median filtering
+        # pixels that are 1.5 times larger than the row and the column median are set to black
+        # all other pixels are set to white
+        col_median = numpy.median(filtered_spectrogram, axis=0, keepdims=True)
+        row_median = numpy.median(filtered_spectrogram, axis=1, keepdims=True)
+
+        filtered_spectrogram[filtered_spectrogram < row_median * 1.5] = 0
+        filtered_spectrogram[filtered_spectrogram < col_median * 1.5] = 0
+        filtered_spectrogram[filtered_spectrogram > 0] = 1
+
+        # spot removal: filter out isolated black pixels
+        # code adapted from https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L120
+
+        # create matrix that indicates for each pixel to which region it belongs
+        # a region is a connected area of black pixels
+        struct = numpy.ones((3, 3))
+        region_labels, num_regions = ndimage.label(
+            filtered_spectrogram, structure=struct)
+
+        # calculate size (number of black pixels) of each region
+        region_sizes = numpy.array(ndimage.sum(
+            filtered_spectrogram, region_labels, range(num_regions + 1)))
+
+        # set isolated black pixels to zero
+        region_mask = (region_sizes == 1)
+        filtered_spectrogram[region_mask[region_labels]] = 0
+
+        # apply morphology closing
+        struct = numpy.ones((5, 5))
+        filtered_spectrogram = ndimage.morphology.binary_closing(
+            filtered_spectrogram, structure=struct)
+
+        return filtered_spectrogram
+
+    def containsSignal(self, spectrogram, threshold=16):
+        filtered_spectrogram = self.filter_noise(spectrogram)
+
+        # count rows with signal
+        row_max = numpy.max(filtered_spectrogram, axis=1)
+
+        # apply binary dilation to array with max values
+        row_max = ndimage.morphology.binary_dilation(
+            row_max, iterations=2).astype(row_max.dtype)
+
+        rows_with_signal = row_max.sum()
+
+        return rows_with_signal > threshold
 
     def save_spectrogram(self, target_file, spectrogram):
         # scale amplitude values to range [0, 1]
