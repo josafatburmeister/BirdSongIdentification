@@ -68,8 +68,7 @@ class XenoCantoSpectrograms(Dataset):
         label = self.labels.iloc[idx]["label"]
         class_id = self.class_to_idx[label]
 
-        label_tensor = torch.zeros(len(self.class_to_idx))
-        label_tensor[class_id] = 1
+        label_tensor = class_id
 
         if self.transform:
             image = self.transform(image)
