@@ -92,7 +92,7 @@ class SpectrogramCreator:
 
         return filtered_spectrogram
 
-    def contains_signal(self, spectrogram, threshold=16):
+    def contains_signal(self, spectrogram, signal_threshold=16, noise_threshold=3):
         filtered_spectrogram = self.filter_noise(spectrogram)
 
         # count rows with signal
@@ -104,7 +104,7 @@ class SpectrogramCreator:
 
         rows_with_signal = row_max.sum()
 
-        return rows_with_signal > threshold, rows_with_signal
+        return rows_with_signal > signal_threshold, rows_with_signal < noise_threshold
 
     def save_spectrogram(self, target_file, spectrogram):
         # scale amplitude values to range [0, 255]
@@ -117,7 +117,7 @@ class SpectrogramCreator:
 
         io.imsave(target_file, img)
 
-    def create_spectrograms_from_file(self, audio_file, target_dir):
+    def create_spectrograms_from_file(self, audio_file, target_dir, include_noise_samples=True):
 
         # load audio file
         amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
@@ -145,10 +145,14 @@ class SpectrogramCreator:
             target_file = os.path.join(
                 target_dir, "{}-{}.png".format(file_name, i))
 
-            contains_signal, rows_with_signal = self.contains_signal(
+            contains_signal, is_noise = self.contains_signal(
                 mel_spectrogram_db)
 
-            if contains_signal == True:
+            if contains_signal:
+                self.save_spectrogram(target_file, mel_spectrogram_db)
+            elif is_noise and include_noise_samples:
+                target_file = os.path.join(
+                    target_dir, "{}-{}_noise.png".format(file_name, i))
                 self.save_spectrogram(target_file, mel_spectrogram_db)
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
@@ -199,6 +203,10 @@ class SpectrogramCreator:
             if file.endswith(".png"):
                 file_id = int(file.split("-")[0])
                 label = labels[labels["id"] == file_id]
+
+                if file.endswith("noise.png"):
+                    label["label"] = "noise"
+                    label["sound_type"] = "noise"
 
                 if len(label) != 1:
                     raise NameError(
