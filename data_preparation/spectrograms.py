@@ -27,12 +27,32 @@ class SpectrogramCreator:
 
         self.path = path_manager
 
-    def scale_min_max(self, x, min=0.0, max=1.0):
-        x_std = (x - x.min()) / (x.max() - x.min())
+    def scale_min_max(self, x, min=0.0, max=1.0, min_source=None, max_source=None):
+        invert_image = False
+        if not min_source:
+            min_source = x.min()
+        if not max_source:
+            max_source = x.max()
+        if min > max:
+            # if min value is greater than max value, the image is inverted
+            invert_image = True
+            min_tmp = min
+            min = max
+            max = min_tmp
+
+        # scale values to target interval
+        x_std = (x - min_source) / (max_source - min_source)
         x_scaled = x_std * (max - min) + min
+
+        if invert_image:
+            x_scaled = max - x_scaled
+
         return x_scaled
 
     def filter_noise(self, spectrogram):
+        # normalize spectrogram to [0, 1]
+        spectrogram = self.scale_min_max(
+            spectrogram.astype(numpy.double), 0.0, 1.0).astype(numpy.double)
 
         # apply median blur with kernel size 5
         # each pixel is replaced by the median gray value of the kernel
@@ -44,9 +64,9 @@ class SpectrogramCreator:
         col_median = numpy.median(filtered_spectrogram, axis=0, keepdims=True)
         row_median = numpy.median(filtered_spectrogram, axis=1, keepdims=True)
 
-        filtered_spectrogram[filtered_spectrogram < row_median * 1.5] = 0
-        filtered_spectrogram[filtered_spectrogram < col_median * 1.5] = 0
-        filtered_spectrogram[filtered_spectrogram > 0] = 1
+        filtered_spectrogram[filtered_spectrogram < row_median * 1.5] = 0.0
+        filtered_spectrogram[filtered_spectrogram < col_median * 1.5] = 0.0
+        filtered_spectrogram[filtered_spectrogram > 0] = 1.0
 
         # spot removal: filter out isolated black pixels
         # code adapted from https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L120
@@ -68,11 +88,11 @@ class SpectrogramCreator:
         # apply morphology closing
         struct = numpy.ones((5, 5))
         filtered_spectrogram = ndimage.morphology.binary_closing(
-            filtered_spectrogram, structure=struct)
+            filtered_spectrogram, structure=struct).astype(numpy.int)
 
         return filtered_spectrogram
 
-    def containsSignal(self, spectrogram, threshold=16):
+    def contains_signal(self, spectrogram, threshold=16):
         filtered_spectrogram = self.filter_noise(spectrogram)
 
         # count rows with signal
@@ -84,17 +104,16 @@ class SpectrogramCreator:
 
         rows_with_signal = row_max.sum()
 
-        return rows_with_signal > threshold
+        return rows_with_signal > threshold, rows_with_signal
 
     def save_spectrogram(self, target_file, spectrogram):
-        # scale amplitude values to range [0, 1]
-        img = self.scale_min_max(spectrogram, 0, 255).astype(numpy.uint8)
+        # scale amplitude values to range [0, 255]
+        # invert image so that black represents higher amplitudes
+        img = self.scale_min_max(
+            spectrogram, 255, 0, 0.0, 1.0).astype(numpy.uint8)
 
         # put low frequencies at the bottom of the image
         img = numpy.flip(img, axis=0)
-
-        # invert image so that black represents higher amplitudes
-        img = 255-img
 
         io.imsave(target_file, img)
 
@@ -126,7 +145,11 @@ class SpectrogramCreator:
             target_file = os.path.join(
                 target_dir, "{}-{}.png".format(file_name, i))
 
-            self.save_spectrogram(target_file, mel_spectrogram_db)
+            contains_signal, rows_with_signal = self.contains_signal(
+                mel_spectrogram_db)
+
+            if contains_signal == True:
+                self.save_spectrogram(target_file, mel_spectrogram_db)
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
         # clean up target dir
