@@ -214,11 +214,15 @@ class XenoCantoDownloader:
                              "sound_type", "background_species"]]
 
             # create train, test and val splits
-            train_labels, test_labels = train_test_split(
+            train_labels, test_labels = self.train_test_split(
                 labels, test_size=test_size, random_state=12)
 
-            val_labels, test_labels = train_test_split(
+            val_labels, test_labels = self.train_test_split(
                 test_labels, test_size=test_size, random_state=12)
+            if len(val_labels) == 0:
+                print("No validation samples for class", species_name)
+            elif len(test_labels) == 0:
+                print("No test samples for class", species_name)
 
             train_frames.append(train_labels)
             val_frames.append(val_labels)
@@ -261,3 +265,15 @@ class XenoCantoDownloader:
             species = pd.read_json(file_path)
 
         return list(species[column_name])
+
+    def train_test_split(self, labels, test_size=0.35, random_state=12):
+        try:
+            train_labels, test_labels = train_test_split(
+                labels, test_size=test_size, random_state=12)
+
+        except ValueError as e:
+            if "resulting train set will be empty" in str(e):
+                train_labels = labels
+                test_labels = []
+
+        return train_labels, test_labels
