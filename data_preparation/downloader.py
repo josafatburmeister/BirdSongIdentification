@@ -17,8 +17,10 @@ class XenoCantoDownloader:
         self.xc_sound_types = {"uncertain", "song", "subsong", "call", "alarm call", "flight call",
                                "nocturnal flight call", "begging call", "drumming", "duet", "dawn song"}
         self.xc_sexes = {"male", "female", "sex uncertain"}
-        self.xc_life_stages = {"adult", "juvenile", "hatchling or nestling", "life stage uncertain"}
-        self.xc_special_cases = {"aberrant", "mimicry/imitation", "bird in hand"}
+        self.xc_life_stages = {"adult", "juvenile",
+                               "hatchling or nestling", "life stage uncertain"}
+        self.xc_special_cases = {"aberrant",
+                                 "mimicry/imitation", "bird in hand"}
 
         self.path = path_manager
 
@@ -117,8 +119,11 @@ class XenoCantoDownloader:
 
     def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
                         life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None):
+        if type(species_list) != list:
+            species_list = self.load_species_list_from_file(species_list)
         if life_stages is None:
-            life_stages = ["adult", "juvenile", "hatchling or nestling", "life stage uncertain"]
+            life_stages = ["adult", "juvenile",
+                           "hatchling or nestling", "life stage uncertain"]
         if sexes is None:
             sexes = ["male", "female", "sex uncertain"]
         if sound_types is None:
@@ -142,7 +147,8 @@ class XenoCantoDownloader:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception as e:
                 print(e)
-                return
+                print("Skipping class", species_name)
+                continue
 
             labels = pd.DataFrame.from_dict(labels)
 
@@ -243,3 +249,15 @@ class XenoCantoDownloader:
 
         self.download_audio_files_by_id(
             self.path.test_audio_dir, test_set["id"], "Download test set")
+
+    def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
+        if not file_path.endswith(".csv") and not file_path.endswith(".json"):
+            return []
+
+        if ".csv" in file_path:
+            species = pd.read_csv(file_path)
+
+        elif ".json" in file_path:
+            species = pd.read_json(file_path)
+
+        return list(species[column_name])
