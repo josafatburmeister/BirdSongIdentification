@@ -117,8 +117,8 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
-                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None):
+    def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
+                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, verbose=False):
         if type(species_list) != list:
             species_list = self.load_species_list_from_file(species_list)
         if life_stages is None:
@@ -212,6 +212,11 @@ class XenoCantoDownloader:
             # select relevant columns
             labels = labels[["id", "label", "q",
                              "sound_type", "background_species"]]
+
+            # obtain random subset if maximum_samples_per_class is set
+            if len(labels) > maximum_samples_per_class:
+                labels, _ = train_test_split(
+                    labels, train_size=maximum_samples_per_class, random_state=12)
 
             # create train, test and val splits
             train_labels, test_labels = self.train_test_split(
