@@ -1,0 +1,94 @@
+name: Download Xeno-Canto Data
+description: Downloads data from Xeno-Canto and creates train, validatin and test split
+inputs:
+  - {
+      name: Data Dir,
+      type: String,
+      default: "bird_song_identification",
+      description: "Path of the data folder in the glcoud storage",
+    }
+  - {
+      name: Species List,
+      type: String,
+      default: "nips4b_species_list.csv",
+      description: "Path of a file containing a list of bird species that should be included in the datasets",
+    }
+  - {
+      name: Maximum Samples Per Class,
+      type: Integer,
+      default: "100",
+      description: "Maximum number of samples per class",
+    }
+  - {
+      name: Test Size,
+      type: Float,
+      default: "0.35",
+      description: "Percentage of samples that should be used for model testing / validation",
+    }
+  - {
+      name: Min Quality,
+      type: String,
+      default: "E",
+      description: "Minimum quality of the audio samples to be included in the datasets",
+    }
+  - {
+      name: Sound Types,
+      type: List,
+      default: None,
+      description: "List of sound types to include in the datasets",
+    }
+  - {
+      name: Sexes,
+      type: List,
+      default: None,
+      description: "List of sexes to include in the datasets",
+    }
+  - {
+      name: Life Stages,
+      type: List,
+      default: None,
+      description: "List of life stages to include in the datasets",
+    }
+  - {
+      name: Exclude Special Cases,
+      type: Bool,
+      default: True,
+      description: "Whether special cases (e.g. birds imitating other birds) should be excluded from the datasets",
+    }
+  - {
+      name: Maximum Number Of Background Species,
+      type: Interger,
+      default: "1",
+      description: "Maximum number of background species of the audio samples to be included in the datasets",
+    }
+outputs:
+  - { name: Output, type: Directory }
+implementation:
+  container:
+    image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
+    command:
+      [
+        python,
+        pipeline/pipeline.py,
+        download_xeno_canto_data,
+        --data_dir,
+        { inputValue: Data Dir },
+        --maximum_samples_per_class,
+        { inputValue: Maximum Samples Per Class },
+        --test_size,
+        { inputValue: Test Size },
+        --min_quality,
+        { inputValue: Min Quality },
+        --sound_types,
+        { inputValue: Sound Types },
+        --sexes,
+        { inputValue: Sexes },
+        --life_stages,
+        { inputValue: Life Stages },
+        --exclude_special_cases,
+        { inputValue: Exclude Special Cases },
+        --maximum_number_of_background_species,
+        { inputValue: Maximum Number Of Background Species },
+        --data_path,
+        { outputPath: Output },
+      ]

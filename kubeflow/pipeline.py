@@ -1,0 +1,35 @@
+from data_preparation import filepaths, downloader, spectrograms
+import os
+
+import fire
+import kfp
+from kfp.compiler import compiler
+
+from .pipeline_steps import PipelineSteps
+
+
+if __name__ == '__main__':
+    fire.Fire(PipelineSteps)
+
+
+def compile_run_pipeline():
+    download_data_container_op = kfp.components.load_component_from_file(
+        os.path.join(os.getcwd(), 'kubeflow/download_component.yaml'))
+
+    def pipeline(species_list, data_dir="bird_song_identification", maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
+                 life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, verbose=False):
+        download_task = download_data_container_op(
+            data_dir=data_dir,
+            species_list=species_list,
+            maximum_samples_per_class=maximum_samples_per_class,
+            test_size=test_size,
+            min_quality=min_quality,
+            sound_types=sound_types,
+            sexes=sexes,
+            life_stages=life_stages,
+            exclude_special_cases=exclude_special_cases,
+            maximum_number_of_background_species=maximum_number_of_background_species
+        )
+
+    pipeline_filename = "download_pipeline.zip"
+    compiler.Compiler().compile(pipeline, pipeline_filename)
