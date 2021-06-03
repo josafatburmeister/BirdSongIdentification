@@ -1,0 +1,8 @@
+# exclude all hidden files
+.*
+
+__pycache__
+venv
+
+# exclude training data
+data
