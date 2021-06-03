@@ -9,9 +9,9 @@ inputs:
     }
   - {
       name: Species List,
-      type: String,
-      default: "nips4b_species_list.csv",
-      description: "Path of a file containing a list of bird species that should be included in the datasets",
+      type: List,
+      default: None,
+      description: "List of bird species to include in the dataset",
     }
   - {
       name: Maximum Samples Per Class,
@@ -69,7 +69,7 @@ implementation:
     command:
       [
         python,
-        pipeline/pipeline.py,
+        kubeflow/pipeline.py,
         download_xeno_canto_data,
         --data_dir,
         { inputValue: Data Dir },
