@@ -1,12 +1,10 @@
-from data_preparation import filepaths, downloader, spectrograms
 import os
 
 import fire
 import kfp
 from kfp.compiler import compiler
 
-from .pipeline_steps import PipelineSteps
-
+from pipeline_steps import PipelineSteps
 
 if __name__ == '__main__':
     fire.Fire(PipelineSteps)
