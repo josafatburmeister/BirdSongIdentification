@@ -69,7 +69,7 @@ implementation:
     command:
       [
         python,
-        kubeflow/pipeline.py,
+        kubeflow/run_pipeline.py,
         download_xeno_canto_data,
         --data_dir,
         { inputValue: Data Dir },
