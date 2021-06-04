@@ -73,6 +73,8 @@ implementation:
         download_xeno_canto_data,
         --data_dir,
         { inputValue: Data Dir },
+        --species_list,
+        { inputValue: Species List },
         --maximum_samples_per_class,
         { inputValue: Maximum Samples Per Class },
         --test_size,
