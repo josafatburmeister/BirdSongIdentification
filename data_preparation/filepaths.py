@@ -8,7 +8,7 @@ from kubeflow_utils.config import settings
 
 class PathManager:
     def __init__(self, data_dir, gcs_path=None):
-        os.makedirs(data_dir)
+        self.ensure_dir(data_dir)
 
         self.cache_dir = os.path.join(data_dir, "cache")
         self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
@@ -44,9 +44,13 @@ class PathManager:
         self.gcs_val_dir = os.path.join(self.GCS_BUCKET_PATH, "val")
         self.gcs_val_audio_dir = os.path.join(self.val_dir, "audio")
 
+    def ensure_dir(self, dir_path):
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
     def ensure_dirs(self, dir_paths):
         for dir_path in dir_paths:
-            os.makedirs(dir_path)
+            self.ensure_dir(dir_path)
 
     def empty_dir(self, dir_path):
         for file in os.listdir(dir_path):
