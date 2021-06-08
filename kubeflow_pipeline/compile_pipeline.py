@@ -6,7 +6,7 @@ from kfp.compiler import compiler
 
 def compile_pipeline():
     download_data_container_op = kfp.components.load_component_from_file(
-        os.path.join(os.getcwd(), 'kubeflow/download_component.yaml'))
+        os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component.yaml'))
 
     def pipeline(species_list, data_dir="bird_song_identification", maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
                  life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, verbose=False):
