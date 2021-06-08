@@ -189,7 +189,7 @@ class SpectrogramCreator:
                         test_spectrogram_dir, "test set"])
 
         for audio_dir, label_file, spectrogram_dir, desc in dirs:
-            self.path.ensure_dir(spectrogram_dir)
+            os.makedirs(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, desc)
             self.create_spectrogram_labels(label_file, spectrogram_dir)

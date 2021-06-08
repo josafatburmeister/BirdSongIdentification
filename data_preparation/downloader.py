@@ -138,6 +138,10 @@ class XenoCantoDownloader:
         if not set(life_stages).issubset(self.xc_life_stages):
             raise ValueError("Invalid life stage for Xeno-Canto database")
 
+        # retrieve cached files from google cloud storage
+        if self.path.use_gcs:
+            self.path.copy_cache_from_gcs()
+
         train_frames = []
         test_frames = []
         val_frames = []
@@ -258,6 +262,10 @@ class XenoCantoDownloader:
 
         self.download_audio_files_by_id(
             self.path.test_audio_dir, test_set["id"], "Download test set")
+
+        # copy cache to google cloud storage to speedup future runs
+        if self.path.use_gcs:
+            self.path.copy_cache_to_gcs()
 
     def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):
