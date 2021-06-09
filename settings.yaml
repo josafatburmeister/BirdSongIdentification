@@ -1,0 +1,23 @@
+docker:
+  image_name: ames-xgboost-job
+  registry_prefix: us.gcr.io
+  folder_path: ames-xgboost
+
+gcloud:
+  bucket_id: bird-song-identification
+  bucket_prefix: gs://
+  bucket_path: bird-song-identification
+
+k8s:
+  namespace: hpi-ml-applications
+
+artifact_store:
+  host: "metadata-grpc-service.kubeflow"
+  port: 8080
+  workspace:
+    name: "ames-workspace"
+    description: "workspace for xgboost demo on the ames dataset"
+  run:
+    description: "a run from local"
+  execution:
+    description: "execution for example training"
