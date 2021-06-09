@@ -69,9 +69,9 @@ implementation:
     command:
       [
         python,
-        kubeflow/run_pipeline.py,
+        kubeflow_pipeline/run_pipeline.py,
         download_xeno_canto_data,
-        --data_dir,
+        --gcs_path,
         { inputValue: Data Dir },
         --species_list,
         { inputValue: Species List },
@@ -91,6 +91,6 @@ implementation:
         { inputValue: Exclude Special Cases },
         --maximum_number_of_background_species,
         { inputValue: Maximum Number Of Background Species },
-        --data_path,
+        --target_dir,
         { outputPath: Output },
       ]
