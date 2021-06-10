@@ -46,9 +46,9 @@ class PathManager:
 
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_dirs = {
-                "audio_cache": os.path.join(self.gcs_cache_dir, "audio"),
-                "labels_cache": os.path.join(self.gcs_cache_dir, "labels"),
-                "spectrograms_cache": os.path.join(self.gcs_cache_dir, "spectrograms"),
+                "audio_cache": os.path.join(self.gcs_cache_dir, "audio", ""),
+                "labels_cache": os.path.join(self.gcs_cache_dir, "labels", ""),
+                "spectrograms_cache": os.path.join(self.gcs_cache_dir, "spectrograms", ""),
             }
 
     def ensure_dir(self, dir_path):
@@ -75,6 +75,10 @@ class PathManager:
     def cache(self, subdir: str):
         return self.cache_dirs[subdir]
 
+    def cached_file_path(self, subdir, file_path):
+        file_name = os.path.basename(file_path)
+        return os.path.join(self.cache(subdir), file_name)
+
     def data_folder(self, split: str, subdir: str, **kwargs):
         if subdir == "spectrograms":
             for key in kwargs.values():
@@ -92,18 +96,20 @@ class PathManager:
         logging.info(f'Copied {src_path} to {dest_path}')
 
     def gcs_copy_dir(self, src_path: str, dest_path: str):
+        if not src_path.endswith("/"):
+            src_path += "/"
         if sys.platform == 'win32' or sys.platform == 'nt':
             logging.info(
-                subprocess.run(['gsutil', '-m', 'cp', '-r', src_path, dest_path], stdout=subprocess.PIPE, shell=True).stdout[
+                subprocess.run(['gsutil', '-m', 'cp', '-r', f'{src_path}*', dest_path], stdout=subprocess.PIPE, shell=True).stdout[
                     :-1].decode('utf-8'))
         else:
             logging.info(
-                subprocess.run(['gsutil', '-m', 'cp', '-r', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode(
+                subprocess.run(['gsutil', '-m', 'cp', '-r', f'{src_path}*', dest_path], stdout=subprocess.PIPE).stdout[:-1].decode(
                     'utf-8'))
         logging.info(f'Copied {src_path} to {dest_path}')
 
-    def gcs_bucket_path(self, bucket_name: str):
-        return f'{settings.gcloud.bucket_prefix}{bucket_name}/'
+    def gcs_bucket_path(self, bucket_name: str, file_name=""):
+        return f'{settings.gcloud.bucket_prefix}{bucket_name}/{file_name}'
 
     def gcs_make_bucket(self, bucket_name: str, project_name: str):
         if sys.platform == 'win32' or sys.platform == 'nt':
@@ -125,8 +131,18 @@ class PathManager:
                 ['gsutil', 'ls', '-b', bucket_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
         return result == bucket_path
 
+    def gcs_file_exists(self, file_path: str):
+        if sys.platform == 'win32' or sys.platform == 'nt':
+            result = subprocess.run(['gsutil', 'ls', file_path],
+                                    stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
+        else:
+            result = subprocess.run(
+                ['gsutil', 'ls', file_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
+        return file_path in result
+
     def copy_cache_to_gcs(self, subdir: str):
-        self.gcs_copy_dir(self.cache(subdir), self.GCS_BUCKET)
+        self.gcs_copy_dir(self.cache(subdir), self.gcs_dirs[f"{subdir}_cache"])
 
     def copy_cache_from_gcs(self, subdir: str):
-        self.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)
+        if self.gcs_file_exists(self.gcs_dirs[f"{subdir}_cache"]):
+            self.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)

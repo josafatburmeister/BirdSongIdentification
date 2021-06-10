@@ -29,10 +29,7 @@ class XenoCantoDownloader:
         return os.path.join(self.path.cache("labels"), file_name)
 
     def download_file(self, url, target_file, cache_dir=None):
-        file_name = os.path.basename(target_file)
-
-        cached_file_path = os.path.join(
-            self.path.cache("audio"), file_name)
+        cached_file_path = self.path.cached_file_path("audio", target_file)
 
         # check if file is in cache
         if cache_dir and os.path.exists(cached_file_path):

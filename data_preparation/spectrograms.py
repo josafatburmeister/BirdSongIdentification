@@ -4,6 +4,7 @@ import numpy
 import pandas as pd
 import os
 from scipy import ndimage
+import shutil
 from skimage import io
 import tqdm
 import warnings
@@ -29,6 +30,13 @@ class SpectrogramCreator:
             spectrogram_path_manager = audio_path_manager
         self.audio_path = audio_path_manager
         self.spectrogram_path = spectrogram_path_manager
+
+        if self.spectrogram_path.use_gcs:
+            self.spectrogram_path.copy_cache_from_gcs("spectrograms")
+
+    def __del__(self):
+        if self.spectrogram_path.use_gcs:
+            self.spectrogram_path.copy_cache_to_gcs("spectrograms")
 
     def scale_min_max(self, x, min=0.0, max=1.0, min_source=None, max_source=None):
         invert_image = False
@@ -120,43 +128,70 @@ class SpectrogramCreator:
 
         io.imsave(target_file, img)
 
+        # copy spectrogram to cache
+        cached_file_path = self.spectrogram_path.cached_file_path(
+            "spectrograms", target_file)
+        shutil.copy(target_file, cached_file_path)
+
+    def get_cached_spectrograms(self, audio_file, include_noise_samples=True):
+        spectrogram_name = f"{os.path.splitext(audio_file)[1]}_{self.chunk_length}"
+        cache_path = self.spectrogram_path.cache("spectrograms")
+
+        cached_spectrograms_for_current_file = []
+
+        for cached_spectrogram in os.listdir(cache_path):
+            if spectrogram_name in cached_spectrogram:
+                if include_noise_samples or not "noise" in spectrogram_name:
+                    spectrogram_path = os.path.join(
+                        cache_path, cached_spectrogram)
+                    cached_spectrograms_for_current_file.append(
+                        spectrogram_path)
+
+        return cached_spectrograms_for_current_file
+
     def create_spectrograms_from_file(self, audio_file, target_dir, include_noise_samples=True):
+        cached_spectrograms_for_current_file = self.get_cached_spectrograms(
+            audio_file, include_noise_samples)
+        if len(cached_spectrograms_for_current_file) > 0:
+            for file in cached_spectrograms_for_current_file:
+                shutil.copy(file, target_dir)
 
-        # load audio file
-        amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
+        else:
+            # load audio file
+            amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
 
-        audio_length = amplitudes.shape[0]
+            audio_length = amplitudes.shape[0]
 
-        number_of_chunks = math.floor(
-            audio_length / self.samples_per_chunk)
+            number_of_chunks = math.floor(
+                audio_length / self.samples_per_chunk)
 
-        # split audio file in chunks and create one spectrogram per chunk
-        for i in range(number_of_chunks):
-            # get samples of current chunk
-            chunk = amplitudes[i *
-                               self.samples_per_chunk:(i+1)*self.samples_per_chunk]
+            # split audio file in chunks and create one spectrogram per chunk
+            for i in range(number_of_chunks):
+                # get samples of current chunk
+                chunk = amplitudes[i *
+                                   self.samples_per_chunk:(i+1)*self.samples_per_chunk]
 
-            # apply short time fourier transformation to extract frequency information from amplitude data
-            mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate, hop_length=self.hop_length, n_fft=self.n_fft,
-                                                             win_length=self.window_length, n_mels=112, fmin=self.fmin, fmax=self.fmax)
+                # apply short time fourier transformation to extract frequency information from amplitude data
+                mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate, hop_length=self.hop_length, n_fft=self.n_fft,
+                                                                 win_length=self.window_length, n_mels=112, fmin=self.fmin, fmax=self.fmax)
 
-            # convert power spectrogram to dB-scaled spectrogram
-            mel_spectrogram_db = librosa.power_to_db(
-                mel_spectrogram, ref=numpy.max)
+                # convert power spectrogram to dB-scaled spectrogram
+                mel_spectrogram_db = librosa.power_to_db(
+                    mel_spectrogram, ref=numpy.max)
 
-            file_name = os.path.splitext(os.path.basename(audio_file))[0]
-            target_file = os.path.join(
-                target_dir, "{}-{}.png".format(file_name, i))
-
-            contains_signal, is_noise = self.contains_signal(
-                mel_spectrogram_db)
-
-            if contains_signal:
-                self.save_spectrogram(target_file, mel_spectrogram_db)
-            elif is_noise and include_noise_samples:
+                file_name = os.path.splitext(os.path.basename(audio_file))[0]
                 target_file = os.path.join(
-                    target_dir, "{}-{}_noise.png".format(file_name, i))
-                self.save_spectrogram(target_file, mel_spectrogram_db)
+                    target_dir, "{}-{}.png".format(file_name, i))
+
+                contains_signal, is_noise = self.contains_signal(
+                    mel_spectrogram_db)
+
+                if contains_signal:
+                    self.save_spectrogram(target_file, mel_spectrogram_db)
+                elif is_noise and include_noise_samples:
+                    target_file = os.path.join(
+                        target_dir, "{}-{}_noise.png".format(file_name, i))
+                    self.save_spectrogram(target_file, mel_spectrogram_db)
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
         # clean up target dir
@@ -213,8 +248,11 @@ class SpectrogramCreator:
 
                 spectrogram_labels.append(label)
 
-        spectrogram_labels = pd.concat(spectrogram_labels).sort_values(
-            by=['file_name'])
+        if len(spectrogram_labels) > 0:
+            spectrogram_labels = pd.concat(spectrogram_labels).sort_values(
+                by=['file_name'])
 
-        spectrogram_labels.to_json(label_file.replace(
-            ".json", "_{}.json".format(self.chunk_length)), "records", indent=4)
+            spectrogram_labels.to_json(label_file.replace(
+                ".json", "_{}.json".format(self.chunk_length)), "records", indent=4)
+        else:
+            raise NameError("No spectrograms found")
