@@ -14,9 +14,12 @@ class PipelineSteps:
                                       maximum_number_of_background_species=None, verbose=False)
 
     def create_spectrograms(self, input_dir, target_dir, gcs_path, chunk_length):
-        path_manager = filepaths.PathManager(input_dir, gcs_path=gcs_path)
+        audio_path_manager = filepaths.PathManager(
+            input_dir, gcs_path=gcs_path)
+        spectrogram_path_manager = filepaths.PathManager(
+            target_dir, gcs_path=gcs_path)
         spectrogram_creator = spectrograms.SpectrogramCreator(
-            chunk_length, path_manager)
+            chunk_length, audio_path_manager, spectrogram_path_manager)
 
         spectrogram_creator.create_spectrograms_for_datasets(
             datasets=["train", "val", "test"])

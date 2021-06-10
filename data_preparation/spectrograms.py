@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 
 
 class SpectrogramCreator:
-    def __init__(self, chunk_length, path_manager):
+    def __init__(self, chunk_length, audio_path_manager, spectrogram_path_manager=None):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in milliseconds
         self.sampling_rate = 44100  # number of samples per second
@@ -25,7 +25,10 @@ class SpectrogramCreator:
         self.samples_per_chunk = math.floor(
             (self.sampling_rate * chunk_length) / 1000)
 
-        self.path = path_manager
+        if not spectrogram_path_manager:
+            spectrogram_path_manager = audio_path_manager
+        self.audio_path = audio_path_manager
+        self.spectrogram_path = spectrogram_path_manager
 
     def scale_min_max(self, x, min=0.0, max=1.0, min_source=None, max_source=None):
         invert_image = False
@@ -157,7 +160,7 @@ class SpectrogramCreator:
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
         # clean up target dir
-        self.path.empty_dir(target_dir)
+        self.spectrogram_path.empty_dir(target_dir)
 
         progress_bar = tqdm.tqdm(
             total=len(os.listdir(audio_dir)), desc="Create spectrograms for {}".format(desc), position=0)
@@ -174,22 +177,25 @@ class SpectrogramCreator:
         dirs = []
 
         if "train" in datasets:
-            train_spectrogram_dir = self.path.train_spectrogram_dir(1000)
-            dirs.append([self.path.train_audio_dir, self.path.train_label_file(),
+            train_spectrogram_dir = self.spectrogram_path.train_spectrogram_dir(
+                1000)
+            dirs.append([self.audio_path.train_audio_dir, self.audio_path.train_label_file(),
                         train_spectrogram_dir, "training set"])
 
         if "val" in datasets:
-            val_spectrogram_dir = self.path.val_spectrogram_dir(1000)
-            dirs.append([self.path.val_audio_dir, self.path.val_label_file(),
+            val_spectrogram_dir = self.spectrogram_path.val_spectrogram_dir(
+                1000)
+            dirs.append([self.audio_path.val_audio_dir, self.audio_path.val_label_file(),
                         val_spectrogram_dir, "validation set"])
 
         if "test" in datasets:
-            test_spectrogram_dir = self.path.test_spectrogram_dir(1000)
-            dirs.append([self.path.test_audio_dir, self.path.test_label_file(),
+            test_spectrogram_dir = self.spectrogram_path.test_spectrogram_dir(
+                1000)
+            dirs.append([self.audio_path.test_audio_dir, self.audio_path.test_label_file(),
                         test_spectrogram_dir, "test set"])
 
         for audio_dir, label_file, spectrogram_dir, desc in dirs:
-            self.path.ensure_dir(spectrogram_dir)
+            self.audio_path.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, desc)
             self.create_spectrogram_labels(label_file, spectrogram_dir)

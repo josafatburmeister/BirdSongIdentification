@@ -2,6 +2,7 @@ from kubeflow import fairing
 import logging
 import os
 import subprocess
+import sys
 
 from kubeflow_utils.config import settings
 
@@ -74,15 +75,48 @@ class PathManager:
     def test_spectrogram_dir(self, chunk_length):
         return os.path.join(self.test_dir, "spectrograms_{}".format(chunk_length))
 
-    def gcs_copy_file(self, src_path, dest_path):
-        logging.info(
-            subprocess.run(['gsutil', 'cp', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8'))
+    def gcs_copy_file(self, src_path: str, dest_path: str):
+        if sys.platform == 'win32' or sys.platform == 'nt':
+            logging.info(
+                subprocess.run(['gsutil', 'cp', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8'))
+        else:
+            logging.info(
+                subprocess.run(['gsutil', 'cp', src_path, dest_path], stdout=subprocess.PIPE, shell=True).stdout[:-1].decode(
+                    'utf-8'))
         logging.info(f'Copied {src_path} to {dest_path}')
 
-    def gcs_copy_dir(self, src_path, dest_path):
-        logging.info(
-            subprocess.run(['gsutil', 'cp', '-r', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8'))
+    def gcs_copy_dir(self, src_path: str, dest_path: str):
+        if sys.platform == 'win32' or sys.platform == 'nt':
+            logging.info(
+                subprocess.run(['gsutil', '-m', 'cp', '-r', src_path, dest_path], stdout=subprocess.PIPE, shell=True).stdout[
+                    :-1].decode('utf-8'))
+        else:
+            logging.info(
+                subprocess.run(['gsutil', '-m', 'cp', '-r', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode(
+                    'utf-8'))
         logging.info(f'Copied {src_path} to {dest_path}')
+
+    def gcs_bucket_path(self, bucket_name: str):
+        return f'{settings.gcloud.bucket_prefix}{bucket_name}'
+
+    def gcs_make_bucket(self, bucket_name: str, project_name: str):
+        if sys.platform == 'win32' or sys.platform == 'nt':
+            logging.info(
+                subprocess.run(['gsutil', 'mb', '-p', project_name, bucket_name], stdout=subprocess.PIPE,
+                               shell=True).stdout[:-1].decode('utf-8'))
+        else:
+            logging.info(subprocess.run(['gsutil', 'mb', '-p', project_name, bucket_name], stdout=subprocess.PIPE).stdout[
+                :-1].decode('utf-8'))
+        logging.info(f'Created bucket {bucket_name}')
+
+    def gcs_bucket_exists(self, bucket_name: str, project_name: str):
+        if sys.platform == 'win32' or sys.platform == 'nt':
+            result = subprocess.run(['gsutil', '-q', 'stats', self.gcs_bucket_path(
+                bucket_name)], stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
+        else:
+            result = subprocess.run(['gsutil', '-q', 'stats', self.gcs_bucket_path(
+                bucket_name)], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
+        return result == 0
 
     def copy_cache_to_gcs(self):
         self.gcs_copy_dir(self.cache_dir, self.gcs_cache_dir)
