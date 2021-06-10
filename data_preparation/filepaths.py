@@ -9,17 +9,18 @@ from kubeflow_utils.config import settings
 
 class PathManager:
     def __init__(self, data_dir, gcs_path=None):
-        self.ensure_dir(data_dir)
+        self.data_dir = data_dir
+        self.ensure_dir(self.data_dir)
 
-        self.cache_dir = os.path.join(data_dir, "cache")
+        self.cache_dir = os.path.join(self.data_dir, "cache")
         self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
         self.label_cache_dir = os.path.join(self.cache_dir, "labels")
 
-        self.train_dir = os.path.join(data_dir, "train")
+        self.train_dir = os.path.join(self.data_dir, "train")
         self.train_audio_dir = os.path.join(self.train_dir, "audio")
-        self.test_dir = os.path.join(data_dir, "test")
+        self.test_dir = os.path.join(self.data_dir, "test")
         self.test_audio_dir = os.path.join(self.test_dir, "audio")
-        self.val_dir = os.path.join(data_dir, "val")
+        self.val_dir = os.path.join(self.data_dir, "val")
         self.val_audio_dir = os.path.join(self.val_dir, "audio")
 
         # create nested directories
@@ -34,16 +35,12 @@ class PathManager:
         self.GCS_BUCKET = f'{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}'
         self.GCS_BUCKET_PATH = f'{self.GCS_BUCKET}/{settings.gcloud.bucket_path}'
 
-        self.gcs_cache_dir = os.path.join(self.GCS_BUCKET_PATH, "cache")
+        if not self.gcs_bucket_exists(self.GCS_BUCKET_ID):
+            self.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
+
+        self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
         self.gcs_audio_cache_dir = os.path.join(self.cache_dir, "audio")
         self.gcs_label_cache_dir = os.path.join(self.cache_dir, "labels")
-
-        self.gcs_train_dir = os.path.join(self.GCS_BUCKET_PATH, "train")
-        self.gcs_train_audio_dir = os.path.join(self.train_dir, "audio")
-        self.gcs_test_dir = os.path.join(self.GCS_BUCKET_PATH, "test")
-        self.gcs_test_audio_dir = os.path.join(self.test_dir, "audio")
-        self.gcs_val_dir = os.path.join(self.GCS_BUCKET_PATH, "val")
-        self.gcs_val_audio_dir = os.path.join(self.val_dir, "audio")
 
     def ensure_dir(self, dir_path):
         if not os.path.exists(dir_path):
@@ -97,7 +94,7 @@ class PathManager:
         logging.info(f'Copied {src_path} to {dest_path}')
 
     def gcs_bucket_path(self, bucket_name: str):
-        return f'{settings.gcloud.bucket_prefix}{bucket_name}'
+        return f'{settings.gcloud.bucket_prefix}{bucket_name}/'
 
     def gcs_make_bucket(self, bucket_name: str, project_name: str):
         if sys.platform == 'win32' or sys.platform == 'nt':
@@ -109,17 +106,18 @@ class PathManager:
                 :-1].decode('utf-8'))
         logging.info(f'Created bucket {bucket_name}')
 
-    def gcs_bucket_exists(self, bucket_name: str, project_name: str):
+    def gcs_bucket_exists(self, bucket_name: str):
+        bucket_path = self.gcs_bucket_path(bucket_name)
         if sys.platform == 'win32' or sys.platform == 'nt':
-            result = subprocess.run(['gsutil', '-q', 'stats', self.gcs_bucket_path(
-                bucket_name)], stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
+            result = subprocess.run(['gsutil', 'ls', '-b', bucket_path],
+                                    stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
         else:
-            result = subprocess.run(['gsutil', '-q', 'stats', self.gcs_bucket_path(
-                bucket_name)], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
-        return result == 0
+            result = subprocess.run(
+                ['gsutil', 'ls', '-b', bucket_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
+        return result == bucket_path
 
     def copy_cache_to_gcs(self):
-        self.gcs_copy_dir(self.cache_dir, self.gcs_cache_dir)
+        self.gcs_copy_dir(self.cache_dir, self.GCS_BUCKET)
 
     def copy_cache_from_gcs(self):
-        self.gcs_copy_dir(self.gcs_cache_dir, self.cache_dir)
+        self.gcs_copy_dir(self.gcs_cache_dir, self.data_dir)
