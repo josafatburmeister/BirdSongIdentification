@@ -119,6 +119,9 @@ class XenoCantoDownloader:
 
     def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
                         life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, verbose=False):
+        if maximum_samples_per_class < 3:
+            raise ValueError(
+                "At least three samples are needed for each class")
         if type(species_list) != list:
             species_list = self.load_species_list_from_file(species_list)
         if life_stages is None:
@@ -228,16 +231,29 @@ class XenoCantoDownloader:
 
             val_labels, test_labels = self.train_test_split(
                 test_labels, test_size=test_size, random_state=12)
+
+            if len(train_labels) == 0:
+                print("No training samples for class", species_name)
+            else:
+                train_frames.append(train_labels)
+
             if len(val_labels) == 0:
                 print("No validation samples for class", species_name)
-            elif len(test_labels) == 0:
+            else:
+                val_frames.append(val_labels)
+            if len(test_labels) == 0:
                 print("No test samples for class", species_name)
-
-            train_frames.append(train_labels)
-            val_frames.append(val_labels)
-            test_frames.append(test_labels)
+            else:
+                test_frames.append(test_labels)
 
         # save label files
+        if len(train_frames) == 0:
+            raise NameError("Empty training set")
+        if len(val_frames) == 0:
+            raise NameError("Empty validation set")
+        if len(test_frames) == 0:
+            raise NameError("Empty test set")
+
         training_set = pd.concat(train_frames)
         validation_set = pd.concat(val_frames)
         test_set = pd.concat(test_frames)
