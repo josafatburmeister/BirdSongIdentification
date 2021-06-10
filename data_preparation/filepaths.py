@@ -15,6 +15,8 @@ class PathManager:
         self.cache_dir = os.path.join(self.data_dir, "cache")
         self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
         self.label_cache_dir = os.path.join(self.cache_dir, "labels")
+        self.spectrogram_cache_dir = os.path.join(
+            self.cache_dir, "spectrograms")
 
         self.train_dir = os.path.join(self.data_dir, "train")
         self.train_audio_dir = os.path.join(self.train_dir, "audio")
@@ -39,8 +41,10 @@ class PathManager:
             self.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
 
         self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
-        self.gcs_audio_cache_dir = os.path.join(self.cache_dir, "audio")
-        self.gcs_label_cache_dir = os.path.join(self.cache_dir, "labels")
+        self.gcs_audio_cache_dir = os.path.join(self.gcs_cache_dir, "audio")
+        self.gcs_label_cache_dir = os.path.join(self.gcs_cache_dir, "labels")
+        self.gcs_spectrogram_cache_dir = os.path.join(
+            self.gcs_cache_dir, "spectrograms")
 
     def ensure_dir(self, dir_path):
         if not os.path.exists(dir_path):
