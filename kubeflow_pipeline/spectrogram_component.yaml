@@ -1,4 +1,4 @@
-name: Spectrogram Creator
+name: Create spectrograms
 description: Creates spectrograms from audio files
 inputs:
   - {
