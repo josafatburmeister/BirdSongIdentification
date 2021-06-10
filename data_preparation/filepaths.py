@@ -8,43 +8,48 @@ from kubeflow_utils.config import settings
 
 
 class PathManager:
-    def __init__(self, data_dir, gcs_path=None):
+    def __init__(self, data_dir: str, gcs_path=None):
         self.data_dir = data_dir
-        self.ensure_dir(self.data_dir)
-
         self.cache_dir = os.path.join(self.data_dir, "cache")
-        self.audio_cache_dir = os.path.join(self.cache_dir, "audio")
-        self.label_cache_dir = os.path.join(self.cache_dir, "labels")
-        self.spectrogram_cache_dir = os.path.join(
-            self.cache_dir, "spectrograms")
 
-        self.train_dir = os.path.join(self.data_dir, "train")
-        self.train_audio_dir = os.path.join(self.train_dir, "audio")
-        self.test_dir = os.path.join(self.data_dir, "test")
-        self.test_audio_dir = os.path.join(self.test_dir, "audio")
-        self.val_dir = os.path.join(self.data_dir, "val")
-        self.val_audio_dir = os.path.join(self.val_dir, "audio")
+        self.cache_dirs = {
+            "audio": os.path.join(self.cache_dir, "audio"),
+            "labels": os.path.join(self.cache_dir, "labels"),
+            "spectrograms": os.path.join(self.cache_dir, "spectrograms"),
+        }
 
-        # create nested directories
-        self.ensure_dirs([self.audio_cache_dir, self.label_cache_dir, self.train_audio_dir, self.test_audio_dir,
-                          self.val_audio_dir])
+        self.data_dirs = {
+            "train": os.path.join(self.data_dir, "train"),
+            "val": os.path.join(self.data_dir, "val"),
+            "test": os.path.join(self.data_dir, "test"),
+        }
+
+        self.data_subdirs = ["audio"]
+
+        self.ensure_dirs(self.cache_dirs.values())
+        self.ensure_dirs(self.data_dirs.values())
+
+        for dir in self.data_dirs.values():
+            for subdir in self.data_subdirs:
+                self.ensure_dir(os.path.join(dir, subdir))
 
         # google cloud storage config
         if gcs_path:
             self.use_gcs = True
-        self.GCP_PROJECT = fairing.cloud.gcp.guess_project_name()
-        self.GCS_BUCKET_ID = f'{settings.gcloud.bucket_id}'
-        self.GCS_BUCKET = f'{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}'
-        self.GCS_BUCKET_PATH = f'{self.GCS_BUCKET}/{settings.gcloud.bucket_path}'
+            self.GCP_PROJECT = fairing.cloud.gcp.guess_project_name()
+            self.GCS_BUCKET_ID = f'{settings.gcloud.bucket_id}'
+            self.GCS_BUCKET = f'{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}'
+            self.GCS_BUCKET_PATH = f'{self.GCS_BUCKET}/{settings.gcloud.bucket_path}'
 
-        if not self.gcs_bucket_exists(self.GCS_BUCKET_ID):
-            self.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
+            if not self.gcs_bucket_exists(self.GCS_BUCKET_ID):
+                self.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
 
-        self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
-        self.gcs_audio_cache_dir = os.path.join(self.gcs_cache_dir, "audio")
-        self.gcs_label_cache_dir = os.path.join(self.gcs_cache_dir, "labels")
-        self.gcs_spectrogram_cache_dir = os.path.join(
-            self.gcs_cache_dir, "spectrograms")
+            self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
+            self.gcs_dirs = {
+                "audio_cache": os.path.join(self.gcs_cache_dir, "audio"),
+                "labels_cache": os.path.join(self.gcs_cache_dir, "labels"),
+                "spectrograms_cache": os.path.join(self.gcs_cache_dir, "spectrograms"),
+            }
 
     def ensure_dir(self, dir_path):
         if not os.path.exists(dir_path):
@@ -58,23 +63,23 @@ class PathManager:
         for file in os.listdir(dir_path):
             os.remove(os.path.join(dir_path, file))
 
-    def train_label_file(self):
-        return os.path.join(self.train_dir, "train.json")
+    def audio_label_file(self, split: str):
+        return os.path.join(self.data_dirs[split], f"{split}.json")
 
-    def val_label_file(self):
-        return os.path.join(self.val_dir, "val.json")
+    def spectrogram_label_file(self, split: str, **kwargs):
+        keywords = ""
+        for key in kwargs.values():
+            keywords += f"_{key}"
+        return os.path.join(self.data_dirs[split], f"{split}{keywords}.json")
 
-    def test_label_file(self):
-        return os.path.join(self.test_dir, "test.json")
+    def cache(self, subdir: str):
+        return self.cache_dirs[subdir]
 
-    def train_spectrogram_dir(self, chunk_length):
-        return os.path.join(self.train_dir, "spectrograms_{}".format(chunk_length))
-
-    def val_spectrogram_dir(self, chunk_length):
-        return os.path.join(self.val_dir, "spectrograms_{}".format(chunk_length))
-
-    def test_spectrogram_dir(self, chunk_length):
-        return os.path.join(self.test_dir, "spectrograms_{}".format(chunk_length))
+    def data_folder(self, split: str, subdir: str, **kwargs):
+        if subdir == "spectrograms":
+            for key in kwargs.values():
+                subdir += f"_{key}"
+        return os.path.join(self.data_dirs[split], subdir)
 
     def gcs_copy_file(self, src_path: str, dest_path: str):
         if sys.platform == 'win32' or sys.platform == 'nt':
@@ -120,8 +125,8 @@ class PathManager:
                 ['gsutil', 'ls', '-b', bucket_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
         return result == bucket_path
 
-    def copy_cache_to_gcs(self):
-        self.gcs_copy_dir(self.cache_dir, self.GCS_BUCKET)
+    def copy_cache_to_gcs(self, subdir: str):
+        self.gcs_copy_dir(self.cache(subdir), self.GCS_BUCKET)
 
-    def copy_cache_from_gcs(self):
-        self.gcs_copy_dir(self.gcs_cache_dir, self.data_dir)
+    def copy_cache_from_gcs(self, subdir: str):
+        self.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)

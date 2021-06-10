@@ -21,5 +21,5 @@ class PipelineSteps:
         spectrogram_creator = spectrograms.SpectrogramCreator(
             chunk_length, audio_path_manager, spectrogram_path_manager)
 
-        spectrogram_creator.create_spectrograms_for_datasets(
-            datasets=["train", "val", "test"])
+        spectrogram_creator.create_spectrograms_for_splits(
+            splits=["train", "val", "test"])

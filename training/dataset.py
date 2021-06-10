@@ -17,22 +17,10 @@ class XenoCantoSpectrograms(Dataset):
 
         self.transform = transforms.Compose(transformations)
 
-        if split == "train":
-            self.data_dir = path_manager.train_spectrogram_dir(chunk_length)
-            self.label_file = os.path.join(
-                path_manager.train_dir, "train_{}.json".format(chunk_length))
-
-        elif split == "val":
-            self.data_dir = path_manager.val_spectrogram_dir(chunk_length)
-            self.label_file = os.path.join(
-                path_manager.val_dir, "val_{}.json".format(chunk_length))
-
-        elif split == "test":
-            self.data_dir = path_manager.test_spectrogram_dir(chunk_length)
-            self.label_file = os.path.join(
-                path_manager.test_dir, "test_{}.json".format(chunk_length))
-        else:
-            raise NameError("Invalid split name")
+        self.data_dir = path_manager.data_folder(
+            split, "spectrograms", chunk_length=chunk_length)
+        self.label_file = path_manager.spectrogram_label_file(split,
+                                                              chunk_length=chunk_length)
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
             raise NameError("Data files missing")

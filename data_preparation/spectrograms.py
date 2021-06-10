@@ -171,34 +171,25 @@ class SpectrogramCreator:
                 self.create_spectrograms_from_file(audio_path, target_dir)
             progress_bar.update(1)
 
-    def create_spectrograms_for_datasets(self, datasets=None):
-        if datasets is None:
-            datasets = ["train", "val", "test"]
-        dirs = []
+    def create_spectrograms_for_splits(self, splits=None):
+        if splits is None:
+            splits = ["train", "val", "test"]
 
-        if "train" in datasets:
-            train_spectrogram_dir = self.spectrogram_path.train_spectrogram_dir(
-                1000)
-            dirs.append([self.audio_path.train_audio_dir, self.audio_path.train_label_file(),
-                        train_spectrogram_dir, "training set"])
+        descriptions = {
+            "train": "training set",
+            "val": "validation set",
+            "test": "test set"
+        }
 
-        if "val" in datasets:
-            val_spectrogram_dir = self.spectrogram_path.val_spectrogram_dir(
-                1000)
-            dirs.append([self.audio_path.val_audio_dir, self.audio_path.val_label_file(),
-                        val_spectrogram_dir, "validation set"])
-
-        if "test" in datasets:
-            test_spectrogram_dir = self.spectrogram_path.test_spectrogram_dir(
-                1000)
-            dirs.append([self.audio_path.test_audio_dir, self.audio_path.test_label_file(),
-                        test_spectrogram_dir, "test set"])
-
-        for audio_dir, label_file, spectrogram_dir, desc in dirs:
+        for split in splits:
+            spectrogram_dir = self.spectrogram_path.data_folder(
+                split, "spectrograms", chunk_length=self.chunk_length)
+            audio_dir = self.audio_path.data_folder(split, "audio")
+            audio_label_file = self.audio_path.audio_label_file(split)
             self.audio_path.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
-                audio_dir, spectrogram_dir, desc)
-            self.create_spectrogram_labels(label_file, spectrogram_dir)
+                audio_dir, spectrogram_dir, descriptions[split])
+            self.create_spectrogram_labels(audio_label_file, spectrogram_dir)
 
     def create_spectrogram_labels(self, label_file, spectrogram_dir):
         labels = pd.read_json(label_file)

@@ -26,13 +26,13 @@ class XenoCantoDownloader:
 
     def metadata_cache_path(self, species_name):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
-        return os.path.join(self.path.label_cache_dir, file_name)
+        return os.path.join(self.path.cache("labels"), file_name)
 
     def download_file(self, url, target_file, cache_dir=None):
         file_name = os.path.basename(target_file)
 
         cached_file_path = os.path.join(
-            self.path.audio_cache_dir, file_name)
+            self.path.cache("audio"), file_name)
 
         # check if file is in cache
         if cache_dir and os.path.exists(cached_file_path):
@@ -54,7 +54,7 @@ class XenoCantoDownloader:
                 raise NameError("File couldn\'t be retrieved")
 
     def download_audio_file(self, url, target_file):
-        self.download_file(url, target_file, self.path.audio_cache_dir)
+        self.download_file(url, target_file, self.path.cache("audio"))
 
     def download_audio_files_by_id(self, target_dir, file_ids, desc="Download audio files..."):
         progress_bar = tqdm.tqdm(
@@ -143,7 +143,8 @@ class XenoCantoDownloader:
 
         # retrieve cached files from google cloud storage
         if self.path.use_gcs:
-            self.path.copy_cache_from_gcs()
+            self.path.copy_cache_from_gcs("audio")
+            self.path.copy_cache_from_gcs("labels")
 
         train_frames = []
         test_frames = []
@@ -257,31 +258,32 @@ class XenoCantoDownloader:
         training_set = pd.concat(train_frames)
         validation_set = pd.concat(val_frames)
         test_set = pd.concat(test_frames)
-        training_set.to_json(os.path.join(
-            self.path.train_dir, "train.json"), "records", indent=4)
-        validation_set.to_json(os.path.join(
-            self.path.val_dir, "val.json"), "records", indent=4)
-        test_set.to_json(os.path.join(
-            self.path.test_dir, "test.json"), "records", indent=4)
+        training_set.to_json(self.path.audio_label_file(
+            "train"), "records", indent=4)
+        validation_set.to_json(
+            self.path.audio_label_file("val"), "records", indent=4)
+        test_set.to_json(self.path.audio_label_file(
+            "test"), "records", indent=4)
 
         # clear data folders
-        self.path.empty_dir(self.path.train_audio_dir)
-        self.path.empty_dir(self.path.test_audio_dir)
-        self.path.empty_dir(self.path.val_audio_dir)
+        self.path.empty_dir(self.path.data_folder("train", "audio"))
+        self.path.empty_dir(self.path.data_folder("val", "audio"))
+        self.path.empty_dir(self.path.data_folder("test", "audio"))
 
         # download audio files
         self.download_audio_files_by_id(
-            self.path.train_audio_dir, training_set["id"], "Download training set")
+            self.path.data_folder("train", "audio"), training_set["id"], "Download training set")
 
         self.download_audio_files_by_id(
-            self.path.val_audio_dir, validation_set["id"], "Download validation set")
+            self.path.data_folder("val", "audio"), validation_set["id"], "Download validation set")
 
         self.download_audio_files_by_id(
-            self.path.test_audio_dir, test_set["id"], "Download test set")
+            self.path.data_folder("test", "audio"), test_set["id"], "Download test set")
 
         # copy cache to google cloud storage to speedup future runs
         if self.path.use_gcs:
-            self.path.copy_cache_to_gcs()
+            self.path.copy_cache_to_gcs("audio")
+            self.path.copy_cache_to_gcs("labels")
 
     def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):
