@@ -24,6 +24,17 @@ class XenoCantoDownloader:
 
         self.path = path_manager
 
+        # retrieve cached files from google cloud storage
+        if self.path.use_gcs:
+            self.path.copy_cache_from_gcs("audio")
+            self.path.copy_cache_from_gcs("labels")
+
+    def __del__(self):
+        # copy cache to google cloud storage to speedup future runs
+        if self.path.use_gcs:
+            self.path.copy_cache_to_gcs("audio")
+            self.path.copy_cache_to_gcs("labels")
+
     def metadata_cache_path(self, species_name):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
@@ -137,11 +148,6 @@ class XenoCantoDownloader:
             raise ValueError("Invalid sex for Xeno-Canto database")
         if not set(life_stages).issubset(self.xc_life_stages):
             raise ValueError("Invalid life stage for Xeno-Canto database")
-
-        # retrieve cached files from google cloud storage
-        if self.path.use_gcs:
-            self.path.copy_cache_from_gcs("audio")
-            self.path.copy_cache_from_gcs("labels")
 
         train_frames = []
         test_frames = []
@@ -276,11 +282,6 @@ class XenoCantoDownloader:
 
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set")
-
-        # copy cache to google cloud storage to speedup future runs
-        if self.path.use_gcs:
-            self.path.copy_cache_to_gcs("audio")
-            self.path.copy_cache_to_gcs("labels")
 
     def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):
