@@ -2,14 +2,14 @@ import logging
 from tqdm.notebook import tqdm
 from collections.abc import Iterable
 
-
-class ProgressBar:
+class Logger:
     logger = logging.getLogger("Pipeline-Logger")
     logger.propagate = False
     # print logs to console
     console = logging.StreamHandler()
     logger.addHandler(console)
 
+class ProgressBar:
     def iterable(self):
         if self.is_pipeline_run:
             return self.sequence
@@ -20,12 +20,12 @@ class ProgressBar:
         self.sequence = sequence
         self.is_pipeline_run = is_pipeline_run
         if self.is_pipeline_run:
-            ProgressBar.logger.info(desc)
+            Logger.logger.info(desc)
         else:
             self.tqdm = tqdm(sequence, desc=desc, position=position)
 
     def write(self, text: str):
         if self.is_pipeline_run:
-            ProgressBar.logger.info(text)
+            Logger.logger.info(text)
         else:
             self.tqdm.write(text)

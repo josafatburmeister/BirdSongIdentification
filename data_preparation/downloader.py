@@ -5,7 +5,7 @@ import requests
 import shutil
 from sklearn.model_selection import train_test_split
 
-from general.progress_bar import ProgressBar
+from general.logging import ProgressBar
 
 
 class XenoCantoDownloader:

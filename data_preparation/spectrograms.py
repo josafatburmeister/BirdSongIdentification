@@ -8,7 +8,7 @@ import shutil
 from skimage import io
 import warnings
 
-from general.progress_bar import ProgressBar
+from general.logging import ProgressBar
 
 warnings.filterwarnings('ignore')
 
