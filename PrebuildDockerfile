@@ -18,6 +18,11 @@ RUN wget -nv \
 # Path configuration
 ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
 
+# install libsndfile1 and ffmpeg for audio processing
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential gcc \
+    libsndfile1 \
+    ffmpeg
+
 RUN pip install -U pip && mkdir -p /app
 WORKDIR /app
 COPY requirements.txt /app/

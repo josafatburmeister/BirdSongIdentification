@@ -9,12 +9,6 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install pip==20.2.4
 RUN pip install -r requirements.txt
-
-# install libsndfile1 and ffmpeg for audio processing
-RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential gcc \
-    libsndfile1 \
-    ffmpeg
-
 COPY . /app
 
 # create virtual environment to install our own modules as packages
