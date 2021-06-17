@@ -6,8 +6,9 @@ import os
 from scipy import ndimage
 import shutil
 from skimage import io
-import tqdm
 import warnings
+
+from general.progress_bar import ProgressBar
 
 warnings.filterwarnings('ignore')
 
@@ -31,11 +32,11 @@ class SpectrogramCreator:
         self.audio_path = audio_path_manager
         self.spectrogram_path = spectrogram_path_manager
 
-        if self.spectrogram_path.use_gcs:
+        if self.spectrogram_path.is_pipeline_run:
             self.spectrogram_path.copy_cache_from_gcs("spectrograms")
 
     def __del__(self):
-        if self.spectrogram_path.use_gcs:
+        if self.spectrogram_path.is_pipeline_run:
             self.spectrogram_path.copy_cache_to_gcs("spectrograms")
 
     def scale_min_max(self, x, min=0.0, max=1.0, min_source=None, max_source=None):
@@ -169,11 +170,13 @@ class SpectrogramCreator:
             for i in range(number_of_chunks):
                 # get samples of current chunk
                 chunk = amplitudes[i *
-                                   self.samples_per_chunk:(i+1)*self.samples_per_chunk]
+                                   self.samples_per_chunk:(i + 1) * self.samples_per_chunk]
 
                 # apply short time fourier transformation to extract frequency information from amplitude data
-                mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate, hop_length=self.hop_length, n_fft=self.n_fft,
-                                                                 win_length=self.window_length, n_mels=112, fmin=self.fmin, fmax=self.fmax)
+                mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate,
+                                                                 hop_length=self.hop_length, n_fft=self.n_fft,
+                                                                 win_length=self.window_length, n_mels=112,
+                                                                 fmin=self.fmin, fmax=self.fmax)
 
                 # convert power spectrogram to dB-scaled spectrogram
                 mel_spectrogram_db = librosa.power_to_db(
@@ -197,14 +200,14 @@ class SpectrogramCreator:
         # clean up target dir
         self.spectrogram_path.empty_dir(target_dir)
 
-        progress_bar = tqdm.tqdm(
-            total=len(os.listdir(audio_dir)), desc="Create spectrograms for {}".format(desc), position=0)
+        progress_bar = ProgressBar(
+            os.listdir(audio_dir), desc="Create spectrograms for {}".format(desc), position=0,
+            is_pipeline_run=self.spectrogram_path.is_pipeline_run)
 
-        for file in os.listdir(audio_dir):
+        for file in progress_bar.iterable():
             if file.endswith(".mp3"):
                 audio_path = os.path.join(audio_dir, file)
                 self.create_spectrograms_from_file(audio_path, target_dir)
-            progress_bar.update(1)
 
     def create_spectrograms_for_splits(self, splits=None):
         if splits is None:

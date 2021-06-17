@@ -4,7 +4,8 @@ import pandas as pd
 import requests
 import shutil
 from sklearn.model_selection import train_test_split
-import tqdm
+
+from general.progress_bar import ProgressBar
 
 
 class XenoCantoDownloader:
@@ -25,13 +26,13 @@ class XenoCantoDownloader:
         self.path = path_manager
 
         # retrieve cached files from google cloud storage
-        if self.path.use_gcs:
+        if self.path.is_pipeline_run:
             self.path.copy_cache_from_gcs("audio")
             self.path.copy_cache_from_gcs("labels")
 
     def __del__(self):
         # copy cache to google cloud storage to speedup future runs
-        if self.path.use_gcs:
+        if self.path.is_pipeline_run:
             self.path.copy_cache_to_gcs("audio")
             self.path.copy_cache_to_gcs("labels")
 
@@ -65,10 +66,10 @@ class XenoCantoDownloader:
         self.download_file(url, target_file, self.path.cache("audio"))
 
     def download_audio_files_by_id(self, target_dir, file_ids, desc="Download audio files..."):
-        progress_bar = tqdm.tqdm(
-            total=len(file_ids), desc=desc, position=0)
+        progress_bar = ProgressBar(
+            file_ids, desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
 
-        for file_id in file_ids:
+        for file_id in progress_bar.iterable():
             url = self.xeno_canto_url + "/" + file_id + "/" + "download"
             file_path = os.path.join(target_dir, file_id + ".mp3")
             try:
@@ -76,8 +77,6 @@ class XenoCantoDownloader:
             except Exception:
                 progress_bar.write(
                     "Could not download file with id {}".format(file_id))
-
-            progress_bar.update(1)
 
     def download_xeno_canto_page(self, species_name, page=1):
         params = {"query": species_name, "page": page}
@@ -106,17 +105,14 @@ class XenoCantoDownloader:
             metadata = first_page["recordings"]
 
             # download remaining pages
-            progress_bar = tqdm.tqdm(
-                total=number_of_pages, desc="Download label file for {}...".format(species_name), position=0)
-            progress_bar.update(1)
+            progress_bar = ProgressBar(range(2, number_of_pages + 1), desc="Download label file for {}...".format(species_name), position=0, is_pipeline_run=self.path.is_pipeline_run)
 
-            for page in range(2, number_of_pages + 1):
+            for page in progress_bar.iterable():
                 current_page = self.download_xeno_canto_page(
                     species_name, page)
 
                 metadata.extend(current_page["recordings"])
 
-                progress_bar.update(1)
 
             # store all labels as json file
             with open(metadata_file_path, "w") as metadata_file:
@@ -125,8 +121,10 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
-                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, verbose=False):
+    def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E",
+                        sound_types=None, sexes=None,
+                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
+                        verbose=False):
         if maximum_samples_per_class < 3:
             raise ValueError(
                 "At least three samples are needed for each class")
@@ -176,7 +174,7 @@ class XenoCantoDownloader:
 
                 labels = labels[(labels["type"].str.contains(
                     type_search_string)) & (~labels["type"].str.contains(
-                        type_exclude_string))]
+                    type_exclude_string))]
 
             # filter samples by sex
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
@@ -218,7 +216,7 @@ class XenoCantoDownloader:
                         labels.loc[idx, "sound_type"] = sound_type
                         break
             labels["label"] = labels["gen"] + "_" + \
-                labels["sp"] + "_" + labels["sound_type"]
+                              labels["sp"] + "_" + labels["sound_type"]
 
             # select relevant columns
             labels = labels[["id", "label", "q",
@@ -275,13 +273,13 @@ class XenoCantoDownloader:
 
         # download audio files
         self.download_audio_files_by_id(
-            self.path.data_folder("train", "audio"), training_set["id"], "Download training set")
+            self.path.data_folder("train", "audio"), training_set["id"], "Download training set...")
 
         self.download_audio_files_by_id(
-            self.path.data_folder("val", "audio"), validation_set["id"], "Download validation set")
+            self.path.data_folder("val", "audio"), validation_set["id"], "Download validation set...")
 
         self.download_audio_files_by_id(
-            self.path.data_folder("test", "audio"), test_set["id"], "Download test set")
+            self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
 
     def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):

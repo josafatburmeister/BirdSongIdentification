@@ -33,9 +33,11 @@ class PathManager:
             for subdir in self.data_subdirs:
                 self.ensure_dir(os.path.join(dir, subdir))
 
+        self.is_pipeline_run = False
+
         # google cloud storage config
         if gcs_path:
-            self.use_gcs = True
+            self.is_pipeline_run = True
             self.GCP_PROJECT = fairing.cloud.gcp.guess_project_name()
             self.GCS_BUCKET_ID = f'{settings.gcloud.bucket_id}'
             self.GCS_BUCKET = f'{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}'
