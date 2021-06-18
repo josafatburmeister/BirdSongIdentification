@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import shutil
 from sklearn.model_selection import train_test_split
+from typing import List, Optional
 
 from data_preparation.filepaths import PathManager
 from general.logging import ProgressBar
@@ -43,7 +44,7 @@ class XenoCantoDownloader:
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
 
-    def download_file(self, url: str, target_file: str, cache_dir: str = None):
+    def download_file(self, url: str, target_file: str, cache_dir: Optional[str] = None):
         cached_file_path = self.path.cached_file_path("audio", target_file)
 
         # check if file is in cache
@@ -68,7 +69,7 @@ class XenoCantoDownloader:
     def download_audio_file(self, url: str, target_file: str):
         self.download_file(url, target_file, self.path.cache("audio"))
 
-    def download_audio_files_by_id(self, target_dir: str, file_ids: list[str], desc: str = "Download audio files..."):
+    def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files..."):
         progress_bar = ProgressBar(
             file_ids, desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
 
@@ -125,11 +126,11 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list: list[str] = None, use_nips4b_species_list: bool = True,
+    def create_datasets(self, species_list: Optional[List[str]] = None, use_nips4b_species_list: bool = True,
                         maximum_samples_per_class: int = 100, test_size: float = 0.35,
-                        min_quality: str = "E", sound_types: list[str] = None, sexes: list[str] = None,
-                        life_stages: list[str] = None, exclude_special_cases: bool = True,
-                        maximum_number_of_background_species: int = None,
+                        min_quality: str = "E", sound_types: Optional[List[str]] = None, sexes: Optional[List[str]] = None,
+                        life_stages: Optional[List[str]] = None, exclude_special_cases: bool = True,
+                        maximum_number_of_background_species: Optional[int] = None,
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
         if use_nips4b_species_list or species_list == None:
             with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:

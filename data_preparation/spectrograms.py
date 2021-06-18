@@ -6,6 +6,7 @@ import os
 from scipy import ndimage
 import shutil
 from skimage import io
+from typing import List, Optional
 import warnings
 
 from data_preparation.filepaths import PathManager
@@ -16,7 +17,7 @@ warnings.filterwarnings('ignore')
 
 class SpectrogramCreator:
     def __init__(self, chunk_length: int, audio_path_manager: PathManager,
-                 spectrogram_path_manager: PathManager = None):
+                 spectrogram_path_manager: Optional[PathManager] = None):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in milliseconds
         self.sampling_rate = 44100  # number of samples per second
@@ -41,8 +42,8 @@ class SpectrogramCreator:
         if self.spectrogram_path.is_pipeline_run:
             self.spectrogram_path.copy_cache_to_gcs("spectrograms")
 
-    def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: float = None,
-                      max_value_source: float = None):
+    def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
+                      max_value_source: Optional[float] = None):
         invert_image = False
         if not min_value_source:
             min_value_source = x.min()
@@ -199,7 +200,7 @@ class SpectrogramCreator:
                         target_dir, "{}-{}_noise.png".format(file_name, i))
                     self.save_spectrogram(target_file, mel_spectrogram_db)
 
-    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, desc: str = None):
+    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, desc: Optional[str] = None):
         # clean up target dir
         PathManager.empty_dir(target_dir)
 
@@ -212,7 +213,7 @@ class SpectrogramCreator:
                 audio_path = os.path.join(audio_dir, file)
                 self.create_spectrograms_from_file(audio_path, target_dir)
 
-    def create_spectrograms_for_splits(self, splits: list[str] = None, clear_spectrogram_cache: bool = False):
+    def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, clear_spectrogram_cache: bool = False):
         if splits is None:
             splits = ["train", "val", "test"]
 
