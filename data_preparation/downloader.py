@@ -82,6 +82,9 @@ class XenoCantoDownloader:
                 progress_bar.write(
                     "Could not download file with id {}".format(file_id))
 
+        if self.path.is_pipeline_run:
+            self.path.copy_cache_to_gcs("audio")
+
     def download_xeno_canto_page(self, species_name: str, page: int = 1):
         params = {"query": species_name, "page": page}
 
@@ -280,6 +283,9 @@ class XenoCantoDownloader:
             self.path.audio_label_file("val"), "records", indent=4)
         test_set.to_json(self.path.audio_label_file(
             "test"), "records", indent=4)
+
+        if self.path.is_pipeline_run:
+            self.path.copy_cache_to_gcs("labels")
 
         # clear data folders
         PathManager.empty_dir(self.path.data_folder("train", "audio"))
