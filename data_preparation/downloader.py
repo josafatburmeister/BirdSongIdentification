@@ -124,8 +124,9 @@ class XenoCantoDownloader:
 
     def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E",
                         sound_types=None, sexes=None,
-                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
-                        verbose=False):
+                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None):
+        if len(species_list) < 1:
+            raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
             raise ValueError(
                 "At least three samples are needed for each class")

@@ -11,10 +11,12 @@ def compile_pipeline():
     spectrogram_container_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/spectrogram_component.yaml'))
 
-    def pipeline(species_list, data_dir="bird_song_identification", maximum_samples_per_class=100, test_size=0.35, min_quality="E", sound_types=None, sexes=None,
-                 life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None, chunk_length=1000, verbose=False):
+    def pipeline(species_list, gcs_bucket="bird-song-identification", maximum_samples_per_class=100, test_size=0.35,
+                 min_quality="E", sound_types=None, sexes=None,
+                 life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
+                 chunk_length=1000):
         download_task = download_data_container_op(
-            data_dir=data_dir,
+            gcs_bucket=gcs_bucket,
             species_list=species_list,
             maximum_samples_per_class=maximum_samples_per_class,
             test_size=test_size,
@@ -28,7 +30,7 @@ def compile_pipeline():
 
         spectrogram_task = spectrogram_container_op(
             input_path=download_task.output,
-            data_dir=data_dir,
+            gcs_bucket=gcs_bucket,
             chunk_length=chunk_length
         )
 

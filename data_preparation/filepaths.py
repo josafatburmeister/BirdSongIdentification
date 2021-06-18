@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 
-from kubeflow_utils.config import settings
 from general.logging import logger
 
 
@@ -101,7 +100,7 @@ class PathManager:
             logger.error(error_message)
             raise NameError(error_message)
 
-    def __init__(self, data_dir: str, gcs_path=None):
+    def __init__(self, data_dir: str, gcs_bucket=None):
         self.data_dir = data_dir
         self.cache_dir = os.path.join(self.data_dir, "cache")
 
@@ -129,12 +128,11 @@ class PathManager:
         self.is_pipeline_run = False
 
         # google cloud storage config
-        if gcs_path:
+        if gcs_bucket:
             self.is_pipeline_run = True
             self.GCP_PROJECT = fairing.cloud.gcp.guess_project_name()
-            self.GCS_BUCKET_ID = f"{settings.gcloud.bucket_id}"
-            self.GCS_BUCKET = f"{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}"
-            self.GCS_BUCKET_PATH = f"{self.GCS_BUCKET}/{settings.gcloud.bucket_path}"
+            self.GCS_BUCKET_ID = gcs_bucket
+            self.GCS_BUCKET = f"gs://{self.GCS_BUCKET_ID}"
 
             if not PathManager.gcs_bucket_exists(self.GCS_BUCKET):
                 PathManager.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
