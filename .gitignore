@@ -137,3 +137,6 @@ data-old
 
 # Credentials
 gcp-bakdata-kubeflow-cluster.json
+
+# IDE
+.idea
