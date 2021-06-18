@@ -15,7 +15,8 @@ warnings.filterwarnings('ignore')
 
 
 class SpectrogramCreator:
-    def __init__(self, chunk_length, audio_path_manager, spectrogram_path_manager=None):
+    def __init__(self, chunk_length: int, audio_path_manager: PathManager,
+                 spectrogram_path_manager: PathManager = None):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in milliseconds
         self.sampling_rate = 44100  # number of samples per second
@@ -40,29 +41,30 @@ class SpectrogramCreator:
         if self.spectrogram_path.is_pipeline_run:
             self.spectrogram_path.copy_cache_to_gcs("spectrograms")
 
-    def scale_min_max(self, x, min=0.0, max=1.0, min_source=None, max_source=None):
+    def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: float = None,
+                      max_value_source: float = None):
         invert_image = False
-        if not min_source:
-            min_source = x.min()
-        if not max_source:
-            max_source = x.max()
-        if min > max:
+        if not min_value_source:
+            min_value_source = x.min()
+        if not max_value_source:
+            max_value_source = x.max()
+        if min_value > max_value:
             # if min value is greater than max value, the image is inverted
             invert_image = True
-            min_tmp = min
-            min = max
-            max = min_tmp
+            min_tmp = min_value
+            min_value = max_value
+            max_value = min_tmp
 
         # scale values to target interval
-        x_std = (x - min_source) / (max_source - min_source)
-        x_scaled = x_std * (max - min) + min
+        x_std = (x - min_value_source) / (max_value_source - min_value_source)
+        x_scaled = x_std * (max_value - min_value) + min_value
 
         if invert_image:
-            x_scaled = max - x_scaled
+            x_scaled = max_value - x_scaled
 
         return x_scaled
 
-    def filter_noise(self, spectrogram):
+    def filter_noise(self, spectrogram: numpy.ndarray):
         # normalize spectrogram to [0, 1]
         spectrogram = self.scale_min_max(
             spectrogram.astype(numpy.double), 0.0, 1.0).astype(numpy.double)
@@ -105,7 +107,7 @@ class SpectrogramCreator:
 
         return filtered_spectrogram
 
-    def contains_signal(self, spectrogram, signal_threshold=16, noise_threshold=3):
+    def contains_signal(self, spectrogram: numpy.ndarray, signal_threshold: int = 16, noise_threshold: int = 3):
         filtered_spectrogram = self.filter_noise(spectrogram)
 
         # count rows with signal
@@ -119,7 +121,7 @@ class SpectrogramCreator:
 
         return rows_with_signal > signal_threshold, rows_with_signal < noise_threshold
 
-    def save_spectrogram(self, target_file, spectrogram):
+    def save_spectrogram(self, target_file: str, spectrogram: numpy.ndarray):
         # scale amplitude values to range [0, 255]
         # invert image so that black represents higher amplitudes
         img = self.scale_min_max(
@@ -135,7 +137,7 @@ class SpectrogramCreator:
             "spectrograms", target_file)
         shutil.copy(target_file, cached_file_path)
 
-    def get_cached_spectrograms(self, audio_file, include_noise_samples=True):
+    def get_cached_spectrograms(self, audio_file: str, include_noise_samples: bool = True):
         spectrogram_name = f"{os.path.splitext(audio_file)[1]}_{self.chunk_length}"
         cache_path = self.spectrogram_path.cache("spectrograms")
 
@@ -151,7 +153,7 @@ class SpectrogramCreator:
 
         return cached_spectrograms_for_current_file
 
-    def create_spectrograms_from_file(self, audio_file, target_dir, include_noise_samples=True):
+    def create_spectrograms_from_file(self, audio_file: str, target_dir: str, include_noise_samples: bool = True):
         cached_spectrograms_for_current_file = self.get_cached_spectrograms(
             audio_file, include_noise_samples)
         if len(cached_spectrograms_for_current_file) > 0:
@@ -197,7 +199,7 @@ class SpectrogramCreator:
                         target_dir, "{}-{}_noise.png".format(file_name, i))
                     self.save_spectrogram(target_file, mel_spectrogram_db)
 
-    def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
+    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, desc: str = None):
         # clean up target dir
         PathManager.empty_dir(target_dir)
 
@@ -210,7 +212,7 @@ class SpectrogramCreator:
                 audio_path = os.path.join(audio_dir, file)
                 self.create_spectrograms_from_file(audio_path, target_dir)
 
-    def create_spectrograms_for_splits(self, splits=None, clear_spectrogram_cache=False):
+    def create_spectrograms_for_splits(self, splits: list[str] = None, clear_spectrogram_cache: bool = False):
         if splits is None:
             splits = ["train", "val", "test"]
 
@@ -233,7 +235,7 @@ class SpectrogramCreator:
                 audio_dir, spectrogram_dir, descriptions[split])
             self.create_spectrogram_labels(audio_label_file, spectrogram_dir)
 
-    def create_spectrogram_labels(self, label_file, spectrogram_dir):
+    def create_spectrogram_labels(self, label_file: str, spectrogram_dir: str):
         labels = pd.read_json(label_file)
 
         spectrogram_labels = []

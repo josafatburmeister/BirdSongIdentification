@@ -21,7 +21,7 @@ class ProgressBar:
         else:
             return self.tqdm
 
-    def __init__(self, sequence: Iterable, desc="", position=0, is_pipeline_run=False):
+    def __init__(self, sequence: Iterable, desc: str = "", position: int = 0, is_pipeline_run: bool = False):
         self.sequence = sequence
         self.is_pipeline_run = is_pipeline_run
         if self.is_pipeline_run:

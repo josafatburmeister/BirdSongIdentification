@@ -10,7 +10,7 @@ from general.logging import ProgressBar
 
 
 class XenoCantoDownloader:
-    def __init__(self, path_manager):
+    def __init__(self, path_manager: PathManager):
         self.xeno_canto_url = "https://www.xeno-canto.org"
         self.xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
@@ -37,11 +37,11 @@ class XenoCantoDownloader:
             self.path.copy_cache_to_gcs("audio")
             self.path.copy_cache_to_gcs("labels")
 
-    def metadata_cache_path(self, species_name):
+    def metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
 
-    def download_file(self, url, target_file, cache_dir=None):
+    def download_file(self, url: str, target_file: str, cache_dir: str = None):
         cached_file_path = self.path.cached_file_path("audio", target_file)
 
         # check if file is in cache
@@ -63,10 +63,10 @@ class XenoCantoDownloader:
             else:
                 raise NameError("File couldn\'t be retrieved")
 
-    def download_audio_file(self, url, target_file):
+    def download_audio_file(self, url: str, target_file: str):
         self.download_file(url, target_file, self.path.cache("audio"))
 
-    def download_audio_files_by_id(self, target_dir, file_ids, desc="Download audio files..."):
+    def download_audio_files_by_id(self, target_dir: str, file_ids: list[str], desc: str = "Download audio files..."):
         progress_bar = ProgressBar(
             file_ids, desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
 
@@ -79,14 +79,14 @@ class XenoCantoDownloader:
                 progress_bar.write(
                     "Could not download file with id {}".format(file_id))
 
-    def download_xeno_canto_page(self, species_name, page=1):
+    def download_xeno_canto_page(self, species_name: str, page: int = 1):
         params = {"query": species_name, "page": page}
 
         response = requests.get(url=self.xeno_api_canto_url, params=params)
 
         return response.json()
 
-    def download_species_metadata(self, species_name):
+    def download_species_metadata(self, species_name: str):
         metadata_file_path = self.metadata_cache_path(species_name)
 
         # check if metadata file is in cache
@@ -123,10 +123,11 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E",
-                        sound_types=None, sexes=None,
-                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
-                        clear_audio_cache=False, clear_label_cache=False):
+    def create_datasets(self, species_list: list[str], maximum_samples_per_class: int = 100, test_size: float = 0.35,
+                        min_quality: str = "E", sound_types: list[str] = None, sexes: list[str] = None,
+                        life_stages: list[str] = None, exclude_special_cases: bool = True,
+                        maximum_number_of_background_species: int = None,
+                        clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
@@ -234,14 +235,14 @@ class XenoCantoDownloader:
             # obtain random subset if maximum_samples_per_class is set
             if len(labels) > maximum_samples_per_class:
                 labels, _ = train_test_split(
-                    labels, train_size=maximum_samples_per_class, random_state=12)
+                    labels, train_size=maximum_samples_per_class, random_state=random_state)
 
             # create train, test and val splits
             train_labels, test_labels = self.train_test_split(
-                labels, test_size=test_size, random_state=12)
+                labels, test_size=test_size, random_state=random_state)
 
             val_labels, test_labels = self.train_test_split(
-                test_labels, test_size=test_size, random_state=12)
+                test_labels, test_size=test_size, random_state=random_state)
 
             if len(train_labels) == 0:
                 print("No training samples for class", species_name)
@@ -290,7 +291,7 @@ class XenoCantoDownloader:
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
 
-    def load_species_list_from_file(self, file_path, column_name="Scientific_name"):
+    def load_species_list_from_file(self, file_path: str, column_name: str = "Scientific_name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):
             return []
 
@@ -302,10 +303,10 @@ class XenoCantoDownloader:
 
         return list(species[column_name])
 
-    def train_test_split(self, labels, test_size=0.35, random_state=12):
+    def train_test_split(self, labels, test_size: float = 0.35, random_state: int = 12):
         try:
             train_labels, test_labels = train_test_split(
-                labels, test_size=test_size, random_state=12)
+                labels, test_size=test_size, random_state=random_state)
 
         except ValueError as e:
             if "resulting train set will be empty" in str(e):

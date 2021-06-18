@@ -8,17 +8,17 @@ from general.logging import logger
 
 class PathManager:
     @staticmethod
-    def ensure_dir(dir_path):
+    def ensure_dir(dir_path: str):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
     @staticmethod
-    def ensure_dirs(dir_paths):
+    def ensure_dirs(dir_paths: str):
         for dir_path in dir_paths:
             PathManager.ensure_dir(dir_path)
 
     @staticmethod
-    def empty_dir(dir_path):
+    def empty_dir(dir_path: str):
         for file in os.listdir(dir_path):
             os.remove(os.path.join(dir_path, file))
 
@@ -110,7 +110,7 @@ class PathManager:
             logger.error(error_message)
             raise NameError(error_message)
 
-    def __init__(self, data_dir: str, gcs_bucket=None):
+    def __init__(self, data_dir: str, gcs_bucket: str = None):
         self.data_dir = data_dir
         self.cache_dir = os.path.join(self.data_dir, "cache")
 
@@ -166,7 +166,7 @@ class PathManager:
     def cache(self, subdir: str):
         return self.cache_dirs[subdir]
 
-    def cached_file_path(self, subdir, file_path):
+    def cached_file_path(self, subdir: str, file_path: str):
         file_name = os.path.basename(file_path)
         return os.path.join(self.cache(subdir), file_name)
 
@@ -187,4 +187,3 @@ class PathManager:
         PathManager.empty_dir(self.cache(subdir))
         if self.is_pipeline_run:
             PathManager.gcs_remove_dir(self.gcs_dirs[f"{subdir}_cache"])
-

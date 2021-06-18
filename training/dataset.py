@@ -5,9 +5,11 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 
+from data_preparation.filepaths import PathManager
+
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager, chunk_length=1000, split="train"):
+    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, split: str = "train"):
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -45,7 +47,7 @@ class XenoCantoSpectrograms(Dataset):
     def __len__(self):
         return len(self.labels)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
