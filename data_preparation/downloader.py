@@ -1,3 +1,4 @@
+import importlib.resources as pkg_resources
 import json
 import os
 import pandas as pd
@@ -8,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from data_preparation.filepaths import PathManager
 from general.logging import ProgressBar
 
+import data_preparation
 
 class XenoCantoDownloader:
     def __init__(self, path_manager: PathManager):
@@ -123,18 +125,20 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list: list[str], maximum_samples_per_class: int = 100, test_size: float = 0.35,
+    def create_datasets(self, species_list: list[str] = None, use_nips4b_species_list: bool = True,
+                        maximum_samples_per_class: int = 100, test_size: float = 0.35,
                         min_quality: str = "E", sound_types: list[str] = None, sexes: list[str] = None,
                         life_stages: list[str] = None, exclude_special_cases: bool = True,
                         maximum_number_of_background_species: int = None,
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
+        if use_nips4b_species_list or species_list == None:
+            with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
+                species_list = self.load_species_list_from_file(str(species_file))
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
             raise ValueError(
                 "At least three samples are needed for each class")
-        if type(species_list) != list:
-            species_list = self.load_species_list_from_file(species_list)
         if life_stages is None:
             life_stages = ["adult", "juvenile",
                            "hatchling or nestling", "life stage uncertain"]

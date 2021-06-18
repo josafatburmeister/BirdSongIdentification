@@ -14,6 +14,12 @@ inputs:
     description: "List of bird species to include in the dataset",
   }
   - {
+      name: Use NIPS4B Species List,
+      type: Bool,
+      default: True,
+      description: "Whether the species list of the NIPS4B dataset should be used (if set to true, the provided species list can be empty)",
+  }
+  - {
     name: Maximum Samples Per Class,
     type: Integer,
     default: "100",
@@ -89,6 +95,8 @@ implementation:
           { outputPath: Output },
           --species_list,
           { inputValue: Species List },
+          --use_nips4b_species_list,
+          { inputValue: Use NIPS4B Species List },
           --maximum_samples_per_class,
           { inputValue: Maximum Samples Per Class },
           --test_size,
