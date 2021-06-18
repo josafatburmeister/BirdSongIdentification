@@ -2,21 +2,27 @@ name: Create spectrograms
 description: Creates spectrograms from audio files
 inputs:
   - {
-      name: Data Dir,
-      type: String,
-      default: "bird_song_identification",
-      description: "Path of the data folder in the glcoud storage",
-    }
+    name: GCS Bucket,
+    type: String,
+    default: "bird-song-identification",
+    description: "Name of Google Cloud Storage bucket that should be used for caching spectrogram files",
+  }
   - {
-      name: Input Path,
-      type: Directory,
-      description: "Path of the data folder",
-    }
+    name: Input Path,
+    type: Directory,
+    description: "Path of the data folder",
+  }
   - {
-      name: Chunk Length,
-      type: Integer,
-      description: "Chunk length in milliseconds",
-    }
+    name: Chunk Length,
+    type: Integer,
+    description: "Chunk length in milliseconds",
+  }
+  - {
+    name: Clear Spectrogram Cache,
+    type: Bool,
+    default: False,
+    description: "Whether the spectrogram cache should be cleared before running the download component",
+  }
 outputs:
   - { name: Output Path, type: Directory }
 implementation:
@@ -24,15 +30,17 @@ implementation:
     image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
     command:
       [
-        python,
-        kubeflow_pipeline/run_pipeline.py,
-        create_spectrograms,
-        --input_dir,
-        { inputPath: Input Path },
-        --gcs_path,
-        { inputValue: Data Dir },
-        --chunk_length,
-        { inputValue: Chunk Length },
-        --target_dir,
-        { outputPath: Output Path },
+          python,
+          kubeflow_pipeline/run_pipeline.py,
+          create_spectrograms,
+          --input_dir,
+          { inputPath: Input Path },
+          --gcs_bucket,
+          { inputValue: GCS Bucket },
+          --target_dir,
+          { outputPath: Output Path },
+          --chunk_length,
+          { inputValue: Chunk Length },
+          --clear_spectrogram_cache,
+          { inputValue: Clear Spectrogram Cache },
       ]

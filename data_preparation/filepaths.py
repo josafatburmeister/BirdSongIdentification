@@ -39,6 +39,16 @@ class PathManager:
             raise NameError(error_message)
 
     @staticmethod
+    def gcs_remove_dir(dir_path: str):
+        try:
+            subprocess.run(["gsutil", "-q", "rm", "-r", dir_path], check=True)
+            logger.info(f"Removed {dir_path}")
+        except subprocess.CalledProcessError:
+            error_message = f"Removing dir {dir_path} failed"
+            logger.error(error_message)
+            raise NameError(error_message)
+
+    @staticmethod
     def gcs_copy_dir(src_path: str, dest_path: str):
         src_path = PathManager.ensure_trailing_slash(src_path)
         try:
@@ -172,3 +182,9 @@ class PathManager:
     def copy_cache_from_gcs(self, subdir: str):
         if self.gcs_file_exists(self.gcs_dirs[f"{subdir}_cache"]):
             PathManager.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)
+
+    def clear_cache(self, subdir: str):
+        PathManager.empty_dir(self.cache(subdir))
+        if self.is_pipeline_run:
+            PathManager.gcs_remove_dir(self.gcs_dirs[f"{subdir}_cache"])
+

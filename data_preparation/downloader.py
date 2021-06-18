@@ -106,14 +106,15 @@ class XenoCantoDownloader:
             metadata = first_page["recordings"]
 
             # download remaining pages
-            progress_bar = ProgressBar(range(2, number_of_pages + 1), desc="Download label file for {}...".format(species_name), position=0, is_pipeline_run=self.path.is_pipeline_run)
+            progress_bar = ProgressBar(range(2, number_of_pages + 1),
+                                       desc="Download label file for {}...".format(species_name), position=0,
+                                       is_pipeline_run=self.path.is_pipeline_run)
 
             for page in progress_bar.iterable():
                 current_page = self.download_xeno_canto_page(
                     species_name, page)
 
                 metadata.extend(current_page["recordings"])
-
 
             # store all labels as json file
             with open(metadata_file_path, "w") as metadata_file:
@@ -124,7 +125,8 @@ class XenoCantoDownloader:
 
     def create_datasets(self, species_list, maximum_samples_per_class=100, test_size=0.35, min_quality="E",
                         sound_types=None, sexes=None,
-                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None):
+                        life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
+                        clear_audio_cache=False, clear_label_cache=False):
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
@@ -148,6 +150,11 @@ class XenoCantoDownloader:
             raise ValueError("Invalid sex for Xeno-Canto database")
         if not set(life_stages).issubset(self.xc_life_stages):
             raise ValueError("Invalid life stage for Xeno-Canto database")
+
+        if clear_audio_cache:
+            self.path.clear_cache("audio")
+        if clear_label_cache:
+            self.path.clear_cache("labels")
 
         train_frames = []
         test_frames = []

@@ -14,7 +14,8 @@ def compile_pipeline():
     def pipeline(species_list, gcs_bucket="bird-song-identification", maximum_samples_per_class=100, test_size=0.35,
                  min_quality="E", sound_types=None, sexes=None,
                  life_stages=None, exclude_special_cases=True, maximum_number_of_background_species=None,
-                 chunk_length=1000):
+                 clear_audio_cache=False, clear_label_cache=False,
+                 chunk_length=1000, clear_spectrogram_cache=False):
         download_task = download_data_container_op(
             gcs_bucket=gcs_bucket,
             species_list=species_list,
@@ -25,13 +26,16 @@ def compile_pipeline():
             sexes=sexes,
             life_stages=life_stages,
             exclude_special_cases=exclude_special_cases,
-            maximum_number_of_background_species=maximum_number_of_background_species
+            maximum_number_of_background_species=maximum_number_of_background_species,
+            clear_audio_cache=clear_audio_cache,
+            clear_label_cache=clear_label_cache
         )
 
         spectrogram_task = spectrogram_container_op(
             input_path=download_task.output,
             gcs_bucket=gcs_bucket,
-            chunk_length=chunk_length
+            chunk_length=chunk_length,
+            clear_spectrogram_cache=clear_spectrogram_cache
         )
 
     pipeline_filename = "birdsong_pipeline.zip"

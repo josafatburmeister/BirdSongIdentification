@@ -210,7 +210,7 @@ class SpectrogramCreator:
                 audio_path = os.path.join(audio_dir, file)
                 self.create_spectrograms_from_file(audio_path, target_dir)
 
-    def create_spectrograms_for_splits(self, splits=None):
+    def create_spectrograms_for_splits(self, splits=None, clear_spectrogram_cache=False):
         if splits is None:
             splits = ["train", "val", "test"]
 
@@ -219,6 +219,9 @@ class SpectrogramCreator:
             "val": "validation set",
             "test": "test set"
         }
+
+        if clear_spectrogram_cache:
+            self.spectrogram_path.clear_cache("spectrograms")
 
         for split in splits:
             spectrogram_dir = self.spectrogram_path.data_folder(

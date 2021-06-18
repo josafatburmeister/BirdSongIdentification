@@ -7,7 +7,7 @@ class PipelineSteps:
         xc_downloader = downloader.XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(species_list, **kwargs)
 
-    def create_spectrograms(self, input_dir, gcs_bucket, target_dir, chunk_length):
+    def create_spectrograms(self, input_dir, gcs_bucket, target_dir, chunk_length, clear_spectrogram_cache=False):
         audio_path_manager = filepaths.PathManager(
             input_dir, gcs_bucket=gcs_bucket)
         spectrogram_path_manager = filepaths.PathManager(
@@ -16,4 +16,4 @@ class PipelineSteps:
             chunk_length, audio_path_manager, spectrogram_path_manager)
 
         spectrogram_creator.create_spectrograms_for_splits(
-            splits=["train", "val", "test"])
+            splits=["train", "val", "test"], clear_spectrogram_cache=clear_spectrogram_cache)
