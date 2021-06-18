@@ -8,6 +8,7 @@ import shutil
 from skimage import io
 import warnings
 
+from data_preparation.filepaths import PathManager
 from general.logging import ProgressBar
 
 warnings.filterwarnings('ignore')
@@ -198,7 +199,7 @@ class SpectrogramCreator:
 
     def create_spectrograms_from_dir(self, audio_dir, target_dir, desc=None):
         # clean up target dir
-        self.spectrogram_path.empty_dir(target_dir)
+        PathManager.empty_dir(target_dir)
 
         progress_bar = ProgressBar(
             os.listdir(audio_dir), desc="Create spectrograms for {}".format(desc), position=0,
@@ -224,7 +225,7 @@ class SpectrogramCreator:
                 split, "spectrograms", chunk_length=self.chunk_length)
             audio_dir = self.audio_path.data_folder(split, "audio")
             audio_label_file = self.audio_path.audio_label_file(split)
-            self.audio_path.ensure_dir(spectrogram_dir)
+            PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, descriptions[split])
             self.create_spectrogram_labels(audio_label_file, spectrogram_dir)

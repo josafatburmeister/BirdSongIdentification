@@ -1,13 +1,106 @@
 from kubeflow import fairing
-import logging
 import os
 import subprocess
 import sys
 
 from kubeflow_utils.config import settings
+from general.logging import logger
 
 
 class PathManager:
+    @staticmethod
+    def ensure_dir(dir_path):
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+    @staticmethod
+    def ensure_dirs(dir_paths):
+        for dir_path in dir_paths:
+            PathManager.ensure_dir(dir_path)
+
+    @staticmethod
+    def empty_dir(dir_path):
+        for file in os.listdir(dir_path):
+            os.remove(os.path.join(dir_path, file))
+
+    @staticmethod
+    def ensure_trailing_slash(path: str):
+        if not path.endswith("/"):
+            return path + "/"
+        return path
+
+    @staticmethod
+    def gcs_copy_file(src_path: str, dest_path: str):
+        try:
+            subprocess.run(["gsutil", "-q", "cp", src_path, dest_path], check=True)
+            logger.info(f"Copied {src_path} to {dest_path}")
+        except subprocess.CalledProcessError:
+            error_message = f"Copying {src_path} to {dest_path} failed"
+            logger.error(error_message)
+            raise NameError(error_message)
+
+    @staticmethod
+    def gcs_copy_dir(src_path: str, dest_path: str):
+        src_path = PathManager.ensure_trailing_slash(src_path)
+        try:
+            subprocess.run(["gsutil", "-q", "-m", "cp", "-r", f"{src_path}*", dest_path], check=True)
+            logger.info(f"Copied {src_path} to {dest_path}")
+        except subprocess.CalledProcessError:
+            error_message = f"Copying {src_path} to {dest_path} failed"
+            logger.error(error_message)
+            raise NameError(error_message)
+
+    @staticmethod
+    def gcs_make_bucket(bucket_path: str, project_name: str):
+        try:
+            subprocess.run(["gsutil", "-q", "mb", "-p", project_name, bucket_path], check=True)
+            logger.info(f"Created bucket {bucket_path}")
+        except subprocess.CalledProcessError:
+            error_message = f"Creating bucket {bucket_path} failed"
+            logger.error(error_message)
+            raise NameError(error_message)
+
+    @staticmethod
+    def gcs_bucket_exists(bucket_path: str):
+        bucket_path = PathManager.ensure_trailing_slash(bucket_path)
+        try:
+            if sys.platform == "win32" or sys.platform == "nt":
+                result = subprocess.run(["gsutil", "ls", "-b", bucket_path],
+                                        stdout=subprocess.PIPE, shell=True, check=True).stdout[:-1].decode("utf-8")
+            else:
+                result = subprocess.run(
+                    ["gsutil", "ls", "-b", bucket_path], stdout=subprocess.PIPE, check=True).stdout[:-1].decode("utf-8")
+            bucket_exists = (result == bucket_path)
+            if bucket_exists:
+                logger.info(f"Bucket {bucket_path} exists")
+            else:
+                logger.info(f"Bucket {bucket_path} does not exist")
+            return bucket_exists
+        except subprocess.CalledProcessError:
+            error_message = f"Failed to check existence of bucket {bucket_path}"
+            logger.error(error_message)
+            raise NameError(error_message)
+
+    @staticmethod
+    def gcs_file_exists(file_path: str):
+        try:
+            if sys.platform == "win32" or sys.platform == "nt":
+                result = subprocess.run(["gsutil", "ls", file_path],
+                                        stdout=subprocess.PIPE, shell=True, check=True).stdout[:-1].decode("utf-8")
+            else:
+                result = subprocess.run(
+                    ["gsutil", "ls", file_path], stdout=subprocess.PIPE, check=True).stdout[:-1].decode("utf-8")
+            file_exists = file_path in result
+            if file_exists:
+                logger.info(f"File {file_path} exists")
+            else:
+                logger.info(f"File {file_path} does not exist")
+            return file_exists
+        except subprocess.CalledProcessError:
+            error_message = f"Failed to check existence of file {file_path}"
+            logger.error(error_message)
+            raise NameError(error_message)
+
     def __init__(self, data_dir: str, gcs_path=None):
         self.data_dir = data_dir
         self.cache_dir = os.path.join(self.data_dir, "cache")
@@ -29,9 +122,9 @@ class PathManager:
         self.ensure_dirs(self.cache_dirs.values())
         self.ensure_dirs(self.data_dirs.values())
 
-        for dir in self.data_dirs.values():
+        for dir_path in self.data_dirs.values():
             for subdir in self.data_subdirs:
-                self.ensure_dir(os.path.join(dir, subdir))
+                self.ensure_dir(os.path.join(dir_path, subdir))
 
         self.is_pipeline_run = False
 
@@ -39,12 +132,12 @@ class PathManager:
         if gcs_path:
             self.is_pipeline_run = True
             self.GCP_PROJECT = fairing.cloud.gcp.guess_project_name()
-            self.GCS_BUCKET_ID = f'{settings.gcloud.bucket_id}'
-            self.GCS_BUCKET = f'{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}'
-            self.GCS_BUCKET_PATH = f'{self.GCS_BUCKET}/{settings.gcloud.bucket_path}'
+            self.GCS_BUCKET_ID = f"{settings.gcloud.bucket_id}"
+            self.GCS_BUCKET = f"{settings.gcloud.bucket_prefix}{self.GCS_BUCKET_ID}"
+            self.GCS_BUCKET_PATH = f"{self.GCS_BUCKET}/{settings.gcloud.bucket_path}"
 
-            if not self.gcs_bucket_exists(self.GCS_BUCKET_ID):
-                self.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
+            if not PathManager.gcs_bucket_exists(self.GCS_BUCKET):
+                PathManager.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
 
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_dirs = {
@@ -52,18 +145,6 @@ class PathManager:
                 "labels_cache": os.path.join(self.gcs_cache_dir, "labels", ""),
                 "spectrograms_cache": os.path.join(self.gcs_cache_dir, "spectrograms", ""),
             }
-
-    def ensure_dir(self, dir_path):
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-
-    def ensure_dirs(self, dir_paths):
-        for dir_path in dir_paths:
-            self.ensure_dir(dir_path)
-
-    def empty_dir(self, dir_path):
-        for file in os.listdir(dir_path):
-            os.remove(os.path.join(dir_path, file))
 
     def audio_label_file(self, split: str):
         return os.path.join(self.data_dirs[split], f"{split}.json")
@@ -87,64 +168,9 @@ class PathManager:
                 subdir += f"_{key}"
         return os.path.join(self.data_dirs[split], subdir)
 
-    def gcs_copy_file(self, src_path: str, dest_path: str):
-        if sys.platform == 'win32' or sys.platform == 'nt':
-            logging.info(
-                subprocess.run(['gsutil', 'cp', src_path, dest_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8'))
-        else:
-            logging.info(
-                subprocess.run(['gsutil', 'cp', src_path, dest_path], stdout=subprocess.PIPE, shell=True).stdout[:-1].decode(
-                    'utf-8'))
-        logging.info(f'Copied {src_path} to {dest_path}')
-
-    def gcs_copy_dir(self, src_path: str, dest_path: str):
-        if not src_path.endswith("/"):
-            src_path += "/"
-        if sys.platform == 'win32' or sys.platform == 'nt':
-            logging.info(
-                subprocess.run(['gsutil', '-m', 'cp', '-r', f'{src_path}*', dest_path], stdout=subprocess.PIPE, shell=True).stdout[
-                    :-1].decode('utf-8'))
-        else:
-            logging.info(
-                subprocess.run(['gsutil', '-m', 'cp', '-r', f'{src_path}*', dest_path], stdout=subprocess.PIPE).stdout[:-1].decode(
-                    'utf-8'))
-        logging.info(f'Copied {src_path} to {dest_path}')
-
-    def gcs_bucket_path(self, bucket_name: str, file_name=""):
-        return f'{settings.gcloud.bucket_prefix}{bucket_name}/{file_name}'
-
-    def gcs_make_bucket(self, bucket_name: str, project_name: str):
-        if sys.platform == 'win32' or sys.platform == 'nt':
-            logging.info(
-                subprocess.run(['gsutil', 'mb', '-p', project_name, bucket_name], stdout=subprocess.PIPE,
-                               shell=True).stdout[:-1].decode('utf-8'))
-        else:
-            logging.info(subprocess.run(['gsutil', 'mb', '-p', project_name, bucket_name], stdout=subprocess.PIPE).stdout[
-                :-1].decode('utf-8'))
-        logging.info(f'Created bucket {bucket_name}')
-
-    def gcs_bucket_exists(self, bucket_name: str):
-        bucket_path = self.gcs_bucket_path(bucket_name)
-        if sys.platform == 'win32' or sys.platform == 'nt':
-            result = subprocess.run(['gsutil', 'ls', '-b', bucket_path],
-                                    stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
-        else:
-            result = subprocess.run(
-                ['gsutil', 'ls', '-b', bucket_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
-        return result == bucket_path
-
-    def gcs_file_exists(self, file_path: str):
-        if sys.platform == 'win32' or sys.platform == 'nt':
-            result = subprocess.run(['gsutil', 'ls', file_path],
-                                    stdout=subprocess.PIPE, shell=True).stdout[:-1].decode('utf-8')
-        else:
-            result = subprocess.run(
-                ['gsutil', 'ls', file_path], stdout=subprocess.PIPE).stdout[:-1].decode('utf-8')
-        return file_path in result
-
     def copy_cache_to_gcs(self, subdir: str):
-        self.gcs_copy_dir(self.cache(subdir), self.gcs_dirs[f"{subdir}_cache"])
+        PathManager.gcs_copy_dir(self.cache(subdir), self.gcs_dirs[f"{subdir}_cache"])
 
     def copy_cache_from_gcs(self, subdir: str):
         if self.gcs_file_exists(self.gcs_dirs[f"{subdir}_cache"]):
-            self.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)
+            PathManager.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)

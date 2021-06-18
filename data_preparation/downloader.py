@@ -5,6 +5,7 @@ import requests
 import shutil
 from sklearn.model_selection import train_test_split
 
+from data_preparation.filepaths import PathManager
 from general.logging import ProgressBar
 
 
@@ -267,9 +268,9 @@ class XenoCantoDownloader:
             "test"), "records", indent=4)
 
         # clear data folders
-        self.path.empty_dir(self.path.data_folder("train", "audio"))
-        self.path.empty_dir(self.path.data_folder("val", "audio"))
-        self.path.empty_dir(self.path.data_folder("test", "audio"))
+        PathManager.empty_dir(self.path.data_folder("train", "audio"))
+        PathManager.empty_dir(self.path.data_folder("val", "audio"))
+        PathManager.empty_dir(self.path.data_folder("test", "audio"))
 
         # download audio files
         self.download_audio_files_by_id(
