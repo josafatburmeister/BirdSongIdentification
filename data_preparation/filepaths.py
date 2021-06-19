@@ -73,42 +73,23 @@ class PathManager:
     def gcs_bucket_exists(bucket_path: str):
         bucket_path = PathManager.ensure_trailing_slash(bucket_path)
         try:
-            if sys.platform == "win32" or sys.platform == "nt":
-                result = subprocess.run(["gsutil", "ls", "-b", bucket_path],
-                                        stdout=subprocess.PIPE, shell=True, check=True).stdout[:-1].decode("utf-8")
-            else:
-                result = subprocess.run(
-                    ["gsutil", "ls", "-b", bucket_path], stdout=subprocess.PIPE, check=True).stdout[:-1].decode("utf-8")
-            bucket_exists = (result == bucket_path)
-            if bucket_exists:
-                logger.info(f"Bucket {bucket_path} exists")
-            else:
-                logger.info(f"Bucket {bucket_path} does not exist")
-            return bucket_exists
+            # if the bucket does not exist, this will throw a BucketNotFoundException
+            subprocess.run(["gsutil", "ls", "-b", bucket_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            logger.info(f"Bucket {bucket_path} exists")
+            return True
         except subprocess.CalledProcessError:
-            error_message = f"Failed to check existence of bucket {bucket_path}"
-            logger.error(error_message)
-            raise NameError(error_message)
+            logger.info(f"Bucket {bucket_path} does not exist")
+            return False
 
     @staticmethod
     def gcs_file_exists(file_path: str):
         try:
-            if sys.platform == "win32" or sys.platform == "nt":
-                result = subprocess.run(["gsutil", "ls", file_path],
-                                        stdout=subprocess.PIPE, shell=True, check=True).stdout[:-1].decode("utf-8")
-            else:
-                result = subprocess.run(
-                    ["gsutil", "ls", file_path], stdout=subprocess.PIPE, check=True).stdout[:-1].decode("utf-8")
-            file_exists = file_path in result
-            if file_exists:
-                logger.info(f"File {file_path} exists")
-            else:
-                logger.info(f"File {file_path} does not exist")
-            return file_exists
+            result = subprocess.run(["gsutil", "ls", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            logger.info(f"File {file_path} exists")
+            return True
         except subprocess.CalledProcessError:
-            error_message = f"Failed to check existence of file {file_path}"
-            logger.error(error_message)
-            raise NameError(error_message)
+            logger.info(f"File {file_path} does not exist")
+            return False
 
     def __init__(self, data_dir: str, gcs_bucket: str = None):
         self.data_dir = data_dir
