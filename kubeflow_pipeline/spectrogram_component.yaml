@@ -23,6 +23,12 @@ inputs:
     default: False,
     description: "Whether the spectrogram cache should be cleared before running the download component",
   }
+  - {
+    name: Verbose Logging,
+    type: Bool,
+    default: False,
+    description: "Whether logging should be verbose",
+  }
 outputs:
   - { name: Output Path, type: Directory }
 implementation:
@@ -43,4 +49,6 @@ implementation:
           { inputValue: Chunk Length },
           --clear_spectrogram_cache,
           { inputValue: Clear Spectrogram Cache },
+          --verbose_logging,
+          { inputValue: Verbose Logging },
       ]

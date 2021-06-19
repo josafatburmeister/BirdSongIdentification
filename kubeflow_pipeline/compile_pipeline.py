@@ -17,7 +17,7 @@ def compile_pipeline():
                  life_stages=None, exclude_special_cases=True,
                  maximum_number_of_background_species=None,
                  clear_audio_cache=False, clear_label_cache=False,
-                 chunk_length=1000, clear_spectrogram_cache=False):
+                 chunk_length=1000, clear_spectrogram_cache=False, verbose_logging=False):
         download_task = download_data_container_op(
             gcs_bucket=gcs_bucket,
             species_list=species_list,
@@ -31,14 +31,16 @@ def compile_pipeline():
             exclude_special_cases=exclude_special_cases,
             maximum_number_of_background_species=maximum_number_of_background_species,
             clear_audio_cache=clear_audio_cache,
-            clear_label_cache=clear_label_cache
+            clear_label_cache=clear_label_cache,
+            verbose_logging=verbose_logging
         )
 
         spectrogram_task = spectrogram_container_op(
             input_path=download_task.output,
             gcs_bucket=gcs_bucket,
             chunk_length=chunk_length,
-            clear_spectrogram_cache=clear_spectrogram_cache
+            clear_spectrogram_cache=clear_spectrogram_cache,
+            verbose_logging=verbose_logging
         )
 
     pipeline_filename = "birdsong_pipeline.zip"

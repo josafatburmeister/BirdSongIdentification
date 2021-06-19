@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from typing import List, Optional
 
 from data_preparation.filepaths import PathManager
-from general.logging import ProgressBar
+from general.logging import logger, ProgressBar
 
 import data_preparation
 
@@ -34,24 +34,20 @@ class XenoCantoDownloader:
             self.path.copy_cache_from_gcs("audio")
             self.path.copy_cache_from_gcs("labels")
 
-    def __del__(self):
-        # copy cache to google cloud storage to speedup future runs
-        if self.path.is_pipeline_run:
-            self.path.copy_cache_to_gcs("audio")
-            self.path.copy_cache_to_gcs("labels")
-
     def metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
 
-    def download_file(self, url: str, target_file: str, cache_dir: Optional[str] = None):
-        cached_file_path = self.path.cached_file_path("audio", target_file)
-
+    def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None):
+        if cache_subdir:
+            cached_file_path = self.path.cached_file_path(cache_subdir, target_file)
         # check if file is in cache
-        if cache_dir and os.path.exists(cached_file_path):
+        if cache_subdir and os.path.exists(cached_file_path):
+            logger.verbose("cached %s", url)
             shutil.copy(cached_file_path, target_file)
         # download file
         else:
+            logger.verbose("download %s", url)
             response = requests.get(url, stream=True)
 
             if response.status_code == 200:
@@ -61,13 +57,15 @@ class XenoCantoDownloader:
                     shutil.copyfileobj(response.raw, f)
 
                 # put file copy into cache
-                if cache_dir:
+                if cache_subdir:
                     shutil.copy(target_file, cached_file_path)
+                    if self.path.is_pipeline_run:
+                        self.path.copy_file_to_gcs_cache(cached_file_path, cache_subdir)
             else:
                 raise NameError("File couldn\'t be retrieved")
 
     def download_audio_file(self, url: str, target_file: str):
-        self.download_file(url, target_file, self.path.cache("audio"))
+        self.download_file(url, target_file, "audio")
 
     def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files..."):
         progress_bar = ProgressBar(
@@ -79,11 +77,8 @@ class XenoCantoDownloader:
             try:
                 self.download_audio_file(url, file_path)
             except Exception:
-                progress_bar.write(
-                    "Could not download file with id {}".format(file_id))
-
-        if self.path.is_pipeline_run:
-            self.path.copy_cache_to_gcs("audio")
+                 progress_bar.write(
+                     "Could not download file with id {}".format(file_id))
 
     def download_xeno_canto_page(self, species_name: str, page: int = 1):
         params = {"query": species_name, "page": page}
@@ -97,6 +92,7 @@ class XenoCantoDownloader:
 
         # check if metadata file is in cache
         if os.path.exists(metadata_file_path):
+            logger.verbose("Label file for %s is in cache", species_name)
             with open(metadata_file_path) as metadata_file:
                 metadata = json.load(metadata_file)
                 return metadata, len(metadata)
@@ -126,6 +122,8 @@ class XenoCantoDownloader:
             with open(metadata_file_path, "w") as metadata_file:
                 json.dump(metadata, metadata_file, indent=2,
                           separators=(',', ':'))
+                if self.path.is_pipeline_run:
+                    self.path.copy_file_to_gcs_cache(metadata_file_path, "labels")
 
             return metadata, first_page["numRecordings"]
 
@@ -283,9 +281,6 @@ class XenoCantoDownloader:
             self.path.audio_label_file("val"), "records", indent=4)
         test_set.to_json(self.path.audio_label_file(
             "test"), "records", indent=4)
-
-        if self.path.is_pipeline_run:
-            self.path.copy_cache_to_gcs("labels")
 
         # clear data folders
         PathManager.empty_dir(self.path.data_folder("train", "audio"))

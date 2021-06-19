@@ -1,15 +1,14 @@
-import logging
+import logging, verboselogs
 from tqdm.notebook import tqdm
 from collections.abc import Iterable
 
 
 class Logger:
-    logger = logging.getLogger("Pipeline-Logger")
+    logger = verboselogs.VerboseLogger("Birdsong-Logger")
     logger.propagate = False
     # print logs to console
     console = logging.StreamHandler()
     logger.addHandler(console)
-
 
 logger = Logger.logger
 

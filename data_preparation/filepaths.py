@@ -29,10 +29,11 @@ class PathManager:
         return path
 
     @staticmethod
-    def gcs_copy_file(src_path: str, dest_path: str):
+    def gcs_copy_file(src_path: str, dest_path: str, quiet: bool = True):
         try:
             subprocess.run(["gsutil", "-q", "cp", src_path, dest_path], check=True)
-            logger.info(f"Copied {src_path} to {dest_path}")
+            if not quiet:
+                logger.info(f"Copied {src_path} to {dest_path}")
         except subprocess.CalledProcessError:
             error_message = f"Copying {src_path} to {dest_path} failed"
             logger.error(error_message)
@@ -82,13 +83,15 @@ class PathManager:
             return False
 
     @staticmethod
-    def gcs_file_exists(file_path: str):
+    def gcs_file_exists(file_path: str, quiet: bool = True):
         try:
             result = subprocess.run(["gsutil", "ls", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-            logger.info(f"File {file_path} exists")
+            if not quiet:
+                logger.info(f"File {file_path} exists")
             return True
         except subprocess.CalledProcessError:
-            logger.info(f"File {file_path} does not exist")
+            if not quiet:
+                logger.info(f"File {file_path} does not exist")
             return False
 
     def __init__(self, data_dir: str, gcs_bucket: str = None):
@@ -162,7 +165,10 @@ class PathManager:
 
     def copy_cache_from_gcs(self, subdir: str):
         if self.gcs_file_exists(self.gcs_dirs[f"{subdir}_cache"]):
-            PathManager.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.data_dir)
+            PathManager.gcs_copy_dir(self.gcs_dirs[f"{subdir}_cache"], self.cache(subdir))
+
+    def copy_file_to_gcs_cache(self, file_path: str, subdir: str):
+        PathManager.gcs_copy_file(file_path, self.gcs_dirs[f"{subdir}_cache"])
 
     def clear_cache(self, subdir: str):
         PathManager.empty_dir(self.cache(subdir))

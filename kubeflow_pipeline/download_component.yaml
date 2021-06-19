@@ -79,6 +79,12 @@ inputs:
     default: False,
     description: "Whether the label cache should be cleared before running the download component",
   }
+  - {
+    name: Verbose Logging,
+    type: Bool,
+    default: False,
+    description: "Whether logging should be verbose",
+  }
 outputs:
   - { name: Output, type: Directory }
 implementation:
@@ -117,4 +123,6 @@ implementation:
           { inputValue: Clear Audio Cache },
           --clear_label_cache,
           { inputValue: Clear Label Cache },
+          --verbose_logging,
+          { inputValue: Verbose Logging },
       ]

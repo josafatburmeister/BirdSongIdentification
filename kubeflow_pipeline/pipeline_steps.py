@@ -1,14 +1,20 @@
-from data_preparation import filepaths, downloader, spectrograms
+import logging
 
+from data_preparation import filepaths, downloader, spectrograms
+from general.logging import logger
 
 class PipelineSteps:
-    def download_xeno_canto_data(self, gcs_bucket: str, target_dir: str, **kwargs):
+    def download_xeno_canto_data(self, gcs_bucket: str, target_dir: str, verbose_logging: bool, **kwargs):
+        if verbose_logging:
+            logger.setLevel(logging.VERBOSE)
         path_manager = filepaths.PathManager(target_dir, gcs_bucket=gcs_bucket)
         xc_downloader = downloader.XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(**kwargs)
 
     def create_spectrograms(self, input_dir: str, gcs_bucket: str, target_dir: str, chunk_length: int,
-                            clear_spectrogram_cache: bool = False):
+                            clear_spectrogram_cache: bool = False, verbose_logging: bool = False):
+        if verbose_logging:
+            logger.setLevel(logging.VERBOSE)
         audio_path_manager = filepaths.PathManager(
             input_dir, gcs_bucket=gcs_bucket)
         spectrogram_path_manager = filepaths.PathManager(
