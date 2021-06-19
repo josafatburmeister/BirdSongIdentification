@@ -1,89 +1,89 @@
-class number,class name,English_name,Scientific_name,type
-none,Empty,Empty,noise sample,noise
-1,Aegcau_call,Long-tailed Tit,Aegithalos caudatus,bird
-2,Alaarv_song,Eurasian Skylark,Alauda arvensis,bird
-3,Anttri_song,Tree Pipit,Anthus trivialis,bird
-4,Butbut_call,Common Buzzard,Buteo buteo,bird
-5,Carcan_call,Common Linnet,Linaria cannabina,bird
-6,Carcan_song,Common Linnet,Linaria cannabina,bird
-7,Carcar_call,European Goldfinch,Carduelis carduelis,bird
-8,Carcar_song,European Goldfinch,Carduelis carduelis,bird
-9,Cerbra_call,Short-toed Treecreeper,Certhia brachydactyla,bird
-10,Cerbra_song,Short-toed Treecreeper,Certhia brachydactyla,bird
-11,Cetcet_song,Cetti's Warbler,Cettia cetti,bird
-12,Chlchl_call,European Greenfinch,Chloris chloris,bird
-13,Cicatr_song,Black Cicada,Cicadatra atra,insect
-14,Cicorn_song,Grey Cicada,Cicada orni,insect
-15,Cisjun_song,Zitting Cisticola,Cisticola juncidis,bird
-16,Colpal_song,Common Wood Pigeon,Columba palumbus,bird
-17,Corcor_call,Carrion Crow,Corvus corone,bird
-18,Denmaj_call,Great Spotted Woodpecker,Dendrocopos major,bird
-19,Denmaj_drum,Great Spotted Woodpecker,Dendrocopos major,bird
-20,Embcir_call,Cirl Bunting,Emberiza cirlus,bird
-21,Embcir_song,Cirl Bunting,Emberiza cirlus,bird
-22,Erirub_call,European Robin,Erithacus rubecula,bird
-23,Erirub_song,European Robin,Erithacus rubecula,bird
-24,Fricoe_call,Common Chaffinch,Fringilla coelebs,bird
-25,Fricoe_song,Common Chaffinch,Fringilla coelebs,bird
-26,Galcri_call,Crested Lark,Galerida cristata,bird
-27,Galcri_song,Crested Lark,Galerida cristata,bird
-28,Galthe_call,Thekla Lark,Galerida theklae,bird
-29,Galthe_song,Thekla Lark,Galerida theklae,bird
-30,Gargla_call,Eurasian Jay,Garrulus glandarius,bird
-31,Hirrus_call,Barn Swallow,Hirundo rustica,bird
-32,Jyntor_song,Eurasian Wryneck,Jynx torquilla,bird
-33,Lopcri_call,European Crested Tit,Lophophanes cristatus,bird
-34,Loxcur_call,Red Crossbill,Loxia curvirostra,bird
-35,Lularb_song,Woodlark,lullula arborea,bird
-36,Lusmeg_call,Common Nightingale,Luscinia megarhynchos,bird
-37,Lusmeg_song,Common Nightingale,Luscinia megarhynchos,bird
-38,Lyrple_song,Common Cicada,Lyristes plebejus,insect
-39,Motcin_call,Grey Wagtail,Motacilla cinerea,bird
-40,Musstr_call,Spotted Flycatcher,Muscicapa striata,bird
-41,Oriori_call,Eurasian Golden Oriole,Oriolus oriolus,bird
-42,Oriori_song,Eurasian Golden Oriole,Oriolus oriolus,bird
-43,Parate_call,Coal Tit,Periparus ater,bird
-44,Parate_song,Coal Tit,Periparus ater,bird
-45,Parcae_call,Blue Tit,Cyanistes caeruleus,bird
-46,Parcae_song,Blue Tit,Cyanistes caeruleus,bird
-47,Parmaj_call,Great Tit,Parus major,bird
-48,Parmaj_song,Great Tit,Parus major,bird
-49,Pasdom_call,House Sparrow,Passer domesticus,bird
-50,Pelgra_call,Graf's Hybrid Frog,Pelophylax kl. grafi,amphibian
-51,Petpet_call,Rock Sparrow,Petronia petronia,bird
-52,Petpet_song,Rock Sparrow,Petronia petronia,bird
-53,Phofem_song,Fallow Bush-cricket,Pholidoptera femorata,insect
-54,Phycol_call,Common Chifchaff,Phylloscopus collybita,bird
-55,Phycol_song,Common Chifchaff,Phylloscopus collybita,bird
-56,Picpic_call,Eurasian Magpie,Pica pica,bird
-57,Plaaff_song,Coastal Bush-cricket,Platycleis affinis,insect
-58,Plasab_song,Sand Bush-Cricket,Platycleis sabulosa,insect
-59,Poepal_call,Marsh Tit,Poecile palustris,bird
-60,Poepal_song,Marsh Tit,Poecile palustris,bird
-61,Prumod_song,Dunnock,Prunella modularis,bird
-62,Ptehey_song,Marsh Cricket,Pteronemobius heydenii,insect
-63,Pyrpyr_call,Eurasian Bullfinch,Pyrrhula pyrrhula,bird
-64,Regign_call,Common Firecrest,Regulus ignicapilla,bird
-65,Regign_song,Common Firecrest,Regulus ignicapilla,bird
-66,Serser_call,European Serin,Serinus serinus,bird
-67,Serser_song,European Serin,Serinus serinus,bird
-68,Siteur_call,Eurasian Nuthatch,Sitta europaea,bird
-69,Siteur_song,Eurasian Nuthatch,Sitta europaea,bird
-70,Strdec_song,Eurasian Collared Dove,Streptopelia decaocto,bird
-71,Strtur_song,European Turtle Dove,Streptopelia turtur,bird
-72,Stuvul_call,Common Starling,Sturnus vulgaris,bird
-73,Sylatr_call,Eurasian Blackcap,Sylvia atricapilla,bird
-74,Sylatr_song,Eurasian Blackcap,Sylvia atricapilla,bird
-75,Sylcan_call,Subalpine Warbler,Sylvia cantillans,bird
-76,Sylcan_song,Subalpine Warbler,Sylvia cantillans,bird
-77,Sylmel_call,Mediterranean Warbler,Sylvia melanocephala,bird
-78,Sylmel_song,Mediterranean Warbler,Sylvia melanocephala,bird
-79,Sylund_call,Dartford Warbler,Sylvia undata,bird
-80,Sylund_song,Dartford Warbler,Sylvia undata,bird
-81,Tetpyg_song,Pygmy Cicada,Tettigettula pygmea,insect
-82,Tibtom_song,Tomentous Cicada,Tibicina tomentosa,insect
-83,Trotro_song,Winter Wren,Troglodytes troglodytes,bird
-84,Turmer_call,Common Blackbird,Turdus merula,bird
-85,Turmer_song,Common Blackbird,Turdus merula,bird
-86,Turphi_call,Song Thrush,Turdus philomelos,bird
-87,Turphi_song,Song Thrush,Turdus philomelos,bird
+,class number,class name,English_name,Scientific_name,type,sound_type
+0,none,noise sample,Empty,noise sample,noise,Empty
+1,1,"Aegithalos caudatus, call",Long-tailed Tit,Aegithalos caudatus,bird,call
+2,2,"Alauda arvensis, song",Eurasian Skylark,Alauda arvensis,bird,song
+3,3,"Anthus trivialis, song",Tree Pipit,Anthus trivialis,bird,song
+4,4,"Buteo buteo, call",Common Buzzard,Buteo buteo,bird,call
+5,5,"Linaria cannabina, call",Common Linnet,Linaria cannabina,bird,call
+6,6,"Linaria cannabina, song",Common Linnet,Linaria cannabina,bird,song
+7,7,"Carduelis carduelis, call",European Goldfinch,Carduelis carduelis,bird,call
+8,8,"Carduelis carduelis, song",European Goldfinch,Carduelis carduelis,bird,song
+9,9,"Certhia brachydactyla, call",Short-toed Treecreeper,Certhia brachydactyla,bird,call
+10,10,"Certhia brachydactyla, song",Short-toed Treecreeper,Certhia brachydactyla,bird,song
+11,11,"Cettia cetti, song",Cetti's Warbler,Cettia cetti,bird,song
+12,12,"Chloris chloris, call",European Greenfinch,Chloris chloris,bird,call
+13,13,"Cicadatra atra, song",Black Cicada,Cicadatra atra,insect,song
+14,14,"Cicada orni, song",Grey Cicada,Cicada orni,insect,song
+15,15,"Cisticola juncidis, song",Zitting Cisticola,Cisticola juncidis,bird,song
+16,16,"Columba palumbus, song",Common Wood Pigeon,Columba palumbus,bird,song
+17,17,"Corvus corone, call",Carrion Crow,Corvus corone,bird,call
+18,18,"Dendrocopos major, call",Great Spotted Woodpecker,Dendrocopos major,bird,call
+19,19,"Dendrocopos major, drumming",Great Spotted Woodpecker,Dendrocopos major,bird,drumming
+20,20,"Emberiza cirlus, call",Cirl Bunting,Emberiza cirlus,bird,call
+21,21,"Emberiza cirlus, song",Cirl Bunting,Emberiza cirlus,bird,song
+22,22,"Erithacus rubecula, call",European Robin,Erithacus rubecula,bird,call
+23,23,"Erithacus rubecula, song",European Robin,Erithacus rubecula,bird,song
+24,24,"Fringilla coelebs, call",Common Chaffinch,Fringilla coelebs,bird,call
+25,25,"Fringilla coelebs, song",Common Chaffinch,Fringilla coelebs,bird,song
+26,26,"Galerida cristata, call",Crested Lark,Galerida cristata,bird,call
+27,27,"Galerida cristata, song",Crested Lark,Galerida cristata,bird,song
+28,28,"Galerida theklae, call",Thekla Lark,Galerida theklae,bird,call
+29,29,"Galerida theklae, song",Thekla Lark,Galerida theklae,bird,song
+30,30,"Garrulus glandarius, call",Eurasian Jay,Garrulus glandarius,bird,call
+31,31,"Hirundo rustica, call",Barn Swallow,Hirundo rustica,bird,call
+32,32,"Jynx torquilla, song",Eurasian Wryneck,Jynx torquilla,bird,song
+33,33,"Lophophanes cristatus, call",European Crested Tit,Lophophanes cristatus,bird,call
+34,34,"Loxia curvirostra, call",Red Crossbill,Loxia curvirostra,bird,call
+35,35,"lullula arborea, song",Woodlark,lullula arborea,bird,song
+36,36,"Luscinia megarhynchos, call",Common Nightingale,Luscinia megarhynchos,bird,call
+37,37,"Luscinia megarhynchos, song",Common Nightingale,Luscinia megarhynchos,bird,song
+38,38,"Lyristes plebejus, song",Common Cicada,Lyristes plebejus,insect,song
+39,39,"Motacilla cinerea, call",Grey Wagtail,Motacilla cinerea,bird,call
+40,40,"Muscicapa striata, call",Spotted Flycatcher,Muscicapa striata,bird,call
+41,41,"Oriolus oriolus, call",Eurasian Golden Oriole,Oriolus oriolus,bird,call
+42,42,"Oriolus oriolus, song",Eurasian Golden Oriole,Oriolus oriolus,bird,song
+43,43,"Periparus ater, call",Coal Tit,Periparus ater,bird,call
+44,44,"Periparus ater, song",Coal Tit,Periparus ater,bird,song
+45,45,"Cyanistes caeruleus, call",Blue Tit,Cyanistes caeruleus,bird,call
+46,46,"Cyanistes caeruleus, song",Blue Tit,Cyanistes caeruleus,bird,song
+47,47,"Parus major, call",Great Tit,Parus major,bird,call
+48,48,"Parus major, song",Great Tit,Parus major,bird,song
+49,49,"Passer domesticus, call",House Sparrow,Passer domesticus,bird,call
+50,50,"Pelophylax kl. grafi, call",Graf's Hybrid Frog,Pelophylax kl. grafi,amphibian,call
+51,51,"Petronia petronia, call",Rock Sparrow,Petronia petronia,bird,call
+52,52,"Petronia petronia, song",Rock Sparrow,Petronia petronia,bird,song
+53,53,"Pholidoptera femorata, song",Fallow Bush-cricket,Pholidoptera femorata,insect,song
+54,54,"Phylloscopus collybita, call",Common Chifchaff,Phylloscopus collybita,bird,call
+55,55,"Phylloscopus collybita, song",Common Chifchaff,Phylloscopus collybita,bird,song
+56,56,"Pica pica, call",Eurasian Magpie,Pica pica,bird,call
+57,57,"Platycleis affinis, song",Coastal Bush-cricket,Platycleis affinis,insect,song
+58,58,"Platycleis sabulosa, song",Sand Bush-Cricket,Platycleis sabulosa,insect,song
+59,59,"Poecile palustris, call",Marsh Tit,Poecile palustris,bird,call
+60,60,"Poecile palustris, song",Marsh Tit,Poecile palustris,bird,song
+61,61,"Prunella modularis, song",Dunnock,Prunella modularis,bird,song
+62,62,"Pteronemobius heydenii, song",Marsh Cricket,Pteronemobius heydenii,insect,song
+63,63,"Pyrrhula pyrrhula, call",Eurasian Bullfinch,Pyrrhula pyrrhula,bird,call
+64,64,"Regulus ignicapilla, call",Common Firecrest,Regulus ignicapilla,bird,call
+65,65,"Regulus ignicapilla, song",Common Firecrest,Regulus ignicapilla,bird,song
+66,66,"Serinus serinus, call",European Serin,Serinus serinus,bird,call
+67,67,"Serinus serinus, song",European Serin,Serinus serinus,bird,song
+68,68,"Sitta europaea, call",Eurasian Nuthatch,Sitta europaea,bird,call
+69,69,"Sitta europaea, song",Eurasian Nuthatch,Sitta europaea,bird,song
+70,70,"Streptopelia decaocto, song",Eurasian Collared Dove,Streptopelia decaocto,bird,song
+71,71,"Streptopelia turtur, song",European Turtle Dove,Streptopelia turtur,bird,song
+72,72,"Sturnus vulgaris, call",Common Starling,Sturnus vulgaris,bird,call
+73,73,"Sylvia atricapilla, call",Eurasian Blackcap,Sylvia atricapilla,bird,call
+74,74,"Sylvia atricapilla, song",Eurasian Blackcap,Sylvia atricapilla,bird,song
+75,75,"Sylvia cantillans, call",Subalpine Warbler,Sylvia cantillans,bird,call
+76,76,"Sylvia cantillans, song",Subalpine Warbler,Sylvia cantillans,bird,song
+77,77,"Sylvia melanocephala, call",Mediterranean Warbler,Sylvia melanocephala,bird,call
+78,78,"Sylvia melanocephala, song",Mediterranean Warbler,Sylvia melanocephala,bird,song
+79,79,"Sylvia undata, call",Dartford Warbler,Sylvia undata,bird,call
+80,80,"Sylvia undata, song",Dartford Warbler,Sylvia undata,bird,song
+81,81,"Tettigettula pygmea, song",Pygmy Cicada,Tettigettula pygmea,insect,song
+82,82,"Tibicina tomentosa, song",Tomentous Cicada,Tibicina tomentosa,insect,song
+83,83,"Troglodytes troglodytes, song",Winter Wren,Troglodytes troglodytes,bird,song
+84,84,"Turdus merula, call",Common Blackbird,Turdus merula,bird,call
+85,85,"Turdus merula, song",Common Blackbird,Turdus merula,bird,song
+86,86,"Turdus philomelos, call",Song Thrush,Turdus philomelos,bird,call
+87,87,"Turdus philomelos, song",Song Thrush,Turdus philomelos,bird,song

@@ -11,13 +11,13 @@ inputs:
     name: Species List,
     type: List,
     default: None,
-    description: "List of bird species to include in the dataset",
+    description: "List of bird species to include in the dataset. Each item in the list should have the form 'scientific species name[, sound types]'. If no sound types are provided for a species, all sound types specified by the parameter 'Sound Types' are used for this species",
   }
   - {
-      name: Use NIPS4B Species List,
-      type: Bool,
-      default: True,
-      description: "Whether the species list of the NIPS4B dataset should be used (if set to true, the provided species list can be empty)",
+    name: Use NIPS4B Species List,
+    type: Bool,
+    default: True,
+    description: "Whether the species list of the NIPS4B dataset should be used (if set to true, the provided species list can be empty)",
   }
   - {
     name: Maximum Samples Per Class,

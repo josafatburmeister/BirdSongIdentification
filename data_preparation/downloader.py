@@ -12,6 +12,7 @@ from general.logging import logger, ProgressBar
 
 import data_preparation
 
+
 class XenoCantoDownloader:
     def __init__(self, path_manager: PathManager):
         self.xeno_canto_url = "https://www.xeno-canto.org"
@@ -77,8 +78,8 @@ class XenoCantoDownloader:
             try:
                 self.download_audio_file(url, file_path)
             except Exception:
-                 progress_bar.write(
-                     "Could not download file with id {}".format(file_id))
+                progress_bar.write(
+                    "Could not download file with id {}".format(file_id))
 
     def download_xeno_canto_page(self, species_name: str, page: int = 1):
         params = {"query": species_name, "page": page}
@@ -127,9 +128,27 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
+    def parse_species_list(self, species_list: List[str]):
+        species = {}
+
+        for item in species_list:
+            species_name = item.split(",")[0].rstrip()
+
+            if not species_name in species:
+                species[species_name] = set()
+
+            if len(item.split(",")) > 1:
+                for sound_type in item.split(",")[1:]:
+                    species[species_name].add(sound_type.lstrip().rstrip())
+            else:
+                species[species_name] = species[species_name].union(self.xc_sound_types)
+
+        return species.items()
+
     def create_datasets(self, species_list: Optional[List[str]] = None, use_nips4b_species_list: bool = True,
                         maximum_samples_per_class: int = 100, test_size: float = 0.35,
-                        min_quality: str = "E", sound_types: Optional[List[str]] = None, sexes: Optional[List[str]] = None,
+                        min_quality: str = "E", sound_types: Optional[List[str]] = None,
+                        sexes: Optional[List[str]] = None,
                         life_stages: Optional[List[str]] = None, exclude_special_cases: bool = True,
                         maximum_number_of_background_species: Optional[int] = None,
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
@@ -167,11 +186,10 @@ class XenoCantoDownloader:
         test_frames = []
         val_frames = []
 
-        for species_name in species_list:
+        for species_name, species_sound_types in self.parse_species_list(species_list):
             try:
                 labels, _ = self.download_species_metadata(species_name)
-            except Exception as e:
-                print(e)
+            except Exception:
                 print("Skipping class", species_name)
                 continue
 
@@ -181,12 +199,14 @@ class XenoCantoDownloader:
             if min_quality < "E":
                 labels = labels[labels["q"] <= min_quality]
 
+            selected_sound_types = species_sound_types.intersection(set(sound_types))
+
             # filter samples by soundtype
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
-            if set(sound_types) < self.xc_sound_types:
-                type_search_string = "|".join(sound_types)
+            if selected_sound_types < self.xc_sound_types:
+                type_search_string = "|".join(selected_sound_types)
                 type_exclude_string = "|".join(
-                    self.xc_sound_types - set(sound_types))
+                    self.xc_sound_types - set(selected_sound_types))
 
                 labels = labels[(labels["type"].str.contains(
                     type_search_string)) & (~labels["type"].str.contains(
@@ -297,7 +317,7 @@ class XenoCantoDownloader:
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
 
-    def load_species_list_from_file(self, file_path: str, column_name: str = "Scientific_name"):
+    def load_species_list_from_file(self, file_path: str, column_name: str = "class name"):
         if not file_path.endswith(".csv") and not file_path.endswith(".json"):
             return []
 
