@@ -14,20 +14,70 @@ import data_preparation
 
 
 class XenoCantoDownloader:
+    xeno_canto_url = "https://www.xeno-canto.org"
+    xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
+
+    # Xeno-Canto categories
+    xc_quality_levels = {"A", "B", "C", "D", "E"}
+    xc_sound_types = {"uncertain", "song", "subsong", "call", "alarm call", "flight call", "nocturnal flight call",
+                      "begging call", "drumming", "duet", "dawn song"}
+    xc_sexes = {"male", "female", "sex uncertain"}
+    xc_life_stages = {"adult", "juvenile", "hatchling or nestling", "life stage uncertain"}
+    xc_special_cases = {"aberrant", "mimicry/imitation", "bird in hand"}
+
+    @staticmethod
+    def parse_species_list(species_list: List[str]):
+        species = {}
+
+        for item in species_list:
+            species_name = item.split(",")[0].rstrip()
+
+            if not species_name in species:
+                species[species_name] = set()
+
+            if len(item.split(",")) > 1:
+                for sound_type in item.split(",")[1:]:
+                    species[species_name].add(sound_type.lstrip().rstrip())
+            else:
+                species[species_name] = species[species_name].union(XenoCantoDownloader.xc_sound_types)
+
+        return species.items()
+
+    @staticmethod
+    def download_xeno_canto_page(species_name: str, page: int = 1):
+        params = {"query": species_name, "page": page}
+
+        response = requests.get(url=XenoCantoDownloader.xeno_api_canto_url, params=params)
+
+        return response.json()
+
+    @staticmethod
+    def load_species_list_from_file(file_path: str, column_name: str = "class name"):
+        if not file_path.endswith(".csv") and not file_path.endswith(".json"):
+            return []
+
+        if ".csv" in file_path:
+            species = pd.read_csv(file_path)
+
+        elif ".json" in file_path:
+            species = pd.read_json(file_path)
+
+        return list(species[column_name])
+
+    @staticmethod
+    def train_test_split(labels, test_size: float = 0.35, random_state: int = 12):
+        try:
+            train_labels, test_labels = train_test_split(
+                labels, test_size=test_size, random_state=random_state)
+
+        except ValueError as e:
+            if "resulting train set will be empty" in str(e):
+                train_labels = labels
+                test_labels = []
+
+        return train_labels, test_labels
+
     def __init__(self, path_manager: PathManager):
-        self.xeno_canto_url = "https://www.xeno-canto.org"
-        self.xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
-
-        # Xeno-Canto categories
-        self.xc_quality_levels = {"A", "B", "C", "D", "E"}
-        self.xc_sound_types = {"uncertain", "song", "subsong", "call", "alarm call", "flight call",
-                               "nocturnal flight call", "begging call", "drumming", "duet", "dawn song"}
-        self.xc_sexes = {"male", "female", "sex uncertain"}
-        self.xc_life_stages = {"adult", "juvenile",
-                               "hatchling or nestling", "life stage uncertain"}
-        self.xc_special_cases = {"aberrant",
-                                 "mimicry/imitation", "bird in hand"}
-
         self.path = path_manager
 
         # retrieve cached files from google cloud storage
@@ -65,28 +115,18 @@ class XenoCantoDownloader:
             else:
                 raise NameError("File couldn\'t be retrieved")
 
-    def download_audio_file(self, url: str, target_file: str):
-        self.download_file(url, target_file, "audio")
-
     def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files..."):
         progress_bar = ProgressBar(
             file_ids, desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
 
         for file_id in progress_bar.iterable():
-            url = self.xeno_canto_url + "/" + file_id + "/" + "download"
+            url = XenoCantoDownloader.xeno_canto_url + "/" + file_id + "/" + "download"
             file_path = os.path.join(target_dir, file_id + ".mp3")
             try:
-                self.download_audio_file(url, file_path)
+                self.download_file(url, file_path, "audio")
             except Exception:
                 progress_bar.write(
                     "Could not download file with id {}".format(file_id))
-
-    def download_xeno_canto_page(self, species_name: str, page: int = 1):
-        params = {"query": species_name, "page": page}
-
-        response = requests.get(url=self.xeno_api_canto_url, params=params)
-
-        return response.json()
 
     def download_species_metadata(self, species_name: str):
         metadata_file_path = self.metadata_cache_path(species_name)
@@ -99,7 +139,7 @@ class XenoCantoDownloader:
                 return metadata, len(metadata)
         else:
             # download first page to get total number of pages and number of recordings
-            first_page = self.download_xeno_canto_page(species_name)
+            first_page = XenoCantoDownloader.download_xeno_canto_page(species_name)
 
             if int(first_page["numSpecies"]) != 1:
                 raise NameError(
@@ -114,7 +154,7 @@ class XenoCantoDownloader:
                                        is_pipeline_run=self.path.is_pipeline_run)
 
             for page in progress_bar.iterable():
-                current_page = self.download_xeno_canto_page(
+                current_page = XenoCantoDownloader.download_xeno_canto_page(
                     species_name, page)
 
                 metadata.extend(current_page["recordings"])
@@ -127,23 +167,6 @@ class XenoCantoDownloader:
                     self.path.copy_file_to_gcs_cache(metadata_file_path, "labels")
 
             return metadata, first_page["numRecordings"]
-
-    def parse_species_list(self, species_list: List[str]):
-        species = {}
-
-        for item in species_list:
-            species_name = item.split(",")[0].rstrip()
-
-            if not species_name in species:
-                species[species_name] = set()
-
-            if len(item.split(",")) > 1:
-                for sound_type in item.split(",")[1:]:
-                    species[species_name].add(sound_type.lstrip().rstrip())
-            else:
-                species[species_name] = species[species_name].union(self.xc_sound_types)
-
-        return species.items()
 
     def create_datasets(self, species_list: Optional[List[str]] = None, use_nips4b_species_list: bool = True,
                         maximum_samples_per_class: int = 100, test_size: float = 0.35,
@@ -168,13 +191,13 @@ class XenoCantoDownloader:
         if sound_types is None:
             sound_types = ["song"]
 
-        if min_quality not in self.xc_quality_levels:
+        if min_quality not in XenoCantoDownloader.xc_quality_levels:
             raise ValueError("Invalid quality level for Xeno-Canto database")
-        if not set(sound_types).issubset(self.xc_sound_types):
+        if not set(sound_types).issubset(XenoCantoDownloader.xc_sound_types):
             raise ValueError("Invalid sound type for Xeno-Canto database")
-        if not set(sexes).issubset(self.xc_sexes):
+        if not set(sexes).issubset(XenoCantoDownloader.xc_sexes):
             raise ValueError("Invalid sex for Xeno-Canto database")
-        if not set(life_stages).issubset(self.xc_life_stages):
+        if not set(life_stages).issubset(XenoCantoDownloader.xc_life_stages):
             raise ValueError("Invalid life stage for Xeno-Canto database")
 
         if clear_audio_cache:
@@ -186,7 +209,7 @@ class XenoCantoDownloader:
         test_frames = []
         val_frames = []
 
-        for species_name, species_sound_types in self.parse_species_list(species_list):
+        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list):
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception:
@@ -203,10 +226,10 @@ class XenoCantoDownloader:
 
             # filter samples by soundtype
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
-            if selected_sound_types < self.xc_sound_types:
+            if selected_sound_types < XenoCantoDownloader.xc_sound_types:
                 type_search_string = "|".join(selected_sound_types)
                 type_exclude_string = "|".join(
-                    self.xc_sound_types - set(selected_sound_types))
+                    XenoCantoDownloader.xc_sound_types - set(selected_sound_types))
 
                 labels = labels[(labels["type"].str.contains(
                     type_search_string)) & (~labels["type"].str.contains(
@@ -214,13 +237,13 @@ class XenoCantoDownloader:
 
             # filter samples by sex
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
-            if set(sexes) < self.xc_sexes:
+            if set(sexes) < XenoCantoDownloader.xc_sexes:
                 sex_search_string = "|".join(sexes)
                 labels = labels[labels["type"].str.contains(sex_search_string)]
 
             # filter samples by life stage
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
-            if set(life_stages) < self.xc_life_stages:
+            if set(life_stages) < XenoCantoDownloader.xc_life_stages:
                 life_stage_search_string = "|".join(life_stages)
                 labels = labels[labels["type"].str.contains(
                     life_stage_search_string)]
@@ -228,7 +251,7 @@ class XenoCantoDownloader:
             # remove special cases
             if exclude_special_cases:
                 special_cases_stage_search_string = "|".join(
-                    self.xc_special_cases)
+                    XenoCantoDownloader.xc_special_cases)
                 labels = labels[~labels["type"].str.contains(
                     special_cases_stage_search_string)]
 
@@ -316,27 +339,3 @@ class XenoCantoDownloader:
 
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
-
-    def load_species_list_from_file(self, file_path: str, column_name: str = "class name"):
-        if not file_path.endswith(".csv") and not file_path.endswith(".json"):
-            return []
-
-        if ".csv" in file_path:
-            species = pd.read_csv(file_path)
-
-        elif ".json" in file_path:
-            species = pd.read_json(file_path)
-
-        return list(species[column_name])
-
-    def train_test_split(self, labels, test_size: float = 0.35, random_state: int = 12):
-        try:
-            train_labels, test_labels = train_test_split(
-                labels, test_size=test_size, random_state=random_state)
-
-        except ValueError as e:
-            if "resulting train set will be empty" in str(e):
-                train_labels = labels
-                test_labels = []
-
-        return train_labels, test_labels
