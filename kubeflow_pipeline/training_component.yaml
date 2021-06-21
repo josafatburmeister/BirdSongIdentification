@@ -1,0 +1,43 @@
+name: Train Simple Model
+description: Traines a Simple Model on labled Spectograms
+inputs:
+  - {
+      name: Data Dir,
+      type: String,
+      default: "bird_song_identification",
+      description: "Path of the data folder in the glcoud storage",
+    }
+  - {
+      name: Input Path,
+      type: Directory,
+      description: "Path of the data folder",
+    }
+  - {
+      name: Batch Size,
+      type: Integer,
+      description: "Size of the training batches",
+    }
+  - {
+      name: Number Epochs,
+      type: Integer,
+      description: "Number of Epochs for the training/validation cycle",
+    }
+outputs:
+  - { name: Output Path, type: Directory }
+implementation:
+  container:
+    image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
+    command:
+      [
+        python,
+        kubeflow_pipeline/run_pipeline.py,
+        create_spectrograms,
+        --input_dir,
+        { inputPath: Input Path },
+        --gcs_path,
+        { inputValue: Data Dir },
+        --chunk_length,
+        { inputValue: Chunk Length },
+        --target_dir,
+        { outputPath: Output Path },
+      ]

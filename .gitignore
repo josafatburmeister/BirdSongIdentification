@@ -133,6 +133,10 @@ dmypy.json
 
 # Data folder
 data
+/gcp-bakdata-kubeflow-cluster.json
+
+# Pipeline zips
+*.zip
 data-old
 
 # Credentials
