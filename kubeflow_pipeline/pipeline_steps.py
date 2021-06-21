@@ -33,8 +33,8 @@ class PipelineSteps:
         spectrogram_creator.create_spectrograms_for_splits(
             splits=["train", "val", "test"], clear_spectrogram_cache=clear_spectrogram_cache)
 
-    def train_model(self, input_dir, gcs_path, batch_size=32, num_epochs=25):
-        spectrogram_path_manager = filepaths.PathManager(input_dir, gcs_path=gcs_path)
+    def train_model(self, input_dir, gcs_bucket, batch_size=32, num_epochs=25):
+        spectrogram_path_manager = filepaths.PathManager(input_dir, gcs_bucket=gcs_bucket)
         train_set = dataset.XenoCantoSpectrograms(
             spectrogram_path_manager, chunk_length=1000, split="train")
         train_loader = DataLoader(
