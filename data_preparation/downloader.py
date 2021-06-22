@@ -213,7 +213,7 @@ class XenoCantoDownloader:
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception:
-                logger.info("Skipping class", species_name)
+                logger.info("Skipping class %s", species_name)
                 continue
 
             labels = pd.DataFrame.from_dict(labels)
@@ -223,6 +223,8 @@ class XenoCantoDownloader:
                 labels = labels[labels["q"] <= min_quality]
 
             selected_sound_types = species_sound_types.intersection(set(sound_types))
+
+            logger.verbose("Sound types for %s: %s", species_name, str(selected_sound_types))
 
             # filter samples by soundtype
             # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
