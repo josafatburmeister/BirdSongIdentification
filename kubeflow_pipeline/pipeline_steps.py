@@ -63,7 +63,7 @@ class PipelineSteps:
         exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
 
         model = training.train_model(train_loader, val_loader, test_loader, resnet_model, my_criterion,
-                                        my_optimizer, exp_lr_scheduler, number_epochs)
+                                        my_optimizer, exp_lr_scheduler, number_epochs, number_classes=number_classes)
 
 
         filepaths.PathManager.ensure_dir(output_path)

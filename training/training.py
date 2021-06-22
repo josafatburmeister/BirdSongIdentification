@@ -2,10 +2,11 @@ import torch
 import time
 import copy
 from torch.nn.functional import softmax
+from training import metrics
 
 
-def train_model(train_loader, val_loader, test_loader,
-                model, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(train_loader, val_loader, test_loader, number_classes,
+                model, criterion, optimizer, scheduler, num_epochs=25, multi_label_classification = True):
     since = time.time()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -24,9 +25,8 @@ def train_model(train_loader, val_loader, test_loader,
         model.train()
         running_loss = 0.0
         best_acc = 0.0
-        train_tp = torch.zeros(different_species_count)
-        train_fp = torch.zeros(different_species_count)
-        train_fn = torch.zeros(different_species_count)
+
+        train_metrics = metrics.Metrics(number_classes, multi_label=multi_label_classification)
 
         for images_train, labels_train in train_loader:
             images_train = images_train.to(device)
@@ -44,12 +44,7 @@ def train_model(train_loader, val_loader, test_loader,
 
             # running_loss += loss.item() * images_train.size(0)
             # tp += torch.sum(preds == labels_train.data)
-            for p, l in zip(preds, labels_train.data):
-                if p == l:
-                    train_tp += torch.zeros(different_species_count).scatter_(0, p, 1)
-                else:
-                    train_fp += torch.zeros(different_species_count).scatter_(0, p, 1)
-                    train_fn += torch.zeros(different_species_count).scatter_(0, l, 1)
+            train_metrics.update(preds, labels_train)
 
             scheduler.step()
 
@@ -64,9 +59,7 @@ def train_model(train_loader, val_loader, test_loader,
         running_loss = 0.0
         running_corrects = 0
 
-        val_tp = torch.zeros(different_species_count)
-        val_fp = torch.zeros(different_species_count)
-        val_fn = torch.zeros(different_species_count)
+        val_metrics = metrics.Metrics(number_classes, multi_label=multi_label_classification)
 
         for images_val, labels_val in val_loader:
             images_val = images_val.to(device)
@@ -80,12 +73,7 @@ def train_model(train_loader, val_loader, test_loader,
 
             running_loss += loss.item() * images_val.size(0)
             running_corrects += torch.sum(preds == labels_val.data)
-            for p, l in zip(preds, labels_val.data):
-                if p == l:
-                    val_tp += torch.zeros(different_species_count).scatter_(0, p, 1)
-                else:
-                    val_fp += torch.zeros(different_species_count).scatter_(0, p, 1)
-                    val_fn += torch.zeros(different_species_count).scatter_(0, l, 1)
+            val_metrics.update(preds, labels_val)
 
         epoch_loss = running_loss / len(val_loader.dataset)
         epoch_acc = running_corrects.double() / len(val_loader.dataset)
@@ -97,21 +85,17 @@ def train_model(train_loader, val_loader, test_loader,
             best_acc = epoch_acc
             best_model_wts = copy.deepcopy(model.state_dict())
 
-        precision = val_tp / (val_tp + val_fp)
-        recall = val_tp / (val_tp + val_fn)
-        f1_score = 2 * (precision * recall) / (precision + recall)
-
-        if torch.min(f1_score) > torch.min(best_min_f1):
-            best_min_f1 = f1_score
+        if torch.min(val_metrics.f1_score()) > torch.min(best_min_f1):
+            best_min_f1 = val_metrics.f1_score()
             best_model_min_f1 = copy.deepcopy(model.state_dict())
 
-        if torch.mean(f1_score) > torch.mean(best_avg_f1):
-            best_avg_f1 = f1_score
+        if torch.mean(val_metrics.f1_score()) > torch.mean(best_avg_f1):
+            best_avg_f1 = val_metrics.f1_score()
             best_model_avg_f1 = copy.deepcopy(model.state_dict())
 
-        print('f1 score:', f1_score)
-        print('f1 avg:', torch.mean(f1_score))
-        print('f1 min:', torch.min(f1_score))
+        print('f1 score:', val_metrics.f1_score())
+        print('f1 avg:', torch.mean(val_metrics.f1_score()))
+        print('f1 min:', torch.min(val_metrics.f1_score()))
 
         print()
 
