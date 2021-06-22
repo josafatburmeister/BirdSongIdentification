@@ -163,8 +163,8 @@ class XenoCantoDownloader:
             with open(metadata_file_path, "w") as metadata_file:
                 json.dump(metadata, metadata_file, indent=2,
                           separators=(',', ':'))
-                if self.path.is_pipeline_run:
-                    self.path.copy_file_to_gcs_cache(metadata_file_path, "labels")
+            if self.path.is_pipeline_run:
+                self.path.copy_file_to_gcs_cache(metadata_file_path, "labels")
 
             return metadata, first_page["numRecordings"]
 
@@ -213,7 +213,7 @@ class XenoCantoDownloader:
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception:
-                print("Skipping class", species_name)
+                logger.info("Skipping class", species_name)
                 continue
 
             labels = pd.DataFrame.from_dict(labels)
