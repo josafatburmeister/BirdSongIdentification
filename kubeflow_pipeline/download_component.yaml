@@ -97,7 +97,7 @@ implementation:
           download_xeno_canto_data,
           --gcs_bucket,
           { inputValue: GCS Bucket },
-          --target_dir,
+          --output_path,
           { outputPath: Output },
           --species_list,
           { inputValue: Species List },

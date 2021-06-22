@@ -1,5 +1,5 @@
-name: Train Simple Model
-description: Traines a Simple Model on labled Spectograms
+name: Train Model
+description: Traines a model on labled spectograms
 inputs:
   - {
     name: GCS Bucket,
@@ -13,13 +13,20 @@ inputs:
     description: "Path of the data folder",
   }
   - {
+    name: Chunk Length,
+    type: Integer,
+    description: "Chunk length in milliseconds",
+  }
+  - {
     name: Batch Size,
     type: Integer,
+    default: 32,
     description: "Size of the training batches",
   }
   - {
     name: Number Epochs,
     type: Integer,
+    default: 25,
     description: "Number of Epochs for the training/validation cycle",
   }
 outputs:
@@ -31,13 +38,17 @@ implementation:
       [
           python,
           kubeflow_pipeline/run_pipeline.py,
-          create_spectrograms,
-          --input_dir,
+          train_model,
+          --input_path,
           { inputPath: Input Path },
           --gcs_bucket,
           { inputValue: GCS Bucket },
           --chunk_length,
           { inputValue: Chunk Length },
-          --target_dir,
+          --batch_size,
+          { inputValue: Batch Size },
+          --number_epochs,
+          { inputValue: Number Epochs },
+          --output_path,
           { outputPath: Output Path },
       ]
