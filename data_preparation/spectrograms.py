@@ -10,7 +10,7 @@ from typing import List, Optional
 import warnings
 
 from data_preparation.filepaths import PathManager
-from general.logging import ProgressBar
+from general.logging import logger, ProgressBar
 
 warnings.filterwarnings('ignore')
 
@@ -36,11 +36,9 @@ class SpectrogramCreator:
         self.spectrogram_path = spectrogram_path_manager
 
         if self.spectrogram_path.is_pipeline_run:
-            self.spectrogram_path.copy_cache_from_gcs("spectrograms")
+            self.spectrogram_path.copy_cache_from_gcs("spectrograms", chunk_length=self.chunk_length)
 
-    def __del__(self):
-        if self.spectrogram_path.is_pipeline_run:
-            self.spectrogram_path.copy_cache_to_gcs("spectrograms")
+        self.index_cached_spectrograms()
 
     def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
                       max_value_source: Optional[float] = None):
@@ -135,33 +133,56 @@ class SpectrogramCreator:
 
         # copy spectrogram to cache
         cached_file_path = self.spectrogram_path.cached_file_path(
-            "spectrograms", target_file)
+            "spectrograms", target_file, chunk_length=self.chunk_length)
         shutil.copy(target_file, cached_file_path)
 
-    def get_cached_spectrograms(self, audio_file: str, include_noise_samples: bool = True):
-        spectrogram_name = f"{os.path.splitext(audio_file)[1]}_{self.chunk_length}"
-        cache_path = self.spectrogram_path.cache("spectrograms")
+        if self.spectrogram_path.is_pipeline_run:
+            self.spectrogram_path.copy_file_to_gcs_cache(cached_file_path, "spectrograms",
+                                                         chunk_length=self.chunk_length)
 
-        cached_spectrograms_for_current_file = []
+    def index_cached_spectrograms(self):
+        cache_path = self.spectrogram_path.cache("spectrograms", chunk_length=self.chunk_length)
+
+        self.cached_spectrograms = {
+            "with noise": {},
+            "without noise": {}
+        }
+        self.cached_spectrograms_without_noise = {}
 
         for cached_spectrogram in os.listdir(cache_path):
-            if spectrogram_name in cached_spectrogram:
-                if include_noise_samples or not "noise" in spectrogram_name:
-                    spectrogram_path = os.path.join(
-                        cache_path, cached_spectrogram)
-                    cached_spectrograms_for_current_file.append(
-                        spectrogram_path)
+            file_id = cached_spectrogram.split("-")[0].rstrip(".png")
+            if not file_id in self.cached_spectrograms["with noise"]:
+                self.cached_spectrograms["with noise"][file_id] = []
+            if not file_id in self.cached_spectrograms["without noise"]:
+                self.cached_spectrograms["without noise"][file_id] = []
+            spectrogram_path = os.path.join(
+                cache_path, cached_spectrogram)
+            self.cached_spectrograms["with noise"][file_id].append(spectrogram_path)
 
-        return cached_spectrograms_for_current_file
+            if not "noise" in cached_spectrogram:
+                self.cached_spectrograms["without noise"][file_id].append(spectrogram_path)
+
+    def get_cached_spectrograms(self, audio_file: str, include_noise_samples: bool = True):
+        audio_file_id = os.path.splitext(os.path.basename(audio_file))[0]
+        logger.info("audio_file_id %s", audio_file_id)
+
+        if include_noise_samples and audio_file_id in self.cached_spectrograms["with noise"]:
+            return self.cached_spectrograms["with noise"][audio_file_id]
+        elif not include_noise_samples and audio_file_id in self.cached_spectrograms["without noise"]:
+            return self.cached_spectrograms["without noise"][audio_file_id]
+
+        return []
 
     def create_spectrograms_from_file(self, audio_file: str, target_dir: str, include_noise_samples: bool = True):
         cached_spectrograms_for_current_file = self.get_cached_spectrograms(
             audio_file, include_noise_samples)
         if len(cached_spectrograms_for_current_file) > 0:
+            logger.verbose("cached spectrograms for %s", audio_file)
             for file in cached_spectrograms_for_current_file:
                 shutil.copy(file, target_dir)
 
         else:
+            logger.verbose("process %s", audio_file)
             # load audio file
             amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
 
@@ -224,7 +245,7 @@ class SpectrogramCreator:
         }
 
         if clear_spectrogram_cache:
-            self.spectrogram_path.clear_cache("spectrograms")
+            self.spectrogram_path.clear_cache("spectrograms", chunk_length=self.chunk_length)
 
         for split in splits:
             spectrogram_dir = self.spectrogram_path.data_folder(
@@ -234,10 +255,11 @@ class SpectrogramCreator:
             PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, descriptions[split])
-            self.create_spectrogram_labels(audio_label_file, spectrogram_dir)
+            self.create_spectrogram_labels(split)
 
-    def create_spectrogram_labels(self, label_file: str, spectrogram_dir: str):
-        labels = pd.read_json(label_file)
+    def create_spectrogram_labels(self, split: str):
+        labels = pd.read_json(self.audio_path.audio_label_file(split))
+        spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms", chunk_length=self.chunk_length)
 
         spectrogram_labels = []
 
@@ -262,7 +284,7 @@ class SpectrogramCreator:
             spectrogram_labels = pd.concat(spectrogram_labels).sort_values(
                 by=['file_name'])
 
-            spectrogram_labels.to_json(label_file.replace(
-                ".json", "_{}.json".format(self.chunk_length)), "records", indent=4)
+            label_file = self.spectrogram_path.spectrogram_label_file(split, chunk_length=self.chunk_length)
+            spectrogram_labels.to_json(label_file, "records", indent=4)
         else:
             raise NameError("No spectrograms found")
