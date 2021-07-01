@@ -6,7 +6,7 @@ from training import metrics
 
 
 def train_model(train_loader, val_loader, test_loader, number_classes,
-                model, criterion, optimizer, scheduler, num_epochs=25, multi_label_classification = True):
+                model, criterion, optimizer, scheduler, num_epochs=25, multi_label_classification = True, multi_label_classification_threshold: float =0.5):
     since = time.time()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -35,16 +35,21 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
             optimizer.zero_grad()
 
             with torch.set_grad_enabled(True):
-                images_out = model(images_train)
-                _, preds = torch.max(images_out, 1)
-                loss = criterion(images_out, labels_train)
+                outputs = model(images_train)
+
+                if multi_label_classification:
+                    predictions = torch.sigmoid(outputs).map(lambda x: 0 if x < multilabel_threshold else 1)
+                else:
+                    _, predictions = torch.max(outputs, 1)
+
+                loss = criterion(outputs, labels_train)
 
                 loss.backward()
                 optimizer.step()
 
             # running_loss += loss.item() * images_train.size(0)
             # tp += torch.sum(preds == labels_train.data)
-            train_metrics.update(preds, labels_train)
+            train_metrics.update(predictions, labels_train)
 
             scheduler.step()
 
@@ -68,12 +73,16 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
             optimizer.zero_grad()
 
             outputs = model(images_val)
-            _, preds = torch.max(outputs, 1)
-            loss = criterion(outputs, labels_val)
+            if multi_label_classification:
+                predictions = torch.sigmoid(outputs).map(lambda x: 0 if x < multi_label_classification_threshold else 1)
+            else:
+                _, predictions = torch.max(outputs, 1)
+
+            loss = criterion(outputs, labels_train)
 
             running_loss += loss.item() * images_val.size(0)
-            running_corrects += torch.sum(preds == labels_val.data)
-            val_metrics.update(preds, labels_val)
+            running_corrects += torch.sum(predictions == labels_val.data)
+            val_metrics.update(predictions, labels_val)
 
         epoch_loss = running_loss / len(val_loader.dataset)
         epoch_acc = running_corrects.double() / len(val_loader.dataset)
@@ -106,6 +115,3 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
 
     model.load_state_dict(best_model_wts)
     return model
-
-
-

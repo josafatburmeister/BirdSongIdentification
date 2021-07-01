@@ -9,7 +9,7 @@ from data_preparation.filepaths import PathManager
 
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, split: str = "train"):
+    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, split: str = "train", multi_label_classification: bool = False):
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -29,6 +29,7 @@ class XenoCantoSpectrograms(Dataset):
 
         self.labels = pd.read_json(self.label_file)
         self.create_class_indices()
+        self.multi_label_classification = multi_label_classification
 
     def create_class_indices(self):
         self.class_to_idx = {}
@@ -44,6 +45,9 @@ class XenoCantoSpectrograms(Dataset):
     def id_to_class_mapping(self):
         return {value: key for key, value in self.class_to_idx.items()}
 
+    def num_classes(self):
+        return len(self.class_to_idx)
+
     def __len__(self):
         return len(self.labels)
 
@@ -58,7 +62,12 @@ class XenoCantoSpectrograms(Dataset):
         label = self.labels.iloc[idx]["label"]
         class_id = self.class_to_idx[label]
 
-        label_tensor = class_id
+        if self.multi_label_classification:
+            # create multi-hot encoding
+            label_tensor = torch.zeros(self.num_classes())
+            label_tensor[class_id] = 1
+        else:
+            label_tensor = class_id
 
         if self.transform:
             image = self.transform(image)

@@ -35,7 +35,9 @@ class PipelineSteps:
         spectrogram_creator.create_spectrograms_for_splits(
             splits=["train", "val", "test"], clear_spectrogram_cache=clear_spectrogram_cache)
 
-    def train_model(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, batch_size: int = 32, number_epochs: int = 25):
+    def train_model(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, batch_size: int = 32,
+                    number_epochs: int = 25, multi_label_classification: bool = True,
+                    multi_label_classification_threshold: float = 0.5):
         spectrogram_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
         train_set = dataset.XenoCantoSpectrograms(
             spectrogram_path_manager, chunk_length=chunk_length, split="train")
@@ -57,14 +59,18 @@ class PipelineSteps:
         num_ftrs = resnet_model.fc.in_features
         resnet_model.fc = nn.Linear(num_ftrs, number_classes)
 
-        my_criterion = nn.CrossEntropyLoss()
+        if multi_label_classification:
+            my_criterion = nn.BCEWithLogitsLoss()
+        else:
+            my_criterion = nn.CrossEntropyLoss()
         my_optimizer = optim.SGD(resnet_model.parameters(), lr=0.001, momentum=0.9)
 
         exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
 
         model = training.train_model(train_loader, val_loader, test_loader, resnet_model, my_criterion,
-                                        my_optimizer, exp_lr_scheduler, number_epochs, number_classes=number_classes)
-
+                                     my_optimizer, exp_lr_scheduler, number_classes=number_classes,
+                                     number_epochs=number_epochs, multi_label_classification=multi_label_classification,
+                                     multi_label_classification_threshold=multi_label_classification_threshold)
 
         filepaths.PathManager.ensure_dir(output_path)
 
