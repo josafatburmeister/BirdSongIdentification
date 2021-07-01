@@ -1,6 +1,7 @@
 import logging
 import torch
 import os
+import shutil
 
 from data_preparation import filepaths, downloader, spectrograms
 from training import training, dataset
@@ -34,6 +35,9 @@ class PipelineSteps:
 
         spectrogram_creator.create_spectrograms_for_splits(
             splits=["train", "val", "test"], clear_spectrogram_cache=clear_spectrogram_cache)
+
+        # clean up
+        shutil.rmtree(audio_path_manager.cache_dir)
 
     def train_model(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, batch_size: int = 32,
                     number_epochs: int = 25, multi_label_classification: bool = True,
@@ -75,3 +79,5 @@ class PipelineSteps:
         filepaths.PathManager.ensure_dir(output_path)
 
         torch.save(model, os.path.join(output_path, "model.pt"))
+
+        shutil.rmtree(input_path)
