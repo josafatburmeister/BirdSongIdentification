@@ -25,15 +25,16 @@ class ProgressBar:
 
     def __init__(self, total: int = 0, sequence: Optional[Iterable] = None, desc: str = "", position: int = 0, is_pipeline_run: bool = False):
         self.is_pipeline_run = is_pipeline_run
+        self.sequence = sequence
         if self.is_pipeline_run:
             logger.info(desc)
-        if sequence:
-            self.sequence = sequence
-            self.tqdm = tqdm(sequence, desc=desc, position=position)
-        elif total:
-            self.tqdm = tqdm(total=total, desc=desc, position=position)
         else:
-            raise NameError("Either total or sequence parameter must be set")
+            if self.sequence:
+                self.tqdm = tqdm(sequence, desc=desc, position=position)
+            elif total:
+                self.tqdm = tqdm(total=total, desc=desc, position=position)
+            else:
+                raise NameError("Either total or sequence parameter must be set")
 
     def update(self, n: int = 1):
         if not self.is_pipeline_run:
