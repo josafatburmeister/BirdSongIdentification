@@ -1,5 +1,6 @@
 import importlib.resources as pkg_resources
 import json
+from multiprocessing.pool import ThreadPool
 import os
 import pandas as pd
 import requests
@@ -115,18 +116,25 @@ class XenoCantoDownloader:
             else:
                 raise NameError("File couldn\'t be retrieved")
 
-    def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files..."):
-        progress_bar = ProgressBar(
-            file_ids, desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
+    def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
+                                   download_threads=25):
 
-        for file_id in progress_bar.iterable():
-            url = XenoCantoDownloader.xeno_canto_url + "/" + file_id + "/" + "download"
-            file_path = os.path.join(target_dir, file_id + ".mp3")
+        progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
+
+        url_and_filepaths = [(XenoCantoDownloader.xeno_canto_url + "/" + file_id + "/" + "download",
+                              os.path.join(target_dir, file_id + ".mp3"), file_id) for file_id in file_ids]
+
+        pool = ThreadPool(download_threads)
+
+        def download_task(url, file_path, file_id):
             try:
                 self.download_file(url, file_path, "audio")
             except Exception:
                 progress_bar.write(
-                    "Could not download file with id {}".format(file_id))
+                    "Could not download file with id {}".format(file_ids))
+
+        for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
+            progress_bar.update(1)
 
     def download_species_metadata(self, species_name: str):
         metadata_file_path = self.metadata_cache_path(species_name)
