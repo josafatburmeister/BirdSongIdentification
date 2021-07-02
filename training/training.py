@@ -2,7 +2,7 @@ from torch import Tensor
 import torch
 import time
 import copy
-from training import dataset, metrics
+from training import dataset, metrics, metric_logging
 from torch.utils.data import DataLoader
 from torchvision import models
 from torch import nn
@@ -57,6 +57,10 @@ class ModelTrainer:
         self.num_classes = self.datasets["train"].num_classes()
 
         self.is_pipeline_run = self.spectrogram_path_manager.is_pipeline_run
+
+        config = locals().copy()
+        del config['spectrogram_path_manager']
+        self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run)
 
     def setup_dataloaders(self):
         datasets = {}
@@ -160,10 +164,9 @@ class ModelTrainer:
 
                     model_metrics.update(predictions, labels, loss)
 
-                if phase == "val":
-                    print('{} Loss: {:.4f} Acc: {:.4f}'.format(
-                        'val', model_metrics.average_loss(), model_metrics.accuracy()))
+                self.logger.log_metrics(model_metrics, phase, epoch)
 
+                if phase == "val":
                     if model_metrics.accuracy() > best_acc:
                         best_acc = model_metrics.accuracy()
                         best_model_acc_weights = copy.deepcopy(model.state_dict())
@@ -175,12 +178,6 @@ class ModelTrainer:
                     if torch.mean(model_metrics.f1_score()) > torch.mean(best_avg_f1):
                         best_avg_f1 = model_metrics.f1_score()
                         best_model_avg_f1_weights = copy.deepcopy(model.state_dict())
-
-                    for class_name, class_id in self.datasets["train"].class_to_id_mapping().items():
-                        logger.info(class_name)
-                        logger.info('f1 score: %f', model_metrics.f1_score()[class_id].item())
-                        #logger.info('f1 avg: %f', torch.mean(model_metrics.f1_score()[class_id].item()))
-                        #logger.info('f1 min: %f', torch.min(model_metrics.f1_score()[class_id].item()))
 
         time_elapsed = time.time() - since
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
