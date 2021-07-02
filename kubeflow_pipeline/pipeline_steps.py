@@ -59,7 +59,7 @@ class PipelineSteps:
             test_set, batch_size=batch_size, shuffle=True, num_workers=0)
 
         resnet_model = models.resnet18(pretrained=True)
-        number_classes = len(train_loader.dataset.class_to_idx)
+        number_classes = len(train_set.class_to_idx)
         num_ftrs = resnet_model.fc.in_features
         resnet_model.fc = nn.Linear(num_ftrs, number_classes)
 

@@ -1,21 +1,22 @@
+from torch.utils.data import DataLoader
+from torch import Tensor
 import torch
 import time
 import copy
-from torch.nn.functional import softmax
 from training import metrics
 
 
-def train_model(train_loader, val_loader, test_loader, number_classes,
-                model, criterion, optimizer, scheduler, num_epochs=25, multi_label_classification = True, multi_label_classification_threshold: float =0.5):
-    since = time.time()
+def train_model(train_loader: DataLoader, val_loader: DataLoader, test_loader: DataLoader, number_classes,
+                model, criterion, optimizer, scheduler, num_epochs: int = 25, multi_label_classification=True, multi_label_classification_threshold: float =0.5):
+    since: float = time.time()
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
     print('amount of species', len(train_loader.dataset.class_to_idx))
-    different_species_count = len(train_loader.dataset.class_to_idx)
-    best_avg_f1 = torch.zeros(different_species_count)
-    best_min_f1 = torch.zeros(different_species_count)
+    different_species_count: int = len(train_loader.dataset.class_to_idx)
+    best_avg_f1: Tensor = torch.zeros(different_species_count)
+    best_min_f1: Tensor = torch.zeros(different_species_count)
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch + 1, num_epochs))
@@ -23,14 +24,13 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
 
         # Training Phase
         model.train()
-        running_loss = 0.0
         best_acc = 0.0
 
         train_metrics = metrics.Metrics(number_classes, multi_label=multi_label_classification)
 
         for images_train, labels_train in train_loader:
-            images_train = images_train.to(device)
-            labels_train = labels_train.to(device)
+            images_train: Tensor = images_train.to(device)
+            labels_train: Tensor = labels_train.to(device)
 
             optimizer.zero_grad()
 
@@ -47,17 +47,9 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
                 loss.backward()
                 optimizer.step()
 
-            # running_loss += loss.item() * images_train.size(0)
-            # tp += torch.sum(preds == labels_train.data)
             train_metrics.update(predictions, labels_train)
 
             scheduler.step()
-
-            # epoch_loss = running_loss / len(train_set)
-            # epoch_acc = running_corrects.double() / len(train_set)
-
-            # print('{} Loss: {:.4f} Acc: {:.4f}'.format(
-            #     'train', epoch_loss, epoch_acc))
 
         # Evaluate Model
         model.eval()
@@ -87,8 +79,7 @@ def train_model(train_loader, val_loader, test_loader, number_classes,
         epoch_loss = running_loss / len(val_loader.dataset)
         epoch_acc = running_corrects.double() / len(val_loader.dataset)
 
-        print('{} Loss: {:.4f} Acc: {:.4f}'.format(
-           'val', epoch_loss, epoch_acc))
+        print('{} Loss: {:.4f} Acc: {:.4f}'.format('val', epoch_loss, epoch_acc))
 
         if epoch_acc > best_acc:
             best_acc = epoch_acc
