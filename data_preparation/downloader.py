@@ -1,6 +1,7 @@
 import importlib.resources as pkg_resources
 import json
 from multiprocessing.pool import ThreadPool
+import numpy as np
 import os
 import pandas as pd
 import requests
@@ -86,6 +87,10 @@ class XenoCantoDownloader:
             self.path.copy_cache_from_gcs("audio")
             self.path.copy_cache_from_gcs("labels")
 
+    def __del__(self):
+        # clean up
+        PathManager.empty_dir(self.path.cache_dir)
+
     def metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
@@ -157,7 +162,7 @@ class XenoCantoDownloader:
             metadata = first_page["recordings"]
 
             # download remaining pages
-            progress_bar = ProgressBar(range(2, number_of_pages + 1),
+            progress_bar = ProgressBar(sequence=range(2, number_of_pages + 1),
                                        desc="Download label file for {}...".format(species_name), position=0,
                                        is_pipeline_run=self.path.is_pipeline_run)
 
@@ -216,6 +221,7 @@ class XenoCantoDownloader:
         train_frames = []
         test_frames = []
         val_frames = []
+        categories = []
 
         for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list):
             try:
@@ -231,6 +237,9 @@ class XenoCantoDownloader:
                 labels = labels[labels["q"] <= min_quality]
 
             selected_sound_types = species_sound_types.intersection(set(sound_types))
+
+            for sound_type in selected_sound_types:
+                categories.append(f"{species_name.replace(' ', '_')}_{sound_type}")
 
             logger.verbose("Sound types for %s: %s", species_name, str(selected_sound_types))
 
@@ -334,6 +343,8 @@ class XenoCantoDownloader:
             self.path.audio_label_file("val"), "records", indent=4)
         test_set.to_json(self.path.audio_label_file(
             "test"), "records", indent=4)
+        np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
+
 
         # clear data folders
         PathManager.empty_dir(self.path.data_folder("train", "audio"))

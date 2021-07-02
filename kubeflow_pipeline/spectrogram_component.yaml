@@ -18,6 +18,12 @@ inputs:
     description: "Chunk length in milliseconds",
   }
   - {
+      name: Include Noise Samples,
+      type: Bool,
+      default: True,
+      description: "Whether a class for noise samples should be used in model training",
+  }
+  - {
     name: Clear Spectrogram Cache,
     type: Bool,
     default: False,
@@ -47,6 +53,8 @@ implementation:
           { outputPath: Output Path },
           --chunk_length,
           { inputValue: Chunk Length },
+          --include_noise_samples,
+          { inputValue: Include Noise Samples },
           --clear_spectrogram_cache,
           { inputValue: Clear Spectrogram Cache },
           --verbose_logging,

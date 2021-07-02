@@ -13,9 +13,10 @@ inputs:
       description: "Path of the data folder",
     }
   - {
-      name: Chunk Length,
-      type: Integer,
-      description: "Chunk length in milliseconds",
+      name: Architecture,
+      type: String,
+      default: "resnet18",
+      description: "Model architecture",
     }
   - {
       name: Batch Size,
@@ -24,10 +25,46 @@ inputs:
       description: "Size of the training batches",
     }
   - {
-      name: Number Epochs,
+      name: Chunk Length,
       type: Integer,
-      default: 25,
-      description: "Number of Epochs for the training/validation cycle",
+      description: "Chunk length in milliseconds",
+    }
+  - {
+      name: Experiment Name,
+      type: String,
+      description: "Experiment Description"
+    }
+  - {
+      name: Include Noise Samples,
+      type: Bool,
+      default: True,
+      description: "Whether a class for noise samples should be used",
+    }
+  - {
+      name: Layers To Unfreeze,
+      type: List,
+      description: "Model layers that should be unfreezed in transfer learning"
+    }
+  - {
+      name: Learning Rate,
+      type: Float,
+      default: 0.001,
+      description: "Learning rate"
+    }
+  - {
+      name: Learning Rate Scheduler,
+      type: String,
+      description: "Learning rate scheduler type"
+    }
+  - {
+      name: Learning Rate Scheduler Gamma,
+      type: String,
+      description: "Gamma value for stepwise learning rate decay (only used if learning rate scheduler is set to 'step_lr')"
+    }
+  - {
+      name: Learning Rate Scheduler Step Size,
+      type: String,
+      description: "Step size for stepwise learning rate decay (only used if learning rate scheduler is set to 'step_lr')"
     }
   - {
       name: Multi Label Classification,
@@ -41,8 +78,26 @@ inputs:
       default: 0.5,
       description: "Threshold for assigning samples to positive class in multi-label classification",
     }
+  - {
+      name: Number Epochs,
+      type: Integer,
+      default: 25,
+      description: "Number of Epochs for the training/validation cycle",
+    }
+  - {
+      name: Number Workers,
+      type: Integer,
+      default: 0,
+      description: "Number of dataloading workers",
+    }
+  - {
+      name: Optimizer,
+      type: String,
+      default: "Adam",
+      description: "Optimizer type",
+    }
 outputs:
-  - { name: Output Path, type: Directory }
+  - { name: Pipeline Metrics, type: Metrics }
 implementation:
   container:
     image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
@@ -51,20 +106,40 @@ implementation:
         python,
         kubeflow_pipeline/run_pipeline.py,
         train_model,
-        --input_path,
-        { inputPath: Input Path },
         --gcs_bucket,
         { inputValue: GCS Bucket },
-        --chunk_length,
-        { inputValue: Chunk Length },
+        --input_path,
+        { inputPath: Input Path },
+        --architecture,
+        { inputValue: Architecture },
         --batch_size,
         { inputValue: Batch Size },
-        --number_epochs,
-        { inputValue: Number Epochs },
+        --chunk_length,
+        { inputValue: Chunk Length },
+        --experiment_name,
+        { inputValue: Experiment Name },
+        --include_noise_samples,
+        { inputPath: Include Noise Samples },
+        --layers_to_unfreeze,
+        { inputValue: Layers To Unfreeze },
+        --learning_rate,
+        { inputValue: Learning Rate },
+        --learning_rate_scheduler,
+        { inputValue: Learning Rate Scheduler },
+        --learning_rate_scheduler_gamma,
+        { inputValue: Learning Rate Scheduler Gamma },
+        --learning_rate_scheduler_step_size,
+        { inputValue: Learning Rate Scheduler Step Size },
         --multi_label_classification,
         { inputValue: Multi Label Classification },
         --multi_label_classification_threshold,
         { inputValue: Multi Label Classification Threshold },
-        --output_path,
-        { outputPath: Output Path },
-      ]
+        --number_epochs,
+        { inputValue: Number Epochs },
+        --optimizer,
+        { inputValue: Optimizer },
+        --number_workers,
+        { inputValue: Number Workers}
+    ]
+    fileOutputs:
+      Pipeline Metrics: /mlpipeline-metrics.json

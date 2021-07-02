@@ -40,6 +40,11 @@ class SpectrogramCreator:
 
         self.index_cached_spectrograms()
 
+    def __del__(self):
+        self.spectrogram_path.empty_dir(self.spectrogram_path.cache_dir)
+        for file in os.listdir(self.spectrogram_path.cache_dir):
+            logger.info(file)
+
     def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
                       max_value_source: Optional[float] = None):
         invert_image = False
@@ -226,7 +231,7 @@ class SpectrogramCreator:
         PathManager.empty_dir(target_dir)
 
         progress_bar = ProgressBar(
-            os.listdir(audio_dir), desc="Create spectrograms for {}".format(desc), position=0,
+            sequence=os.listdir(audio_dir), desc="Create spectrograms for {}".format(desc), position=0,
             is_pipeline_run=self.spectrogram_path.is_pipeline_run)
 
         for file in progress_bar.iterable():

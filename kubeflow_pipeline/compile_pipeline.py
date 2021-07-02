@@ -14,14 +14,36 @@ def compile_pipeline():
     training_container_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/training_component.yaml'))
 
-    def pipeline(gcs_bucket="bird-song-identification", species_list=None, use_nips4b_species_list=True,
-                 maximum_samples_per_class=100, test_size=0.35,
-                 min_quality="E", sound_types=None, sexes=None,
-                 life_stages=None, exclude_special_cases=True,
+    def pipeline(gcs_bucket="bird-song-identification",
+                 species_list=None,
+                 use_nips4b_species_list=True,
+                 maximum_samples_per_class=100,
+                 test_size=0.35,
+                 min_quality="E",
+                 sound_types=None,
+                 sexes=None,
+                 life_stages=None,
+                 exclude_special_cases=True,
                  maximum_number_of_background_species=None,
-                 clear_audio_cache=False, clear_label_cache=False,
-                 chunk_length=1000, clear_spectrogram_cache=False, batch_size=32, number_epochs=25,
-                 multi_label_classification=True, multi_label_classification_threshold=0.5, verbose_logging=False):
+                 clear_audio_cache=False,
+                 clear_label_cache=False,
+                 chunk_length=1000,
+                 include_noise_samples=True,
+                 clear_spectrogram_cache=False,
+                 architecture="resnet18",
+                 batch_size=32,
+                 experiment_name="",
+                 layers_to_unfreeze=None,
+                 learning_rate=0.001,
+                 learning_rate_scheduler=None,
+                 learning_rate_scheduler_gamma=0.1,
+                 learning_rate_scheduler_step_size=7,
+                 multi_label_classification=True,
+                 multi_label_classification_threshold=0.5,
+                 number_epochs=25,
+                 number_workers=0,
+                 optimizer="Adam",
+                 verbose_logging=False):
         download_task = download_data_container_op(
             gcs_bucket=gcs_bucket,
             species_list=species_list,
@@ -43,6 +65,7 @@ def compile_pipeline():
             input_path=download_task.output,
             gcs_bucket=gcs_bucket,
             chunk_length=chunk_length,
+            include_noise_samples=include_noise_samples,
             clear_spectrogram_cache=clear_spectrogram_cache,
             verbose_logging=verbose_logging
         )
@@ -50,11 +73,21 @@ def compile_pipeline():
         training_task = training_container_op(
             input_path=spectrogram_task.output,
             gcs_bucket=gcs_bucket,
-            chunk_length=chunk_length,
+            include_noise_samples=include_noise_samples,
+            architecture=architecture,
             batch_size=batch_size,
-            number_epochs=number_epochs,
+            chunk_length=chunk_length,
+            experiment_name=experiment_name,
+            layers_to_unfreeze=layers_to_unfreeze,
+            learning_rate=learning_rate,
+            learning_rate_scheduler=learning_rate_scheduler,
+            learning_rate_scheduler_gamma=learning_rate_scheduler_gamma,
+            learning_rate_scheduler_step_size=learning_rate_scheduler_step_size,
             multi_label_classification=multi_label_classification,
-            multi_label_classification_threshold=multi_label_classification_threshold
+            multi_label_classification_threshold=multi_label_classification_threshold,
+            number_epochs=number_epochs,
+            number_workers=number_workers,
+            optimizer=optimizer
         )
 
     pipeline_filename = "birdsong_pipeline.zip"

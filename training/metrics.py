@@ -12,8 +12,10 @@ class Metrics:
         self.fp = torch.zeros(self.num_classes)
         self.fn = torch.zeros(self.num_classes)
         self.tn = torch.zeros(self.num_classes)
+        self.loss = 0.0
 
-    def update(self, predictions: torch.tensor, labels: torch.tensor):
+    def update(self, predictions: torch.tensor, labels: torch.tensor, loss: torch.tensor):
+        self.loss += loss.item() * predictions.shape[0]
         for prediction, label in zip(predictions, labels):
             if self.multi_label:
                 correct_predictions = prediction.eq(label).int()
@@ -40,3 +42,9 @@ class Metrics:
 
     def f1_score(self):
         return 2 * (self.precision() * self.recall()) / (self.precision() + self.recall())
+
+    def accuracy(self):
+        return ((self.tp).sum() / (self.tp + self.fp + self.tn + self.fn)[0]).item()
+
+    def average_loss(self):
+        return self.loss / (self.tp + self.fp + self.tn + self.fn)[0].item()

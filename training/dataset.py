@@ -1,15 +1,17 @@
+import numpy as np
 import os
 import pandas as pd
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
+from typing import List
 
 from data_preparation.filepaths import PathManager
 
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, split: str = "train", multi_label_classification: bool = False):
+    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, include_noise_samples: bool = True, split: str = "train", multi_label_classification: bool = False):
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -19,24 +21,28 @@ class XenoCantoSpectrograms(Dataset):
 
         self.transform = transforms.Compose(transformations)
 
-        self.data_dir = path_manager.data_folder(
+        self.path_manager = path_manager
+        self.data_dir = self.path_manager.data_folder(
             split, "spectrograms", chunk_length=chunk_length)
-        self.label_file = path_manager.spectrogram_label_file(split,
+        self.label_file = self.path_manager.spectrogram_label_file(split,
                                                               chunk_length=chunk_length)
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
             raise NameError("Data files missing")
 
         self.labels = pd.read_json(self.label_file)
-        self.create_class_indices()
+        self.create_class_indices(include_noise_samples)
         self.multi_label_classification = multi_label_classification
 
-    def create_class_indices(self):
+    def create_class_indices(self, include_noise_samples):
+        categories = list(np.loadtxt(self.path_manager.categories_file(), delimiter=",", dtype=str))
+
+        if include_noise_samples:
+            categories.append("noise")
+
         self.class_to_idx = {}
 
-        class_names = self.labels.label.unique()
-
-        for idx, class_name in enumerate(class_names):
+        for idx, class_name in enumerate(sorted(categories)):
             self.class_to_idx[class_name] = idx
 
     def class_to_id_mapping(self):

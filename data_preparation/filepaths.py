@@ -19,8 +19,15 @@ class PathManager:
 
     @staticmethod
     def empty_dir(dir_path: str):
-        for file in os.listdir(dir_path):
-            os.remove(os.path.join(dir_path, file))
+        logger.verbose("empty dir %s", dir_path)
+        # from https://gist.github.com/jagt/6759127
+        for root, dirs, files in os.walk(dir_path, topdown=False):
+            for name in files:
+                file_path = os.path.join(root, name)
+                os.remove(file_path)
+            for name in dirs:
+                subdir_path = os.path.join(root, name)
+                os.rmdir(subdir_path)
 
     @staticmethod
     def ensure_trailing_slash(path: str):
@@ -135,6 +142,9 @@ class PathManager:
         for key in kwargs.values():
             keywords += f"_{key}"
         return os.path.join(self.data_dirs[split], f"{split}{keywords}.json")
+
+    def categories_file(self):
+        return os.path.join(self.data_dir, "categories.txt")
 
     def cache(self, subdir: str, **kwargs):
         for key in kwargs.values():
