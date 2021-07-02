@@ -34,7 +34,7 @@ class XenoCantoDownloader:
         for item in species_list:
             species_name = item.split(",")[0].rstrip()
 
-            if not species_name in species:
+            if species_name not in species:
                 species[species_name] = set()
 
             if len(item.split(",")) > 1:
@@ -64,10 +64,14 @@ class XenoCantoDownloader:
         elif ".json" in file_path:
             species = pd.read_json(file_path)
 
+        else:
+            raise ValueError('wrong file ending')
+
         return list(species[column_name])
 
     @staticmethod
     def train_test_split(labels, test_size: float = 0.35, random_state: int = 12):
+        train_labels, test_labels = [], []
         try:
             train_labels, test_labels = train_test_split(
                 labels, test_size=test_size, random_state=random_state)
@@ -124,7 +128,8 @@ class XenoCantoDownloader:
     def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
                                    download_threads=25):
 
-        progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0, is_pipeline_run=self.path.is_pipeline_run)
+        progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0,
+                                   is_pipeline_run=self.path.is_pipeline_run)
 
         url_and_filepaths = [(XenoCantoDownloader.xeno_canto_url + "/" + file_id + "/" + "download",
                               os.path.join(target_dir, file_id + ".mp3"), file_id) for file_id in file_ids]
@@ -188,7 +193,7 @@ class XenoCantoDownloader:
                         life_stages: Optional[List[str]] = None, exclude_special_cases: bool = True,
                         maximum_number_of_background_species: Optional[int] = None,
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
-        if use_nips4b_species_list or species_list == None:
+        if use_nips4b_species_list or species_list is None:
             with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
                 species_list = self.load_species_list_from_file(str(species_file))
         if len(species_list) < 1:
@@ -243,25 +248,24 @@ class XenoCantoDownloader:
 
             logger.verbose("Sound types for %s: %s", species_name, str(selected_sound_types))
 
-            # filter samples by soundtype
-            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            # filter samples by soundtype since some Xeno-Canto files miss some type annotations,
+            # only filter if a true subset of the categories was selected
             if selected_sound_types < XenoCantoDownloader.xc_sound_types:
                 type_search_string = "|".join(selected_sound_types)
                 type_exclude_string = "|".join(
                     XenoCantoDownloader.xc_sound_types - set(selected_sound_types))
 
-                labels = labels[(labels["type"].str.contains(
-                    type_search_string)) & (~labels["type"].str.contains(
-                    type_exclude_string))]
+                labels = labels[(labels["type"].str.contains(type_search_string))
+                                & (~labels["type"].str.contains(type_exclude_string))]
 
-            # filter samples by sex
-            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            # filter samples by sex since some Xeno-Canto files miss some type annotations,
+            # only filter if a true subset of the categories was selected
             if set(sexes) < XenoCantoDownloader.xc_sexes:
                 sex_search_string = "|".join(sexes)
                 labels = labels[labels["type"].str.contains(sex_search_string)]
 
-            # filter samples by life stage
-            # since some Xeno-Canto files miss some type annotations, only filter if a true subset of the categories was selected
+            # filter samples by life stage since some Xeno-Canto files miss some type annotations,
+            # only filter if a true subset of the categories was selected
             if set(life_stages) < XenoCantoDownloader.xc_life_stages:
                 life_stage_search_string = "|".join(life_stages)
                 labels = labels[labels["type"].str.contains(
