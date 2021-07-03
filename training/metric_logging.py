@@ -28,6 +28,7 @@ class TrainingLogger():
 
     def log_metrics(self, model_metrics, phase, epoch):
         logger.info("%s metrics:", phase)
+        logger.info("")
 
         table_headers = ["metric"]
 
@@ -40,13 +41,13 @@ class TrainingLogger():
             model_metric = get_method(model_metrics)
 
             metric_row = [metric_name]
-            log_string = f"    {metric_name}: \t"
             for class_id in range(model_metric.shape[0]):
                 metric_row.append(model_metric[class_id].item())
             metric_rows.append(metric_row)
+            if metric_name == "recall":
+                metric_rows.append([])
 
-
-        logger.info(tabulate(metric_rows, headers=table_headers, tablefmt='github'))
+        logger.info(tabulate(metric_rows, headers=table_headers, tablefmt='github', floatfmt=".4f", numalign="center"))
         logger.info("")
 
     def log_metrics_in_kubeflow(self, avg_model_f1_scores, min_model_f1_scores):
