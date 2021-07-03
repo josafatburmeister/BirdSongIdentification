@@ -184,6 +184,10 @@ class ModelTrainer:
             time_elapsed // 60, time_elapsed % 60))
         logger.info("Best val Acc: {:4f}".format(best_acc))
 
+        if self.is_pipeline_run:
+            self.logger.log_metrics_in_kubeflow(best_avg_f1, best_min_f1)
+
         model.load_state_dict(best_model_avg_f1_weights)
+
 
         return model

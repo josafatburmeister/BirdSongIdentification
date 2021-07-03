@@ -142,4 +142,4 @@ implementation:
         { inputValue: Number Workers}
     ]
     fileOutputs:
-      Pipeline Metrics: /mlpipeline-metrics.json
+      Pipeline Metrics: /MLPipeline_Metrics.json

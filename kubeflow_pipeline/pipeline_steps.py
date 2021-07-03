@@ -1,5 +1,4 @@
 import logging
-import json
 import shutil
 
 from data_preparation import filepaths, downloader, spectrograms
@@ -43,6 +42,3 @@ class PipelineSteps:
 
         # clean up
         filepaths.PathManager.empty_dir(input_path)
-
-        with open("/mlpipeline-metrics.json", mode="w") as json_file:
-            json.dump([], json_file)
