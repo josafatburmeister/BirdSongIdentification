@@ -193,7 +193,7 @@ class XenoCantoDownloader:
                         life_stages: Optional[List[str]] = None, exclude_special_cases: bool = True,
                         maximum_number_of_background_species: Optional[int] = None,
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
-        if use_nips4b_species_list or species_list is None:
+        if use_nips4b_species_list or not species_list:
             with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
                 species_list = self.load_species_list_from_file(str(species_file))
         if len(species_list) < 1:
@@ -201,13 +201,16 @@ class XenoCantoDownloader:
         if maximum_samples_per_class < 3:
             raise ValueError(
                 "At least three samples are needed for each class")
-        if life_stages is None:
+        if not life_stages:
             life_stages = ["adult", "juvenile",
                            "hatchling or nestling", "life stage uncertain"]
-        if sexes is None:
+        if not sexes:
             sexes = ["male", "female", "sex uncertain"]
-        if sound_types is None:
-            sound_types = ["song"]
+        if not sound_types:
+            logger.info("sound_types is none")
+            sound_types = ["song", "call"]
+        else:
+            logger.info(f"sound_types is not none {type(sound_types)}")
 
         if min_quality not in XenoCantoDownloader.xc_quality_levels:
             raise ValueError("Invalid quality level for Xeno-Canto database")
@@ -242,6 +245,9 @@ class XenoCantoDownloader:
                 labels = labels[labels["q"] <= min_quality]
 
             selected_sound_types = species_sound_types.intersection(set(sound_types))
+
+            logger.info(f"sound types {sound_types}")
+            logger.info(f"selected_sound_types {selected_sound_types}")
 
             for sound_type in selected_sound_types:
                 categories.append(f"{species_name.replace(' ', '_')}_{sound_type}")
