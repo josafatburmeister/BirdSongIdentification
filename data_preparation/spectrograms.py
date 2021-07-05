@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 
 class SpectrogramCreator:
     def __init__(self, chunk_length: int, audio_path_manager: PathManager,
-                 spectrogram_path_manager: Optional[PathManager] = None):
+                 spectrogram_path_manager: Optional[PathManager] = None, include_noise_samples: bool = True):
         # parameters for spectorgram creation
         self.chunk_length = chunk_length  # chunk length in milliseconds
         self.sampling_rate = 44100  # number of samples per second
@@ -29,6 +29,8 @@ class SpectrogramCreator:
 
         self.samples_per_chunk = math.floor(
             (self.sampling_rate * chunk_length) / 1000)
+
+        self.include_noise_samples = include_noise_samples
 
         if not spectrogram_path_manager:
             spectrogram_path_manager = audio_path_manager
@@ -167,20 +169,20 @@ class SpectrogramCreator:
             if not "noise" in cached_spectrogram:
                 self.cached_spectrograms["without noise"][file_id].append(spectrogram_path)
 
-    def get_cached_spectrograms(self, audio_file: str, include_noise_samples: bool = True):
+    def get_cached_spectrograms(self, audio_file: str):
         audio_file_id = os.path.splitext(os.path.basename(audio_file))[0]
         logger.info("audio_file_id %s", audio_file_id)
 
-        if include_noise_samples and audio_file_id in self.cached_spectrograms["with noise"]:
+        if self.include_noise_samples and audio_file_id in self.cached_spectrograms["with noise"]:
             return self.cached_spectrograms["with noise"][audio_file_id]
-        elif not include_noise_samples and audio_file_id in self.cached_spectrograms["without noise"]:
+        elif not self.include_noise_samples and audio_file_id in self.cached_spectrograms["without noise"]:
             return self.cached_spectrograms["without noise"][audio_file_id]
 
         return []
 
-    def create_spectrograms_from_file(self, audio_file: str, target_dir: str, include_noise_samples: bool = True):
+    def create_spectrograms_from_file(self, audio_file: str, target_dir: str):
         cached_spectrograms_for_current_file = self.get_cached_spectrograms(
-            audio_file, include_noise_samples)
+            audio_file)
         if len(cached_spectrograms_for_current_file) > 0:
             logger.verbose("cached spectrograms for %s", audio_file)
             for file in cached_spectrograms_for_current_file:
@@ -221,7 +223,7 @@ class SpectrogramCreator:
 
                 if contains_signal:
                     self.save_spectrogram(target_file, mel_spectrogram_db)
-                elif is_noise and include_noise_samples:
+                elif is_noise and self.include_noise_samples:
                     target_file = os.path.join(
                         target_dir, "{}-{}_noise.png".format(file_name, i))
                     self.save_spectrogram(target_file, mel_spectrogram_db)
