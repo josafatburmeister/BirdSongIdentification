@@ -32,3 +32,5 @@ torch==1.8.1
 torchvision==0.9.1
 tqdm==4.61.1
 urllib3==1.26.5
+verboselogs==1.7
+wandb==0.10.33

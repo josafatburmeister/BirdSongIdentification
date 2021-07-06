@@ -96,6 +96,27 @@ inputs:
       default: "Adam",
       description: "Optimizer type",
     }
+  - {
+      name: Track Metrics,
+      type: Boolean,
+      default: True,
+      description: "Whether the run metrics should be tracked in Weights and Biases",
+    }
+  - {
+      name: WandB Entity Name,
+      type: String,
+      description: "Name of Weights and Biases entity that should be used to track the run metrics (only used if 'Track Metrics' is set to true)",
+    }
+  - {
+      name: WandB Key,
+      type: String,
+      description: "Login key for Weights and Biases (only used if 'Track Metrics' is set to true)",
+    }
+  - {
+      name: WandB Project Name,
+      type: String,
+      description: "Name of Weights and Biases project that should be used to track the run metrics (only used if 'Track Metrics' is set to true)",
+    }
 outputs:
   - { name: Pipeline Metrics, type: Metrics }
 implementation:
@@ -139,7 +160,15 @@ implementation:
         --optimizer,
         { inputValue: Optimizer },
         --number_workers,
-        { inputValue: Number Workers}
+        { inputValue: Number Workers},
+        --track_metrics,
+        { inputValue: Track Metrics },
+        --wandb_entity_name,
+        { inputValue: WandB Entity Name },
+        --wandb_key,
+        { inputValue: WandB Key },
+        --wandb_project_name,
+        { inputValue: WandB Project Name }
     ]
     fileOutputs:
       Pipeline Metrics: /MLPipeline_Metrics.json

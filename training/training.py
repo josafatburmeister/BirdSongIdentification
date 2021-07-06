@@ -2,7 +2,7 @@ from torch import Tensor
 import torch
 import time
 import copy
-from training import dataset, metrics, metric_logging
+from training import dataset, metrics, metric_logging, model_tracker
 from torch.utils.data import DataLoader
 from torchvision import models
 from torch import nn
@@ -31,7 +31,10 @@ class ModelTrainer:
                  number_epochs=25,
                  number_workers=0,
                  optimizer="Adam",
-                 log_metrics=True):
+                 track_metrics=True,
+                 wandb_entity_name="",
+                 wandb_key="",
+                 wandb_project_name=""):
         self.spectrogram_path_manager = spectrogram_path_manager
         self.architecture = architecture
         self.batch_size = batch_size
@@ -48,7 +51,7 @@ class ModelTrainer:
         self.num_epochs = number_epochs
         self.num_workers = number_workers
         self.optimizer = optimizer
-        self.log_metrics = log_metrics
+        self.track_metrics = track_metrics
 
         # setup datasets
         datasets, dataloaders = self.setup_dataloaders()
@@ -60,7 +63,12 @@ class ModelTrainer:
 
         config = locals().copy()
         del config['spectrogram_path_manager']
-        self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run)
+        self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
+                                                    wandb_entity_name=wandb_entity_name,
+                                                    wandb_project_name=wandb_project_name, wandb_key=wandb_key)
+        self.model_tracker = model_tracker.ModelTracker(self.spectrogram_path_manager, self.experiment_name,
+                                                        self.datasets["train"].id_to_class_mapping(),
+                                                        self.is_pipeline_run, self.multi_label_classification)
 
     def setup_dataloaders(self):
         datasets = {}
@@ -122,13 +130,6 @@ class ModelTrainer:
 
         logger.info("Number of species: %i", self.num_classes)
 
-        best_model_acc_weights = copy.deepcopy(model.state_dict())
-        best_model_min_f1_weights = copy.deepcopy(model.state_dict())
-        best_model_avg_f1_weights = copy.deepcopy(model.state_dict())
-        best_acc = 0.0
-        best_avg_f1 = torch.zeros(self.num_classes)
-        best_min_f1 = torch.zeros(self.num_classes)
-
         for epoch in range(self.num_epochs):
             logger.info("Epoch %i/%i", epoch + 1, self.num_epochs)
             logger.info("----------")
@@ -164,30 +165,27 @@ class ModelTrainer:
 
                     model_metrics.update(predictions, labels, loss)
 
-                self.logger.log_metrics(model_metrics, phase, epoch)
+                    if phase == "val":
+                        self.model_tracker.track_best_model(model, model_metrics, epoch)
 
-                if phase == "val":
-                    if model_metrics.accuracy() > best_acc:
-                        best_acc = model_metrics.accuracy()
-                        best_model_acc_weights = copy.deepcopy(model.state_dict())
-
-                    if torch.min(model_metrics.f1_score()) > torch.min(best_min_f1):
-                        best_min_f1 = model_metrics.f1_score()
-                        best_model_min_f1_weights = copy.deepcopy(model.state_dict())
-
-                    if torch.mean(model_metrics.f1_score()) > torch.mean(best_avg_f1):
-                        best_avg_f1 = model_metrics.f1_score()
-                        best_model_avg_f1_weights = copy.deepcopy(model.state_dict())
+                self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 
         time_elapsed = time.time() - since
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
             time_elapsed // 60, time_elapsed % 60))
-        logger.info("Best val Acc: {:4f}".format(best_acc))
+
+        self.model_tracker.save_best_models(self.logger.get_run_id())
+
+        self.logger.print_model_summary(self.model_tracker.best_average_epoch,
+                                        self.model_tracker.best_average_metrics,
+                                        self.model_tracker.best_minimum_epoch,
+                                        self.model_tracker.best_minimum_metrics,
+                                        self.model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+                                        self.model_tracker.best_metrics_per_class if self.multi_label_classification else None)
 
         if self.is_pipeline_run:
-            self.logger.log_metrics_in_kubeflow(best_avg_f1, best_min_f1)
+            self.logger.log_metrics_in_kubeflow(self.model_tracker.best_average_metrics,
+                                                self.model_tracker.best_minimum_metrics,
+                                                self.model_tracker.best_metrics_per_class if self.multi_label_classification else None)
 
-        model.load_state_dict(best_model_avg_f1_weights)
-
-
-        return model
+        self.logger.finish()

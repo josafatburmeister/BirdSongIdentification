@@ -43,6 +43,10 @@ def compile_pipeline():
                  number_epochs=25,
                  number_workers=0,
                  optimizer="Adam",
+                 track_metrics=True,
+                 wandb_entity_name="",
+                 wandb_key="",
+                 wandb_project_name="",
                  verbose_logging=False):
         download_task = download_data_container_op(
             gcs_bucket=gcs_bucket,
@@ -87,7 +91,11 @@ def compile_pipeline():
             multi_label_classification_threshold=multi_label_classification_threshold,
             number_epochs=number_epochs,
             number_workers=number_workers,
-            optimizer=optimizer
+            optimizer=optimizer,
+            track_metrics=track_metrics,
+            wandb_entity_name=wandb_entity_name,
+            wandb_key=wandb_key,
+            wandb_project_name=wandb_project_name,
         )
 
     pipeline_filename = "birdsong_pipeline.zip"

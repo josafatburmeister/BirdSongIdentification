@@ -1,3 +1,4 @@
+import math
 import torch
 
 
@@ -35,13 +36,16 @@ class Metrics:
                     self.fn += torch.zeros(self.num_classes).scatter_(0, label, 1)
 
     def precision(self):
-        return self.tp / (self.tp + self.fp)
+        precision = self.tp / (self.tp + self.fp)
+        return torch.nan_to_num(precision)
 
     def recall(self):
-        return self.tp / (self.tp + self.fn)
+        recall = self.tp / (self.tp + self.fn)
+        return torch.nan_to_num(recall)
 
     def f1_score(self):
-        return 2 * (self.precision() * self.recall()) / (self.precision() + self.recall())
+        f1_score = 2 * (self.precision() * self.recall()) / (self.precision() + self.recall())
+        return torch.nan_to_num(f1_score)
 
     def accuracy(self):
         return ((self.tp).sum() / (self.tp + self.fp + self.tn + self.fn)[0]).item()

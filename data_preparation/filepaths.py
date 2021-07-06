@@ -133,6 +133,7 @@ class PathManager:
                 PathManager.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
 
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
+            self.gcs_models_dir = os.path.join(self.GCS_BUCKET, "models")
 
     def audio_label_file(self, split: str):
         return os.path.join(self.data_dirs[split], f"{split}.json")
@@ -167,6 +168,12 @@ class PathManager:
             for key in kwargs.values():
                 subdir += f"_{key}"
         return os.path.join(self.data_dirs[split], subdir)
+
+    def model_dir(self):
+        return os.path.join(self.data_dir, "models")
+
+    def gcs_model_dir(self):
+        return self.gcs_models_dir
 
     def copy_cache_to_gcs(self, subdir: str, **kwargs):
         PathManager.gcs_copy_dir(self.cache(subdir), self.gcs_cache(subdir, **kwargs))
