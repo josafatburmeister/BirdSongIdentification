@@ -15,8 +15,9 @@ class Metrics:
         self.tn = torch.zeros(self.num_classes)
         self.loss = 0.0
 
-    def update(self, predictions: torch.tensor, labels: torch.tensor, loss: torch.tensor):
-        self.loss += loss.item() * predictions.shape[0]
+    def update(self, predictions: torch.tensor, labels: torch.tensor, loss: torch.tensor = None):
+        if loss is not None:
+            self.loss += loss.item() * predictions.shape[0]
         for prediction, label in zip(predictions, labels):
             if self.multi_label:
                 correct_predictions = prediction.eq(label).int()

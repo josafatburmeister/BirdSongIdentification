@@ -2,7 +2,7 @@ import logging
 import shutil
 
 from data_preparation import filepaths, downloader, spectrograms
-from training import training
+from training import model_evaluator, training
 
 from general.logging import logger
 
@@ -21,7 +21,8 @@ class PipelineSteps:
             logger.setLevel(logging.VERBOSE)
         audio_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
         spectrogram_path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
-        spectrogram_creator = spectrograms.SpectrogramCreator(chunk_length, audio_path_manager, spectrogram_path_manager, **kwargs)
+        spectrogram_creator = spectrograms.SpectrogramCreator(chunk_length, audio_path_manager,
+                                                              spectrogram_path_manager, **kwargs)
 
         shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())
 
@@ -31,14 +32,25 @@ class PipelineSteps:
         # clean up
         filepaths.PathManager.empty_dir(input_path)
 
-    def train_model(self, input_path: str, gcs_bucket: str, verbose_logging: bool = False, **kwargs):
+    def train_model(self, input_path: str, gcs_bucket: str, experiment_name: str = "", verbose_logging: bool = False,
+                    **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
 
         spectrogram_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
 
-        model_trainer = training.ModelTrainer(spectrogram_path_manager, **kwargs)
-        model_trainer.train_model()
+        trainer = training.ModelTrainer(spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
+        best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
+
+        evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
+        evaluator.evaluate_model_on_test_set(model=best_average_model,
+                                             model_name=f"{experiment_name}_best_average_model")
+        evaluator.evaluate_model_on_test_set(model=best_minimum_model,
+                                             model_name=f"{experiment_name}_best_minimum_model")
+
+        for class_name, model in best_models_per_class.items():
+            evaluator.evaluate_model_on_test_set(model=model,
+                                             model_name=f"{experiment_name}_best_model_{class_name}")
 
         # clean up
         filepaths.PathManager.empty_dir(input_path)
