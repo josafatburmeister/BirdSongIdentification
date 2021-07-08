@@ -1,12 +1,13 @@
-from torch import Tensor
-import torch
 import time
-import copy
-from training import dataset, metrics, metric_logging, model_tracker
+
+import torch
+from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import models
-from torch import nn
+from torch.optim import lr_scheduler
+
 from general.logging import logger
+from training import dataset, metrics, metric_logging, model_tracker
 
 
 class ModelTrainer:
@@ -26,6 +27,7 @@ class ModelTrainer:
                  learning_rate_scheduler=None,
                  learning_rate_scheduler_gamma=0.1,
                  learning_rate_scheduler_step_size=7,
+                 momentum=0.9,
                  multi_label_classification=True,
                  multi_label_classification_threshold=0.5,
                  number_epochs=25,
@@ -46,6 +48,7 @@ class ModelTrainer:
         self.learning_rate_scheduler = learning_rate_scheduler
         self.learning_rate_scheduler_gamma = learning_rate_scheduler_gamma
         self.learning_rate_scheduler_step_size = learning_rate_scheduler_step_size
+        self.momentum = momentum
         self.multi_label_classification = multi_label_classification
         self.multi_label_classification_threshold = multi_label_classification_threshold
         self.num_epochs = number_epochs
@@ -92,6 +95,8 @@ class ModelTrainer:
             model = models.resnet18(pretrained=True, progress=(not self.is_pipeline_run))
             num_ftrs = model.fc.in_features
             model.fc = nn.Linear(num_ftrs, self.num_classes)
+        else:
+            raise ValueError(f"Model architecture is unknown. Given architecture: {self.architecture}")
 
         return model
 
@@ -111,10 +116,10 @@ class ModelTrainer:
         else:
             optimizer = None
         if self.learning_rate_scheduler == "cosine":
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs, eta_min=0)
+            scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs, eta_min=0)
         elif self.learning_rate_scheduler == "step_lr":
-            scheduler = torch.optim.StepLR(optimizer, step_size=self.learning_rate_scheduler_step_size,
-                                           gamma=self.learning_rate_scheduler_gamma)
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=self.learning_rate_scheduler_step_size,
+                                            gamma=self.learning_rate_scheduler_gamma)
         else:
             scheduler = None
         return loss, optimizer, scheduler
@@ -176,16 +181,20 @@ class ModelTrainer:
 
         self.model_tracker.save_best_models(self.logger.get_run_id())
 
-        self.logger.print_model_summary(self.model_tracker.best_average_epoch,
-                                        self.model_tracker.best_average_metrics,
-                                        self.model_tracker.best_minimum_epoch,
-                                        self.model_tracker.best_minimum_metrics,
-                                        self.model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-                                        self.model_tracker.best_metrics_per_class if self.multi_label_classification else None)
+        self.logger.print_model_summary(
+            self.model_tracker.best_average_epoch,
+            self.model_tracker.best_average_metrics,
+            self.model_tracker.best_minimum_epoch,
+            self.model_tracker.best_minimum_metrics,
+            self.model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+            self.model_tracker.best_metrics_per_class if self.multi_label_classification else None
+        )
 
         if self.is_pipeline_run:
-            self.logger.log_metrics_in_kubeflow(self.model_tracker.best_average_metrics,
-                                                self.model_tracker.best_minimum_metrics,
-                                                self.model_tracker.best_metrics_per_class if self.multi_label_classification else None)
+            self.logger.log_metrics_in_kubeflow(
+                self.model_tracker.best_average_metrics,
+                self.model_tracker.best_minimum_metrics,
+                self.model_tracker.best_metrics_per_class if self.multi_label_classification else None
+            )
 
         self.logger.finish()

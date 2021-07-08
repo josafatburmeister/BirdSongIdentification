@@ -5,6 +5,7 @@ import wandb
 
 from general.logging import logger
 
+
 class TrainingLogger():
     metrics = {
         'f1-score': lambda x: x.f1_score(),
@@ -75,7 +76,8 @@ class TrainingLogger():
                     tolog[metric_name] = metric
                 else:
                     for class_id in range(metric.shape.numel()):
-                        metric_name = self.trainer.datasets['train'].id_to_class_name(class_id) + '_' + name + '_' + phase
+                        metric_name = self.trainer.datasets['train'].id_to_class_name(
+                            class_id) + '_' + name + '_' + phase
                         tolog[metric_name] = metric[class_id]
             wandb.log(tolog, step=epoch)
 
@@ -117,7 +119,8 @@ class TrainingLogger():
         with open("/MLPipeline_Metrics.json", mode="w") as json_file:
             json.dump(metrics, json_file)
 
-    def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics, best_epochs_per_class=None, best_metrics_per_class=None):
+    def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics,
+                            best_epochs_per_class=None, best_metrics_per_class=None):
         logger.info("Summary")
         logger.info('-' * 10)
         logger.info("Validation metrics of model with best average F1-Scores (epoch %s):", best_average_epoch)
@@ -125,18 +128,19 @@ class TrainingLogger():
         logger.info("Validation metrics of model with best minimum F1-Score (epoch %s):", best_minimum_epoch)
         self.print_metrics(best_minimum_metrics)
 
-
         if best_metrics_per_class:
             for class_name, best_class_metrics in best_metrics_per_class.items():
-                logger.info("Validation metrics of best model for class %s (epoch %s):", class_name, best_epochs_per_class[class_name])
+                logger.info("Validation metrics of best model for class %s (epoch %s):", class_name,
+                            best_epochs_per_class[class_name])
                 self.print_metrics(best_class_metrics)
 
                 if self.track_metrics:
                     for metric_name, get_method in self.metrics.items():
                         metric = get_method(best_class_metrics)
-                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[self.trainer.datasets["train"].class_name_to_id(class_name)].item()
-                        wandb.run.summary[f"{class_name}_{metric_name}_best_epoch_val"] = best_epochs_per_class[class_name]
-
+                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[
+                            self.trainer.datasets["train"].class_name_to_id(class_name)].item()
+                        wandb.run.summary[f"{class_name}_{metric_name}_best_epoch_val"] = best_epochs_per_class[
+                            class_name]
 
         if self.track_metrics:
             for metric_name, get_method in self.metrics.items():
@@ -147,7 +151,6 @@ class TrainingLogger():
                     wandb.run.summary[f"{class_name}_best_epoch_avg_model"] = best_average_epoch
                     wandb.run.summary[f"{class_name}_{metric_name}_min_model"] = min_metric[class_id].item()
                     wandb.run.summary[f"{class_name}_best_epoch_min_model"] = best_minimum_epoch
-
 
     def finish(self):
         if self.track_metrics:

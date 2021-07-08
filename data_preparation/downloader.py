@@ -141,7 +141,7 @@ class XenoCantoDownloader:
                 self.download_file(url, file_path, "audio")
             except Exception:
                 progress_bar.write(
-                    "Could not download file with id {}".format(file_ids))
+                    "Could not download file with id {}".format(file_id))
 
         for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
             progress_bar.update(1)
@@ -354,7 +354,6 @@ class XenoCantoDownloader:
         test_set.to_json(self.path.audio_label_file(
             "test"), "records", indent=4)
         np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
-
 
         # clear data folders
         PathManager.empty_dir(self.path.data_folder("train", "audio"))

@@ -1,4 +1,3 @@
-import math
 import torch
 
 
@@ -48,7 +47,7 @@ class Metrics:
         return torch.nan_to_num(f1_score)
 
     def accuracy(self):
-        return ((self.tp).sum() / (self.tp + self.fp + self.tn + self.fn)[0]).item()
+        return (self.tp.sum() / (self.tp + self.fp + self.tn + self.fn)[0]).item()
 
     def average_loss(self):
         return self.loss / (self.tp + self.fp + self.tn + self.fn)[0].item()
