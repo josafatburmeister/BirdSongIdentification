@@ -207,10 +207,7 @@ class XenoCantoDownloader:
         if not sexes:
             sexes = ["male", "female", "sex uncertain"]
         if not sound_types:
-            logger.info("sound_types is none")
             sound_types = ["song", "call"]
-        else:
-            logger.info(f"sound_types is not none {type(sound_types)}")
 
         if min_quality not in XenoCantoDownloader.xc_quality_levels:
             raise ValueError("Invalid quality level for Xeno-Canto database")
@@ -234,7 +231,8 @@ class XenoCantoDownloader:
         for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list):
             try:
                 labels, _ = self.download_species_metadata(species_name)
-            except Exception:
+            except Exception as e:
+                logger.info(f"{e}")
                 logger.info("Skipping class %s", species_name)
                 continue
 

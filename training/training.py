@@ -3,11 +3,12 @@ import time
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import models
 from torch.optim import lr_scheduler
+from torchvision import models
 
 from general.logging import logger
-from training import dataset, metrics, metric_logging, model_tracker
+from training import dataset, metrics, metric_logging, model_tracker as tracker
+
 
 
 class ModelTrainer:
@@ -69,9 +70,6 @@ class ModelTrainer:
         self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
-        self.model_tracker = model_tracker.ModelTracker(self.spectrogram_path_manager, self.experiment_name,
-                                                        self.datasets["train"].id_to_class_mapping(),
-                                                        self.is_pipeline_run, self.multi_label_classification)
 
     def setup_dataloaders(self):
         datasets = {}
@@ -129,6 +127,8 @@ class ModelTrainer:
         device = ModelTrainer.setup_device()
         loss_function, optimizer, scheduler = self.setup_optimization(model)
 
+        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager, self.experiment_name, self.datasets["train"].id_to_class_mapping(), self.is_pipeline_run, model, self.multi_label_classification)
+
         model.to(device)
 
         since = time.time()
@@ -171,7 +171,7 @@ class ModelTrainer:
                     model_metrics.update(predictions, labels, loss)
 
                     if phase == "val":
-                        self.model_tracker.track_best_model(model, model_metrics, epoch)
+                        model_tracker.track_best_model(model, model_metrics, epoch)
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 
@@ -179,22 +179,33 @@ class ModelTrainer:
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
             time_elapsed // 60, time_elapsed % 60))
 
-        self.model_tracker.save_best_models(self.logger.get_run_id())
+        model_tracker.save_best_models(self.logger.get_run_id())
 
         self.logger.print_model_summary(
-            self.model_tracker.best_average_epoch,
-            self.model_tracker.best_average_metrics,
-            self.model_tracker.best_minimum_epoch,
-            self.model_tracker.best_minimum_metrics,
-            self.model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-            self.model_tracker.best_metrics_per_class if self.multi_label_classification else None
+            model_tracker.best_average_epoch,
+            model_tracker.best_average_metrics,
+            model_tracker.best_minimum_epoch,
+            model_tracker.best_minimum_metrics,
+            model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+            model_tracker.best_metrics_per_class if self.multi_label_classification else None
         )
 
         if self.is_pipeline_run:
             self.logger.log_metrics_in_kubeflow(
-                self.model_tracker.best_average_metrics,
-                self.model_tracker.best_minimum_metrics,
-                self.model_tracker.best_metrics_per_class if self.multi_label_classification else None
+                model_tracker.best_average_metrics,
+                model_tracker.best_minimum_metrics,
+                model_tracker.best_metrics_per_class if self.multi_label_classification else None
             )
 
         self.logger.finish()
+
+        model.load_state_dict(model_tracker.best_average_model)
+        best_average_model = model
+        model.load_state_dict(model_tracker.best_minimum_model)
+        best_minimum_model = model
+        best_models_per_class = {}
+        for class_name, state_dict in model_tracker.best_models_per_class.items():
+            model.load_state_dict(state_dict)
+            best_models_per_class[class_name] = model
+
+        return best_average_model, best_minimum_model, best_models_per_class

@@ -19,7 +19,7 @@ logger = Logger.logger
 
 class ProgressBar:
     def iterable(self):
-        if not self.sequence:
+        if self.sequence is None:
             raise NameError("No sequence provided")
         if self.is_pipeline_run:
             return self.sequence
@@ -33,7 +33,7 @@ class ProgressBar:
         if self.is_pipeline_run:
             logger.info(desc)
         else:
-            if self.sequence:
+            if self.sequence is not None:
                 self.tqdm = tqdm(sequence, desc=desc, position=position)
             elif total:
                 self.tqdm = tqdm(total=total, desc=desc, position=position)
