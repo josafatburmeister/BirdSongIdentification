@@ -144,3 +144,4 @@ gcp-bakdata-kubeflow-cluster.json
 
 # IDE
 .idea
+/wandb/

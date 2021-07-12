@@ -139,9 +139,9 @@ class XenoCantoDownloader:
         def download_task(url, file_path, file_id):
             try:
                 self.download_file(url, file_path, "audio")
-            except Exception:
+            except Exception as e:
                 progress_bar.write(
-                    "Could not download file with id {}".format(file_id))
+                    "Could not download file with id {}. Reason: {}".format(file_id, e))
 
         for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
             progress_bar.update(1)
@@ -186,13 +186,20 @@ class XenoCantoDownloader:
 
             return metadata, first_page["numRecordings"]
 
-    def create_datasets(self, species_list: Optional[List[str]] = None, use_nips4b_species_list: bool = True,
-                        maximum_samples_per_class: int = 100, test_size: float = 0.35,
-                        min_quality: str = "E", sound_types: Optional[List[str]] = None,
+    def create_datasets(self,
+                        species_list: Optional[List[str]] = None,
+                        use_nips4b_species_list: bool = True,
+                        maximum_samples_per_class: int = 100,
+                        test_size: float = 0.35,
+                        min_quality: str = "E",
+                        sound_types: Optional[List[str]] = None,
                         sexes: Optional[List[str]] = None,
-                        life_stages: Optional[List[str]] = None, exclude_special_cases: bool = True,
+                        life_stages: Optional[List[str]] = None,
+                        exclude_special_cases: bool = True,
                         maximum_number_of_background_species: Optional[int] = None,
-                        clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
+                        clear_audio_cache: bool = False,
+                        clear_label_cache: bool = False,
+                        random_state: int = 12):
         if use_nips4b_species_list or not species_list:
             with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
                 species_list = self.load_species_list_from_file(str(species_file))

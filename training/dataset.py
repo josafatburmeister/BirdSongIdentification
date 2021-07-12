@@ -28,7 +28,7 @@ class XenoCantoSpectrograms(Dataset):
         self.label_file = self.path_manager.spectrogram_label_file(split, chunk_length=chunk_length)
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
-            raise NameError("Data files missing")
+            raise NameError("Data files missing: ", self.data_dir)
 
         self.labels = pd.read_json(self.label_file)
         self.class_to_idx = {}

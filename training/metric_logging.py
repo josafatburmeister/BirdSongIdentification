@@ -6,7 +6,7 @@ import wandb
 from general.logging import logger
 
 
-class TrainingLogger():
+class TrainingLogger:
     metrics = {
         'f1-score': lambda x: x.f1_score(),
         'precision': lambda x: x.precision(),
@@ -23,7 +23,10 @@ class TrainingLogger():
         'mean': lambda x: torch.mean(x, dim=2)[0]
     }
 
-    def __init__(self, model_trainer, config={}, is_pipeline_run: bool = False, track_metrics=False, wandb_entity_name="", wandb_project_name="", wandb_key=""):
+    def __init__(self, model_trainer, config=None, is_pipeline_run: bool = False, track_metrics=False,
+                 wandb_entity_name="", wandb_project_name="", wandb_key=""):
+        if not config:
+            config = {}
         self.trainer = model_trainer
         self.config = config
         self.is_pipeline_run = is_pipeline_run
