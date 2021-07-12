@@ -5,6 +5,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
 from torchvision import models
+from sklearn.model_selection import KFold
+from training.early_stopper import EarlyStopper
 
 from general.logging import logger
 from training import dataset, metrics, metric_logging, model_tracker as tracker
@@ -13,8 +15,10 @@ from training import dataset, metrics, metric_logging, model_tracker as tracker
 
 class ModelTrainer:
     @staticmethod
-    def setup_device():
-        return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    def setup_device() -> torch.device:
+        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
+        logger.info('Device set to:', device)
+        return torch.device(device)
 
     def __init__(self,
                  spectrogram_path_manager,
@@ -35,6 +39,9 @@ class ModelTrainer:
                  number_workers=0,
                  optimizer="Adam",
                  track_metrics=True,
+                 monitor="f1_score",
+                 patience=0,
+                 min_change=0.0,
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name=""):
@@ -57,6 +64,11 @@ class ModelTrainer:
         self.optimizer = optimizer
         self.track_metrics = track_metrics
 
+        # early stopping parameters
+        self.monitor = monitor
+        self.patience = patience
+        self.min_change = min_change
+
         # setup datasets
         datasets, dataloaders = self.setup_dataloaders()
         self.datasets = datasets
@@ -67,6 +79,7 @@ class ModelTrainer:
 
         config = locals().copy()
         del config['spectrogram_path_manager']
+        device = self.setup_device()
         self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
@@ -127,13 +140,20 @@ class ModelTrainer:
         device = ModelTrainer.setup_device()
         loss_function, optimizer, scheduler = self.setup_optimization(model)
 
-        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager, self.experiment_name, self.datasets["train"].id_to_class_mapping(), self.is_pipeline_run, model, self.multi_label_classification)
+        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager,
+                                             self.experiment_name,
+                                             self.datasets["train"].id_to_class_mapping(),
+                                             self.is_pipeline_run, model,
+                                             self.multi_label_classification,
+                                             device)
 
         model.to(device)
 
         since = time.time()
 
         logger.info("Number of species: %i", self.num_classes)
+
+        early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
 
         for epoch in range(self.num_epochs):
             logger.info("Epoch %i/%i", epoch + 1, self.num_epochs)
@@ -146,7 +166,8 @@ class ModelTrainer:
                     model.eval()
 
                 model_metrics = metrics.Metrics(num_classes=self.num_classes,
-                                                multi_label=self.multi_label_classification)
+                                                multi_label=self.multi_label_classification,
+                                                device=device)
 
                 for images, labels in self.dataloaders[phase]:
                     images = images.to(device)
@@ -174,6 +195,11 @@ class ModelTrainer:
                         model_tracker.track_best_model(model, model_metrics, epoch)
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
+
+            if early_stopper.check_early_stopping(model_metrics):
+                logger.info(f"Training stopped early, because {self.monitor}, did not improve by at least"
+                            f"{self.min_change} for the last {self.patience} epochs.")
+                break
 
         time_elapsed = time.time() - since
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
