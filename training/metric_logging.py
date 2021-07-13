@@ -28,6 +28,9 @@ class TrainingLogger():
         self.is_pipeline_run = is_pipeline_run
         self.track_metrics = track_metrics
 
+        self.id_to_class_mapping = list(self.trainer.datasets.values())[0].id_to_class_mapping()
+        self.class_to_id_mapping = list(self.trainer.datasets.values())[0].class_to_id_mapping()
+
         if track_metrics:
             wandb.login(key=wandb_key)
             wandb.init(project=wandb_project_name, entity=wandb_entity_name, config=config)
@@ -44,7 +47,7 @@ class TrainingLogger():
 
         table_headers = ["metric"]
 
-        for class_id, class_name in self.trainer.datasets['train'].id_to_class_mapping().items():
+        for class_id, class_name in self.id_to_class_mapping.items():
             table_headers.append(class_name)
 
         metric_rows = []
@@ -75,7 +78,7 @@ class TrainingLogger():
                     tolog[metric_name] = metric
                 else:
                     for class_id in range(metric.shape.numel()):
-                        metric_name = self.trainer.datasets['train'].id_to_class_name(class_id) + '_' + name + '_' + phase
+                        metric_name = self.id_to_class_mapping[class_id] + '_' + name + '_' + phase
                         tolog[metric_name] = metric[class_id]
             wandb.log(tolog, step=epoch)
 
@@ -134,7 +137,7 @@ class TrainingLogger():
                 if self.track_metrics:
                     for metric_name, get_method in self.metrics.items():
                         metric = get_method(best_class_metrics)
-                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[self.trainer.datasets["train"].class_name_to_id(class_name)].item()
+                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[self.class_to_id_mapping[class_name]].item()
                         wandb.run.summary[f"{class_name}_{metric_name}_best_epoch_val"] = best_epochs_per_class[class_name]
 
 
@@ -142,7 +145,7 @@ class TrainingLogger():
             for metric_name, get_method in self.metrics.items():
                 avg_metric = get_method(best_average_metrics)
                 min_metric = get_method(best_minimum_metrics)
-                for class_id, class_name in self.trainer.datasets['train'].id_to_class_mapping().items():
+                for class_id, class_name in self.id_to_class_mapping.items():
                     wandb.run.summary[f"{class_name}_{metric_name}_avg_model"] = avg_metric[class_id].item()
                     wandb.run.summary[f"{class_name}_best_epoch_avg_model"] = best_average_epoch
                     wandb.run.summary[f"{class_name}_{metric_name}_min_model"] = min_metric[class_id].item()

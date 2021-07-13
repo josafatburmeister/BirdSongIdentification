@@ -43,14 +43,16 @@ class PipelineSteps:
         best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 
         evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
-        evaluator.evaluate_model_on_test_set(model=best_average_model,
-                                             model_name=f"{experiment_name}_best_average_model")
-        evaluator.evaluate_model_on_test_set(model=best_minimum_model,
-                                             model_name=f"{experiment_name}_best_minimum_model")
 
-        for class_name, model in best_models_per_class.items():
-            evaluator.evaluate_model_on_test_set(model=model,
-                                             model_name=f"{experiment_name}_best_model_{class_name}")
+        for split in ["test", "nips4bplus", "nips4bplus_all"]:
+            evaluator.evaluate_model(model=best_average_model,
+                                                 model_name=f"{experiment_name}_best_average_model", split=split)
+            evaluator.evaluate_model(model=best_minimum_model,
+                                                 model_name=f"{experiment_name}_best_minimum_model", split=split)
+
+            for class_name, model in best_models_per_class.items():
+                evaluator.evaluate_model(model=model,
+                                                 model_name=f"{experiment_name}_best_model_{class_name}", split=split)
 
         # clean up
         filepaths.PathManager.empty_dir(input_path)

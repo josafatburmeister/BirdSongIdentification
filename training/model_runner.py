@@ -44,12 +44,6 @@ class ModelRunner:
 
         self.is_pipeline_run = self.spectrogram_path_manager.is_pipeline_run
 
-        # setup datasets
-        datasets, dataloaders = self.setup_dataloaders()
-        self.datasets = datasets
-        self.dataloaders = dataloaders
-        self.num_classes = self.datasets["train"].num_classes()
-
     def setup_metric_logger(self, config: dict = {}):
         logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=self.track_metrics,
                                                     wandb_entity_name=self.wandb_entity_name,
@@ -57,11 +51,11 @@ class ModelRunner:
 
         return logger
 
-    def setup_dataloaders(self):
+    def setup_dataloaders(self, splits: list):
         datasets = {}
         dataloaders = {}
 
-        for split in ["train", "val", "test"]:
+        for split in splits:
             datasets[split] = dataset.XenoCantoSpectrograms(
                 self.spectrogram_path_manager, chunk_length=self.chunk_length,
                 include_noise_samples=self.include_noise_samples, split=split,
@@ -74,11 +68,11 @@ class ModelRunner:
 
         return datasets, dataloaders
 
-    def setup_model(self):
+    def setup_model(self, num_classes: int):
         if self.architecture == "resnet18":
             model = models.resnet18(pretrained=True, progress=(not self.is_pipeline_run))
             num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, self.num_classes)
+            model.fc = nn.Linear(num_ftrs, num_classes)
         else:
             model = None
 

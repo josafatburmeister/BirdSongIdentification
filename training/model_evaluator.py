@@ -8,30 +8,37 @@ class ModelEvaluator(model_runner.ModelRunner):
     def __init__(self, spectrogram_path_manager, architecture: str, **kwargs):
         super().__init__(spectrogram_path_manager, architecture, experiment_name="", **kwargs)
 
-    def setup_model(self, model):
+    def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device, num_classes: int):
         if type(model) == str:
             model_path = model
-            pretrained_model = torch.load(model_path)
+            pretrained_model = torch.load(model_path, map_location=device)
             model_weights = pretrained_model["state_dict"]
-            model = super().setup_model()
+            model = super().setup_model(num_classes)
 
             model.load_state_dict(model_weights)
 
         return model
 
-    def evaluate_model_on_test_set(self, model: Union[str, torch.nn.Module], model_name: str):
+    def evaluate_model(self, model: Union[str, torch.nn.Module], model_name: str, split: str):
+
+        # setup datasets
+        datasets, dataloaders = self.setup_dataloaders([split])
+        self.datasets = datasets
+        self.dataloaders = dataloaders
+        num_classes = self.datasets[split].num_classes()
+
         self.experiment_name=model_name
         device = model_runner.ModelRunner.setup_device()
-        model = self.setup_model(model)
+        model = self.setup_model(model, device, num_classes)
         model.to(device)
         model.eval()
 
         metric_logger = super().setup_metric_logger()
 
-        model_metrics = metrics.Metrics(num_classes=self.num_classes,
+        model_metrics = metrics.Metrics(num_classes=num_classes,
                                         multi_label=self.multi_label_classification)
 
-        for images, labels in self.dataloaders["test"]:
+        for images, labels in self.dataloaders[split]:
             images = images.to(device)
             labels = labels.to(device)
 
@@ -43,7 +50,7 @@ class ModelEvaluator(model_runner.ModelRunner):
                     _, predictions = torch.max(outputs, 1)
 
                 model_metrics.update(predictions, labels)
-        logger.info("Model performance of %s on evaluation set:", model_name)
+        logger.info("Model performance of %s on %s set:", model_name, split)
         metric_logger.log_metrics(model_metrics, "test", 0)
 
         metric_logger.finish()

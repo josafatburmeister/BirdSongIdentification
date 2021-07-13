@@ -5,9 +5,9 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from typing import List
 
 from data_preparation.filepaths import PathManager
+from general.logging import logger
 
 
 class XenoCantoSpectrograms(Dataset):
@@ -28,16 +28,29 @@ class XenoCantoSpectrograms(Dataset):
                                                               chunk_length=chunk_length)
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
+            print("self.label_file", self.label_file)
             raise NameError("Data files missing")
 
-        self.labels = pd.read_json(self.label_file)
-        self.create_class_indices(include_noise_samples)
+        self.labels = pd.read_csv(self.label_file)
+        self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
+        self.create_class_indices()
 
-    def create_class_indices(self, include_noise_samples):
+        for class_name in self.class_names():
+            if class_name not in self.labels.columns:
+                self.labels[class_name] = 0
+
+        if logger:
+            logger.info("\n")
+            logger.info("Label distribution of %s set", split)
+            for class_name in self.class_names():
+                logger.info("%s : %i", class_name, self.labels[class_name].sum())
+            logger.info("\n")
+
+    def create_class_indices(self):
         categories = list(np.loadtxt(self.path_manager.categories_file(), delimiter=",", dtype=str))
 
-        if include_noise_samples:
+        if self.include_noise_samples and not self.multi_label_classification:
             categories.append("noise")
 
         self.class_to_idx = {}
@@ -74,15 +87,22 @@ class XenoCantoSpectrograms(Dataset):
             self.data_dir, self.labels["file_name"].iloc[idx])
 
         image = Image.open(img_path).convert('RGB')
-        label = self.labels.iloc[idx]["label"]
-        class_id = self.class_to_idx[label]
+        label = self.labels.iloc[idx]
 
         if self.multi_label_classification:
             # create multi-hot encoding
             label_tensor = torch.zeros(self.num_classes())
-            label_tensor[class_id] = 1
+            for class_name, class_id in self.class_to_idx.items():
+                if label[class_name] == 1:
+                    label_tensor[class_id] = 1
         else:
-            label_tensor = class_id
+            for class_name, class_id in self.class_to_idx.items():
+                if label[class_name] == 1:
+                    label_tensor = class_id
+                    # in the single label case there should be only one positive class per spectrogram, so we can stop here
+                    break
+            if torch.sum(label_tensor) == 0 and self.include_noise_samples:
+                label_tensor[self.class_name_to_id("noise")] = 1
 
         if self.transform:
             image = self.transform(image)

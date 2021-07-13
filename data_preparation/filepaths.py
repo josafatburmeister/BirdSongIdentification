@@ -105,21 +105,6 @@ class PathManager:
     def __init__(self, data_dir: str, gcs_bucket: str = None):
         self.data_dir = data_dir
         self.cache_dir = os.path.join(self.data_dir, "cache")
-
-        self.data_dirs = {
-            "train": os.path.join(self.data_dir, "train"),
-            "val": os.path.join(self.data_dir, "val"),
-            "test": os.path.join(self.data_dir, "test"),
-        }
-
-        self.data_subdirs = ["audio"]
-
-        self.ensure_dirs(self.data_dirs.values())
-
-        for dir_path in self.data_dirs.values():
-            for subdir in self.data_subdirs:
-                self.ensure_dir(os.path.join(dir_path, subdir))
-
         self.is_pipeline_run = False
 
         # google cloud storage config
@@ -136,13 +121,15 @@ class PathManager:
             self.gcs_models_dir = os.path.join(self.GCS_BUCKET, "models")
 
     def audio_label_file(self, split: str):
-        return os.path.join(self.data_dirs[split], f"{split}.json")
+        self.ensure_dir(os.path.join(self.data_dir, split))
+        return os.path.join(self.data_dir, split, f"{split}.csv")
 
     def spectrogram_label_file(self, split: str, **kwargs):
+        self.ensure_dir(os.path.join(self.data_dir, split))
         keywords = ""
         for key in kwargs.values():
             keywords += f"_{key}"
-        return os.path.join(self.data_dirs[split], f"{split}{keywords}.json")
+        return os.path.join(self.data_dir, split, f"{split}{keywords}.csv")
 
     def categories_file(self):
         return os.path.join(self.data_dir, "categories.txt")
@@ -167,7 +154,9 @@ class PathManager:
         if subdir == "spectrograms":
             for key in kwargs.values():
                 subdir += f"_{key}"
-        return os.path.join(self.data_dirs[split], subdir)
+        data_folder_path = os.path.join(self.data_dir, split, subdir)
+        PathManager.ensure_dir(data_folder_path)
+        return data_folder_path
 
     def model_dir(self):
         return os.path.join(self.data_dir, "models")

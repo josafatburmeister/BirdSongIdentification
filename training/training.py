@@ -69,7 +69,7 @@ class ModelTrainer:
         datasets = {}
         dataloaders = {}
 
-        for split in ["train", "val", "test"]:
+        for split in ["train", "val"]:
             datasets[split] = dataset.XenoCantoSpectrograms(
                 self.spectrogram_path_manager, chunk_length=self.chunk_length,
                 include_noise_samples=self.include_noise_samples, split=split,

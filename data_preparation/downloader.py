@@ -1,3 +1,4 @@
+import datetime
 import importlib.resources as pkg_resources
 import json
 from multiprocessing.pool import ThreadPool
@@ -7,7 +8,9 @@ import pandas as pd
 import requests
 import shutil
 from sklearn.model_selection import train_test_split
+import tarfile
 from typing import List, Optional
+import zipfile
 
 from data_preparation.filepaths import PathManager
 from general.logging import logger, ProgressBar
@@ -93,7 +96,8 @@ class XenoCantoDownloader:
 
     def __del__(self):
         # clean up
-        PathManager.empty_dir(self.path.cache_dir)
+        if self.path.is_pipeline_run:
+            PathManager.empty_dir(self.path.cache_dir)
 
     def metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
@@ -195,7 +199,7 @@ class XenoCantoDownloader:
                         clear_audio_cache: bool = False, clear_label_cache: bool = False, random_state: int = 12):
         if use_nips4b_species_list or not species_list:
             with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
-                species_list = self.load_species_list_from_file(str(species_file))
+                species_list = self.download_nips4b_species_list()["nips4b_class_name"]
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
@@ -243,9 +247,6 @@ class XenoCantoDownloader:
                 labels = labels[labels["q"] <= min_quality]
 
             selected_sound_types = species_sound_types.intersection(set(sound_types))
-
-            logger.info(f"sound types {sound_types}")
-            logger.info(f"selected_sound_types {selected_sound_types}")
 
             for sound_type in selected_sound_types:
                 categories.append(f"{species_name.replace(' ', '_')}_{sound_type}")
@@ -295,6 +296,8 @@ class XenoCantoDownloader:
                     "There are no training samples for class {}".format(species_name))
 
             # create class labels
+            labels["file_name"] = labels["id"] + ".mp3"
+
             labels["sound_type"] = ""
             for idx, row in labels.iterrows():
                 for sound_type in sound_types:
@@ -304,9 +307,13 @@ class XenoCantoDownloader:
             labels["label"] = labels["gen"] + "_" + \
                               labels["sp"] + "_" + labels["sound_type"]
 
+            labels["duration"] = labels["length"].apply(lambda length: datetime.datetime.strptime(length, "%M:%S"))
+            labels["start"] = 0
+            labels["end"] = labels["duration"].apply(
+                lambda duration: duration.minute * 60 * 1000 + duration.second * 1000)
+
             # select relevant columns
-            labels = labels[["id", "label", "q",
-                             "sound_type", "background_species"]]
+            labels = labels[["id", "file_name", "start", "end", "label"]]
 
             # obtain random subset if maximum_samples_per_class is set
             if len(labels) > maximum_samples_per_class:
@@ -321,16 +328,16 @@ class XenoCantoDownloader:
                 test_labels, test_size=test_size, random_state=random_state)
 
             if len(train_labels) == 0:
-                print("No training samples for class", species_name)
+                logger.info("No training samples for class", species_name)
             else:
                 train_frames.append(train_labels)
 
             if len(val_labels) == 0:
-                print("No validation samples for class", species_name)
+                logger.info("No validation samples for class", species_name)
             else:
                 val_frames.append(val_labels)
             if len(test_labels) == 0:
-                print("No test samples for class", species_name)
+                logger.info("No test samples for class", species_name)
             else:
                 test_frames.append(test_labels)
 
@@ -345,14 +352,10 @@ class XenoCantoDownloader:
         training_set = pd.concat(train_frames)
         validation_set = pd.concat(val_frames)
         test_set = pd.concat(test_frames)
-        training_set.to_json(self.path.audio_label_file(
-            "train"), "records", indent=4)
-        validation_set.to_json(
-            self.path.audio_label_file("val"), "records", indent=4)
-        test_set.to_json(self.path.audio_label_file(
-            "test"), "records", indent=4)
+        training_set.to_csv(self.path.audio_label_file("train"))
+        validation_set.to_csv(self.path.audio_label_file("val"))
+        test_set.to_csv(self.path.audio_label_file("test"))
         np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
-
 
         # clear data folders
         PathManager.empty_dir(self.path.data_folder("train", "audio"))
@@ -368,3 +371,123 @@ class XenoCantoDownloader:
 
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
+
+    def download_nips4bplus_dataset(self, species_list: Optional[List[str]] = None):
+        nips4bplus_annotations_url = "https://ndownloader.figshare.com/files/16334603"
+        nips4bplus_annotations_folder_name = "temporal_annotations_nips4b"
+        nips4b_audio_files_url = "http://sabiod.univ-tln.fr/nips4b/media/birds/NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV.tar.gz"
+        nips4b_audio_folder_name = "NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV"
+
+        nips4bplus_folder = self.path.data_folder("nips4bplus", "")
+        nips4bplus_folder_all = self.path.data_folder("nips4bplus_all", "")
+
+        self.path.empty_dir(nips4bplus_folder)
+        nips4bplus_audio_folder = self.path.data_folder("nips4bplus", "audio")
+        nips4bplus_all_audio_folder = self.path.data_folder("nips4bplus_all", "audio")
+        nips4bplus_annotations_path = os.path.join(nips4bplus_folder, "nips4bplus_annotations.zip")
+        nips4bplus_audio_path = os.path.join(nips4bplus_folder, "nips4bplus_audio.tar.gz")
+        extracted_nips_annotations_folder = os.path.join(nips4bplus_folder, nips4bplus_annotations_folder_name)
+
+        nips4b_species_list = self.download_nips4b_species_list()
+
+        logger.info("Download NIPS4BPlus label files...")
+        self.download_file(nips4bplus_annotations_url, nips4bplus_annotations_path, cache_subdir="nips4bplus")
+
+        with zipfile.ZipFile(nips4bplus_annotations_path, 'r') as zip_file:
+            logger.info("Unzip NIPS4BPlus label files...")
+            zip_file.extractall(nips4bplus_folder)
+
+        nips4bplus_selected_labels = []
+        nips4bplus_labels = []
+
+        for file in os.listdir(extracted_nips_annotations_folder):
+            label_file_path = os.path.join(extracted_nips_annotations_folder, file)
+            if species_list:
+                selected_species = '|'.join(species_list)
+
+            def map_class_names(row):
+                if row["label"] == "Unknown":
+                    return "noise"
+                elif row["label"] == "Human":
+                    return "human"
+
+                class_name = nips4b_species_list[nips4b_species_list["nips4b_class_name"] == row["label"]]
+
+                if len(class_name) != 1:
+                    raise NameError(f"No unique label found for class {row['label']}")
+                else:
+                    return class_name["class name"].item()
+
+            if file.endswith(".csv"):
+                try:
+                    labels = pd.read_csv(label_file_path, names=["start", "duration", "label"])
+                    labels["label"] = labels.apply(map_class_names, axis=1)
+                except pd.errors.EmptyDataError:
+                    labels = pd.DataFrame([0, 5, "noise"], columns=["start", "duration", "label"])
+                file_id = file.lstrip("annotation_train").rstrip(".csv")
+
+                labels["id"] = f"nips4b_birds_trainfile{file_id}"
+                labels["file_name"] = f"nips4b_birds_trainfile{file_id}.wav"
+                labels["start"] = labels["start"] * 1000
+                labels["end"] = labels["start"] + labels["duration"] * 1000
+                labels = labels[["id", "file_name", "start", "end", "label"]]
+
+                if species_list and labels["label"].str.contains(selected_species).all():
+                    nips4bplus_selected_labels.append(labels)
+                if species_list:
+                    labels["label"] = labels["label"].apply(
+                        lambda label: "noise" if label not in species_list else label)
+
+                self.append = nips4bplus_labels.append(labels)
+
+        nips4bplus_labels = pd.concat(nips4bplus_labels)
+
+        nips4bplus_labels.to_csv(os.path.join(nips4bplus_folder_all, "nips4bplus_all.csv"))
+        nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
+        nips4bplus_selected_labels.to_csv(os.path.join(nips4bplus_folder, "nips4bplus.csv"))
+
+        os.remove(nips4bplus_annotations_path)
+        shutil.rmtree(extracted_nips_annotations_folder)
+
+        logger.info("Download NIPS4BPlus audio files...")
+        self.download_file(nips4b_audio_files_url, nips4bplus_audio_path, cache_subdir="nips4bplus")
+
+        logger.info("Unzip NIPS4BPlus audio files...")
+        tar_file = tarfile.open(nips4bplus_audio_path)
+        tar_file.extractall(nips4bplus_folder)
+        tar_file.close()
+        extracted_nips_audio_folder = os.path.join(nips4bplus_folder, nips4b_audio_folder_name)
+
+        for split in ["train", "test"]:
+            folder_path = os.path.join(extracted_nips_audio_folder, split)
+            shutil.copytree(folder_path, nips4bplus_audio_folder, dirs_exist_ok=True)
+            shutil.copytree(folder_path, nips4bplus_all_audio_folder, dirs_exist_ok=True)
+
+        os.remove(nips4bplus_audio_path)
+        shutil.rmtree(extracted_nips_audio_folder)
+
+        for file in os.listdir(nips4bplus_audio_folder):
+            if nips4bplus_selected_labels[nips4bplus_selected_labels["file_name"] == file].empty:
+                os.remove(os.path.join(nips4bplus_audio_folder, file))
+        for file in os.listdir(nips4bplus_all_audio_folder):
+            if nips4bplus_labels[nips4bplus_labels["file_name"] == file].empty:
+                os.remove(os.path.join(nips4bplus_all_audio_folder, file))
+
+    def download_nips4b_species_list(self):
+        species_list_url = "https://ndownloader.figshare.com/files/13390469"
+        nips4bplus_folder = self.path.data_folder("nips4bplus", "")
+        nips4bplus_species_list = os.path.join(nips4bplus_folder, "nips4b_species_list.csv")
+
+        self.download_file(species_list_url, nips4bplus_species_list, cache_subdir="nips4bplus")
+
+        species_list = pd.read_csv(nips4bplus_species_list)
+        species_list["nips4b_class_name"] = species_list["class name"]
+
+        species_list["class name"] = species_list.apply(
+            lambda row: row["Scientific_name"] + ", " + row["class name"].split("_")[1] if row[
+                                                                                               "class name"] != "Empty" else "noise sample",
+            axis=1)
+
+        species_list.to_csv(nips4bplus_species_list)
+
+        return species_list

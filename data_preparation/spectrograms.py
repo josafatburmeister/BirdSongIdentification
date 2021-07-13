@@ -45,9 +45,9 @@ class SpectrogramCreator:
         self.index_cached_spectrograms()
 
     def __del__(self):
-        self.spectrogram_path.empty_dir(self.spectrogram_path.cache_dir)
-        for file in os.listdir(self.spectrogram_path.cache_dir):
-            logger.info(file)
+        if self.spectrogram_path.is_pipeline_run:
+            self.spectrogram_path.empty_dir(self.spectrogram_path.cache_dir)
+
 
     def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
                       max_value_source: Optional[float] = None):
@@ -241,7 +241,7 @@ class SpectrogramCreator:
             is_pipeline_run=self.spectrogram_path.is_pipeline_run)
 
         def spectrogram_task(file_name):
-            if file_name.endswith(".mp3"):
+            if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
                 self.create_spectrograms_from_file(audio_path, target_dir)
 
@@ -250,13 +250,7 @@ class SpectrogramCreator:
 
     def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, clear_spectrogram_cache: bool = False):
         if splits is None:
-            splits = ["train", "val", "test"]
-
-        descriptions = {
-            "train": "training set",
-            "val": "validation set",
-            "test": "test set"
-        }
+            splits = ["train", "val", "test", "nips4bplus", "nips4bplus_all"]
 
         if clear_spectrogram_cache:
             self.spectrogram_path.clear_cache("spectrograms", chunk_length=self.chunk_length)
@@ -268,37 +262,59 @@ class SpectrogramCreator:
             audio_label_file = self.audio_path.audio_label_file(split)
             PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
-                audio_dir, spectrogram_dir, descriptions[split])
+                audio_dir, spectrogram_dir, f"{split} set")
             self.create_spectrogram_labels(split)
 
     def create_spectrogram_labels(self, split: str):
-        labels = pd.read_json(self.audio_path.audio_label_file(split))
+        labels = pd.read_csv(self.audio_path.audio_label_file(split))
         spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms", chunk_length=self.chunk_length)
 
         spectrogram_labels = []
 
         for file in os.listdir(spectrogram_dir):
             if file.endswith(".png"):
-                file_id = int(file.split("-")[0])
-                label = labels[labels["id"] == file_id]
+                file_id = file.split("-")[0]
+
+                file_number = file.split("-")[1]
+                file_number = file_number.split("_")[0]
+                file_number = file_number.split(".")[0]
+                file_number = int(file_number)
+
+                start = file_number * self.chunk_length
+                end = (file_number+1) * self.chunk_length
+                matching_labels = labels[labels["id"].astype(str) == file_id]
 
                 if file.endswith("noise.png"):
-                    label["label"] = "noise"
-                    label["sound_type"] = "noise"
+                    matching_labels["label"] = "noise"
+                    matching_labels["sound_type"] = "noise"
 
-                if len(label) != 1:
+                if len(matching_labels) < 1:
                     raise NameError(
                         "No matching labels found for file with id {}".format(file_id))
 
-                label["file_name"] = file
+                final_label = {}
 
-                spectrogram_labels.append(label)
+                found_match = False
+
+                for idx, label in matching_labels.iterrows():
+                    if start <= label["start"] and label["start"] < end or start <= label["end"] and label["end"] < end:
+                        final_label[label["label"]] = 1
+                        final_label["id"] = file_id
+                        final_label["file_name"] = file
+                        found_match = True
+
+                if not found_match:
+                    final_label["noise"] = 1
+                    final_label["id"] = file_id
+                    final_label["file_name"] = file
+
+                spectrogram_labels.append(final_label)
 
         if len(spectrogram_labels) > 0:
-            spectrogram_labels = pd.concat(spectrogram_labels).sort_values(
-                by=['file_name'])
+            spectrogram_labels = pd.DataFrame(spectrogram_labels).sort_values(
+                by=['file_name']).fillna(0)
 
             label_file = self.spectrogram_path.spectrogram_label_file(split, chunk_length=self.chunk_length)
-            spectrogram_labels.to_json(label_file, "records", indent=4)
+            spectrogram_labels.to_csv(label_file)
         else:
             raise NameError("No spectrograms found")
