@@ -5,7 +5,8 @@ import wandb
 
 from general.logging import logger
 
-class TrainingLogger():
+
+class TrainingLogger:
     metrics = {
         'f1-score': lambda x: x.f1_score(),
         'precision': lambda x: x.precision(),
@@ -22,7 +23,10 @@ class TrainingLogger():
         'mean': lambda x: torch.mean(x, dim=2)[0]
     }
 
-    def __init__(self, model_trainer, config={}, is_pipeline_run: bool = False, track_metrics=False, wandb_entity_name="", wandb_project_name="", wandb_key=""):
+    def __init__(self, model_trainer, config=None, is_pipeline_run: bool = False, track_metrics=False,
+                 wandb_entity_name="", wandb_project_name="", wandb_key=""):
+        if not config:
+            config = {}
         self.trainer = model_trainer
         self.config = config
         self.is_pipeline_run = is_pipeline_run
@@ -120,7 +124,8 @@ class TrainingLogger():
         with open("/MLPipeline_Metrics.json", mode="w") as json_file:
             json.dump(metrics, json_file)
 
-    def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics, best_epochs_per_class=None, best_metrics_per_class=None):
+    def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics,
+                            best_epochs_per_class=None, best_metrics_per_class=None):
         logger.info("Summary")
         logger.info('-' * 10)
         logger.info("Validation metrics of model with best average F1-Scores (epoch %s):", best_average_epoch)
@@ -131,7 +136,8 @@ class TrainingLogger():
 
         if best_metrics_per_class:
             for class_name, best_class_metrics in best_metrics_per_class.items():
-                logger.info("Validation metrics of best model for class %s (epoch %s):", class_name, best_epochs_per_class[class_name])
+                logger.info("Validation metrics of best model for class %s (epoch %s):", class_name,
+                            best_epochs_per_class[class_name])
                 self.print_metrics(best_class_metrics)
 
                 if self.track_metrics:

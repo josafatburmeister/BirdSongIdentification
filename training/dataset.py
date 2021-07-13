@@ -3,15 +3,18 @@ import os
 import pandas as pd
 from PIL import Image
 import torch
+from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
+from typing import List
 
 from data_preparation.filepaths import PathManager
 from general.logging import logger
 
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, include_noise_samples: bool = True, split: str = "train", multi_label_classification: bool = False):
+    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, include_noise_samples: bool = True,
+                 split: str = "train", multi_label_classification: bool = False):
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -24,16 +27,15 @@ class XenoCantoSpectrograms(Dataset):
         self.path_manager = path_manager
         self.data_dir = self.path_manager.data_folder(
             split, "spectrograms", chunk_length=chunk_length)
-        self.label_file = self.path_manager.spectrogram_label_file(split,
-                                                              chunk_length=chunk_length)
+        self.label_file = self.path_manager.spectrogram_label_file(split, chunk_length=chunk_length)
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
-            print("self.label_file", self.label_file)
-            raise NameError("Data files missing")
+            raise NameError("Data files missing: ", self.data_dir)
 
         self.labels = pd.read_csv(self.label_file)
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
+        self.class_to_idx = {}
         self.create_class_indices()
 
         for class_name in self.class_names():
@@ -79,7 +81,7 @@ class XenoCantoSpectrograms(Dataset):
     def __len__(self):
         return len(self.labels)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: [int] or Tensor):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 

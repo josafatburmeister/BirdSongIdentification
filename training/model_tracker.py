@@ -9,7 +9,8 @@ from general.logging import logger
 
 class ModelTracker:
     def __init__(self, pathmanager: filepaths.PathManager, experiment_name: str, id_to_class_mapping: dict,
-                 is_pipeline_run: bool, model: torch.nn.Module, multi_label_classification: bool = True):
+                 is_pipeline_run: bool, model: torch.nn.Module, multi_label_classification: bool = True,
+                 device: torch.device = torch.device('cpu')):
         self.path = pathmanager
         self.experiment_name = experiment_name
         self.id_to_class_mapping = id_to_class_mapping
@@ -18,11 +19,13 @@ class ModelTracker:
         self.multi_label_classification = multi_label_classification
         self.best_average_epoch = 1
         self.best_average_metrics = metrics.Metrics(num_classes=self.num_classes,
-                                                    multi_label=self.multi_label_classification)
+                                                    multi_label=self.multi_label_classification,
+                                                    device=device)
         self.best_average_model = copy.deepcopy(model.state_dict())
         self.best_minimum_epoch = 1
         self.best_minimum_metrics = metrics.Metrics(num_classes=self.num_classes,
-                                                    multi_label=self.multi_label_classification)
+                                                    multi_label=self.multi_label_classification,
+                                                    device=device)
         self.best_minimum_model = copy.deepcopy(model.state_dict())
         self.best_epochs_per_class = {}
         self.best_metrics_per_class = {}
@@ -30,31 +33,30 @@ class ModelTracker:
         for class_name in self.id_to_class_mapping.values():
             self.best_epochs_per_class[class_name] = 1
             self.best_metrics_per_class[class_name] = metrics.Metrics(num_classes=self.num_classes,
-                                                                      multi_label=self.multi_label_classification)
+                                                                      multi_label=self.multi_label_classification,
+                                                                      device=device)
             self.best_models_per_class[class_name] = copy.deepcopy(model.state_dict())
 
     def track_best_model(self, model: torch.nn.Module, model_metrics: metrics.Metrics, epoch: int):
-        if torch.mean(self.best_average_metrics.f1_score()) < torch.mean(model_metrics.f1_score()):
+        model_mean_f1 = torch.mean(model_metrics.f1_score())
+        if torch.mean(self.best_average_metrics.f1_score()) < model_mean_f1:
             self.best_average_epoch = epoch + 1
             self.best_average_metrics = model_metrics
             self.best_average_model = copy.deepcopy(model.state_dict())
 
         if torch.min(self.best_minimum_metrics.f1_score()) < torch.min(model_metrics.f1_score()) \
                 or torch.min(self.best_minimum_metrics.f1_score()) == torch.min(model_metrics.f1_score()) \
-                and torch.mean(self.best_minimum_metrics.f1_score()) < torch.mean(model_metrics.f1_score()):
+                and torch.mean(self.best_minimum_metrics.f1_score()) < model_mean_f1:
             self.best_minimum_epoch = epoch + 1
             self.best_minimum_metrics = model_metrics
             self.best_minimum_model = copy.deepcopy(model.state_dict())
 
         if self.multi_label_classification:
             for class_id, class_name in self.id_to_class_mapping.items():
-                if self.best_metrics_per_class[class_name].f1_score()[class_id].item() < model_metrics.f1_score()[
-                    class_id].item() \
-                        or self.best_metrics_per_class[class_name].f1_score()[class_id].item() == \
-                        model_metrics.f1_score()[
-                            class_id].item() \
-                        and torch.mean(self.best_metrics_per_class[class_name].f1_score()).item() < torch.mean(
-                    model_metrics.f1_score()).item():
+                best_f1 = self.best_metrics_per_class[class_name].f1_score()[class_id].item()
+                model_f1 = model_metrics.f1_score()[class_id].item()
+                best_mean_f1 = torch.mean(self.best_metrics_per_class[class_name].f1_score())
+                if best_f1 < model_f1 or (best_f1 == model_f1 and best_mean_f1 < model_mean_f1):
                     self.best_epochs_per_class[class_name] = epoch + 1
                     self.best_metrics_per_class[class_name] = model_metrics
                     self.best_models_per_class[class_name] = copy.deepcopy(model.state_dict())

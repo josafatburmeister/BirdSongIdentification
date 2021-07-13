@@ -1,9 +1,8 @@
-from kubeflow import fairing
 import os
 import subprocess
-import sys
 
 from general.logging import logger
+from kubeflow import fairing
 
 
 class PathManager:
@@ -13,7 +12,7 @@ class PathManager:
             os.makedirs(dir_path)
 
     @staticmethod
-    def ensure_dirs(dir_paths: str):
+    def ensure_dirs(dir_paths: [str]):
         for dir_path in dir_paths:
             PathManager.ensure_dir(dir_path)
 
@@ -83,7 +82,8 @@ class PathManager:
         bucket_path = PathManager.ensure_trailing_slash(bucket_path)
         try:
             # if the bucket does not exist, this will throw a BucketNotFoundException
-            subprocess.run(["gsutil", "ls", "-b", bucket_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(
+                ["gsutil", "ls", "-b", bucket_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
             logger.info(f"Bucket {bucket_path} exists")
             return True
         except subprocess.CalledProcessError:
@@ -93,7 +93,8 @@ class PathManager:
     @staticmethod
     def gcs_file_exists(file_path: str, quiet: bool = True):
         try:
-            result = subprocess.run(["gsutil", "ls", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            result = subprocess.run(
+                ["gsutil", "ls", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
             if not quiet:
                 logger.info(f"File {file_path} exists")
             return True

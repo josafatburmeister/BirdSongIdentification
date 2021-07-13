@@ -1,7 +1,9 @@
-import logging, verboselogs
-from tqdm.notebook import tqdm
+import logging
+import verboselogs
 from collections.abc import Iterable
 from typing import Optional
+
+from tqdm.notebook import tqdm
 
 
 class Logger:
@@ -10,6 +12,7 @@ class Logger:
     # print logs to console
     console = logging.StreamHandler()
     logger.addHandler(console)
+
 
 logger = Logger.logger
 
@@ -23,7 +26,8 @@ class ProgressBar:
         else:
             return self.tqdm
 
-    def __init__(self, total: int = 0, sequence: Optional[Iterable] = None, desc: str = "", position: int = 0, is_pipeline_run: bool = False):
+    def __init__(self, total: int = 0, sequence: Optional[Iterable] = None, desc: str = "", position: int = 0,
+                 is_pipeline_run: bool = False):
         self.is_pipeline_run = is_pipeline_run
         self.sequence = sequence
         if self.is_pipeline_run:

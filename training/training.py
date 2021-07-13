@@ -1,16 +1,24 @@
-import torch
 import time
-from training import dataset, metrics, metric_logging, model_tracker as tracker
-from torch.utils.data import DataLoader
-from torchvision import models
+
+import torch
 from torch import nn
+from torch.utils.data import DataLoader
+from torch.optim import lr_scheduler
+from torchvision import models
+from sklearn.model_selection import KFold
+from training.early_stopper import EarlyStopper
+
 from general.logging import logger
+from training import dataset, metrics, metric_logging, model_tracker as tracker
+
 
 
 class ModelTrainer:
     @staticmethod
-    def setup_device():
-        return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    def setup_device() -> torch.device:
+        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
+        logger.info('Device set to:', device)
+        return torch.device(device)
 
     def __init__(self,
                  spectrogram_path_manager,
@@ -24,12 +32,16 @@ class ModelTrainer:
                  learning_rate_scheduler=None,
                  learning_rate_scheduler_gamma=0.1,
                  learning_rate_scheduler_step_size=7,
+                 momentum=0.9,
                  multi_label_classification=True,
                  multi_label_classification_threshold=0.5,
                  number_epochs=25,
                  number_workers=0,
                  optimizer="Adam",
                  track_metrics=True,
+                 monitor="f1_score",
+                 patience=0,
+                 min_change=0.0,
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name=""):
@@ -44,12 +56,18 @@ class ModelTrainer:
         self.learning_rate_scheduler = learning_rate_scheduler
         self.learning_rate_scheduler_gamma = learning_rate_scheduler_gamma
         self.learning_rate_scheduler_step_size = learning_rate_scheduler_step_size
+        self.momentum = momentum
         self.multi_label_classification = multi_label_classification
         self.multi_label_classification_threshold = multi_label_classification_threshold
         self.num_epochs = number_epochs
         self.num_workers = number_workers
         self.optimizer = optimizer
         self.track_metrics = track_metrics
+
+        # early stopping parameters
+        self.monitor = monitor
+        self.patience = patience
+        self.min_change = min_change
 
         # setup datasets
         datasets, dataloaders = self.setup_dataloaders()
@@ -61,6 +79,7 @@ class ModelTrainer:
 
         config = locals().copy()
         del config['spectrogram_path_manager']
+        device = self.setup_device()
         self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
@@ -87,6 +106,8 @@ class ModelTrainer:
             model = models.resnet18(pretrained=True, progress=(not self.is_pipeline_run))
             num_ftrs = model.fc.in_features
             model.fc = nn.Linear(num_ftrs, self.num_classes)
+        else:
+            raise ValueError(f"Model architecture is unknown. Given architecture: {self.architecture}")
 
         return model
 
@@ -106,10 +127,10 @@ class ModelTrainer:
         else:
             optimizer = None
         if self.learning_rate_scheduler == "cosine":
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs, eta_min=0)
+            scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs, eta_min=0)
         elif self.learning_rate_scheduler == "step_lr":
-            scheduler = torch.optim.StepLR(optimizer, step_size=self.learning_rate_scheduler_step_size,
-                                           gamma=self.learning_rate_scheduler_gamma)
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=self.learning_rate_scheduler_step_size,
+                                            gamma=self.learning_rate_scheduler_gamma)
         else:
             scheduler = None
         return loss, optimizer, scheduler
@@ -119,13 +140,20 @@ class ModelTrainer:
         device = ModelTrainer.setup_device()
         loss_function, optimizer, scheduler = self.setup_optimization(model)
 
-        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager, self.experiment_name, self.datasets["train"].id_to_class_mapping(), self.is_pipeline_run, model, self.multi_label_classification)
+        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager,
+                                             self.experiment_name,
+                                             self.datasets["train"].id_to_class_mapping(),
+                                             self.is_pipeline_run, model,
+                                             self.multi_label_classification,
+                                             device)
 
         model.to(device)
 
         since = time.time()
 
         logger.info("Number of species: %i", self.num_classes)
+
+        early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
 
         for epoch in range(self.num_epochs):
             logger.info("Epoch %i/%i", epoch + 1, self.num_epochs)
@@ -138,7 +166,8 @@ class ModelTrainer:
                     model.eval()
 
                 model_metrics = metrics.Metrics(num_classes=self.num_classes,
-                                                multi_label=self.multi_label_classification)
+                                                multi_label=self.multi_label_classification,
+                                                device=device)
 
                 for images, labels in self.dataloaders[phase]:
                     images = images.to(device)
@@ -167,23 +196,32 @@ class ModelTrainer:
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 
+            if early_stopper.check_early_stopping(model_metrics):
+                logger.info(f"Training stopped early, because {self.monitor}, did not improve by at least"
+                            f"{self.min_change} for the last {self.patience} epochs.")
+                break
+
         time_elapsed = time.time() - since
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
             time_elapsed // 60, time_elapsed % 60))
 
         model_tracker.save_best_models(self.logger.get_run_id())
 
-        self.logger.print_model_summary(model_tracker.best_average_epoch,
-                                        model_tracker.best_average_metrics,
-                                        model_tracker.best_minimum_epoch,
-                                        model_tracker.best_minimum_metrics,
-                                        model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-                                        model_tracker.best_metrics_per_class if self.multi_label_classification else None)
+        self.logger.print_model_summary(
+            model_tracker.best_average_epoch,
+            model_tracker.best_average_metrics,
+            model_tracker.best_minimum_epoch,
+            model_tracker.best_minimum_metrics,
+            model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+            model_tracker.best_metrics_per_class if self.multi_label_classification else None
+        )
 
         if self.is_pipeline_run:
-            self.logger.log_metrics_in_kubeflow(model_tracker.best_average_metrics,
-                                                model_tracker.best_minimum_metrics,
-                                                model_tracker.best_metrics_per_class if self.multi_label_classification else None)
+            self.logger.log_metrics_in_kubeflow(
+                model_tracker.best_average_metrics,
+                model_tracker.best_minimum_metrics,
+                model_tracker.best_metrics_per_class if self.multi_label_classification else None
+            )
 
         self.logger.finish()
 
