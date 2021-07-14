@@ -238,15 +238,20 @@ class SpectrogramCreator:
             total=len(audio_file_names), desc="Create spectrograms for {}".format(desc), position=0,
             is_pipeline_run=self.spectrogram_path.is_pipeline_run)
 
-        pool = ThreadPool(spectrogram_creation_threads)
-
         def spectrogram_task(file_name):
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
                 self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
 
-        for _ in pool.imap_unordered(lambda file_name: spectrogram_task(file_name), audio_file_names):
-            progress_bar.update(1)
+        if self.spectrogram_path.is_pipeline_run or spectrogram_creation_threads <= 1:
+            for file_name in audio_file_names:
+                spectrogram_task(file_name)
+                progress_bar.update(1)
+        else:
+            pool = ThreadPool(spectrogram_creation_threads)
+
+            for _ in pool.imap_unordered(lambda file_name: spectrogram_task(file_name), audio_file_names):
+                progress_bar.update(1)
 
     def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, signal_threshold: int = 3, noise_threshold: int = 1, clear_spectrogram_cache: bool = False, ):
         if splits is None:
