@@ -1,5 +1,6 @@
 import logging
 import shutil
+from typing import List
 
 from data_preparation import filepaths, downloader, spectrograms
 from training import model_evaluator, training
@@ -8,7 +9,7 @@ from general.logging import logger
 
 
 class PipelineSteps:
-    def download_xeno_canto_data(self, gcs_bucket: str, output_path: str, species_list: list[str], verbose_logging: bool, **kwargs):
+    def download_xeno_canto_data(self, gcs_bucket: str, output_path: str, species_list: List[str], verbose_logging: bool, **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
         path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
