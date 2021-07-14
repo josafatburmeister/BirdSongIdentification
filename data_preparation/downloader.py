@@ -381,7 +381,7 @@ class XenoCantoDownloader:
         self.download_audio_files_by_id(
             self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
 
-    def download_nips4bplus_dataset(self, species_list: Optional[List[str]] = None):
+    def download_nips4bplus_dataset(self, species_list: List[str]):
         nips4bplus_annotations_url = "https://ndownloader.figshare.com/files/16334603"
         nips4bplus_annotations_folder_name = "temporal_annotations_nips4b"
         nips4b_audio_files_url = "http://sabiod.univ-tln.fr/nips4b/media/birds/NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV.tar.gz"
@@ -409,11 +409,11 @@ class XenoCantoDownloader:
         nips4bplus_selected_labels = []
         nips4bplus_labels = []
 
+        species_names = [species_name for species_name, sound_types in XenoCantoDownloader.parse_species_list(species_list)]
+        selected_species = '|'.join(species_names)
+
         for file in os.listdir(extracted_nips_annotations_folder):
             label_file_path = os.path.join(extracted_nips_annotations_folder, file)
-            if species_list:
-                species_names = list(XenoCantoDownloader.parse_species_list(species_list).keys())
-                selected_species = '|'.join(species_names)
 
             def map_class_names(row):
                 if row["label"] == "Unknown":
@@ -423,10 +423,12 @@ class XenoCantoDownloader:
 
                 class_name = nips4b_species_list[nips4b_species_list["nips4b_class_name"] == row["label"]]
 
-                if len(class_name) != 1:
+                if class_name["Scientific_name"].item() not in species_names:
+                    return "noise"
+                elif len(class_name) != 1:
                     raise NameError(f"No unique label found for class {row['label']}")
                 else:
-                    return class_name["class name"].item()
+                    return class_name["class name"].item().replace()
 
             if file.endswith(".csv"):
                 try:
@@ -441,21 +443,24 @@ class XenoCantoDownloader:
                 labels["start"] = labels["start"] * 1000
                 labels["end"] = labels["start"] + labels["duration"] * 1000
 
-                if species_list and labels["label"].str.contains(selected_species).all():
+                contains_only_selected_species = True
+                for idx, label in labels.iterrows():
+                    class_name = nips4b_species_list[nips4b_species_list["class name"] == label["label"]]
+
+                    if class_name["Scientific name"].item() in species_names:
+                        contains_only_selected_species = False
+                if contains_only_selected_species:
                     nips4bplus_selected_labels.append(labels)
-                if species_list:
-                    labels["label"] = labels["label"].apply(
-                        lambda label: "noise" if label not in species_list else label)
 
                 labels = labels[["id", "file_name", "start", "end", "label"]]
 
                 self.append = nips4bplus_labels.append(labels)
 
         nips4bplus_labels = pd.concat(nips4bplus_labels)
-
         nips4bplus_labels.to_csv(os.path.join(nips4bplus_folder_all, "nips4bplus_all.csv"))
-        nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
-        nips4bplus_selected_labels.to_csv(os.path.join(nips4bplus_folder, "nips4bplus.csv"))
+        if len(nips4bplus_selected_labels) > 0:
+            nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
+            nips4bplus_selected_labels.to_csv(os.path.join(nips4bplus_folder, "nips4bplus.csv"))
 
         os.remove(nips4bplus_annotations_path)
         shutil.rmtree(extracted_nips_annotations_folder)
@@ -495,7 +500,7 @@ class XenoCantoDownloader:
         species_list["nips4b_class_name"] = species_list["class name"]
 
         species_list["class name"] = species_list.apply(
-            lambda row: row["Scientific_name"] + ", " + row["class name"].split("_")[1] if row[
+            lambda row: row["Scientific_name"].item().replace(" ", "_") + "_" + row["class name"].split("_")[1] if row[
                                                                                                "class name"] != "Empty" else "noise sample",
             axis=1)
 

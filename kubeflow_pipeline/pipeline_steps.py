@@ -8,14 +8,14 @@ from general.logging import logger
 
 
 class PipelineSteps:
-    def download_xeno_canto_data(self, gcs_bucket: str, output_path: str, verbose_logging: bool, **kwargs):
+    def download_xeno_canto_data(self, gcs_bucket: str, output_path: str, species_list: list[str], verbose_logging: bool, **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
         path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
         xc_downloader = downloader.XenoCantoDownloader(path_manager)
-        xc_downloader.create_datasets(**kwargs)
+        xc_downloader.create_datasets(species_list=species_list, **kwargs)
 
-        xc_downloader.download_nips4bplus_dataset()
+        xc_downloader.download_nips4bplus_dataset(species_list=species_list)
 
     def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, signal_threshold=3, noise_threshold=1,
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):
