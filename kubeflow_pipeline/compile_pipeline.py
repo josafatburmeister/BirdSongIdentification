@@ -18,7 +18,7 @@ def compile_pipeline():
                  species_list=None,
                  use_nips4b_species_list=True,
                  maximum_samples_per_class=100,
-                 test_size=0.35,
+                 test_size=0.4,
                  min_quality="E",
                  sound_types=None,
                  sexes=None,
