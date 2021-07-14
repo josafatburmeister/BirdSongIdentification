@@ -316,7 +316,7 @@ class XenoCantoDownloader:
 
             labels["duration"] = labels["length"].apply(
                 lambda length: datetime.datetime.strptime(length, "%M:%S") if length.count(
-                    ':') == 2 else datetime.datetime.strptime(length, "%H:%M:%S"))
+                    ':') == 1 else datetime.datetime.strptime(length, "%H:%M:%S"))
             labels["start"] = 0
             labels["end"] = labels["duration"].apply(
                 lambda duration: duration.minute * 60 * 1000 + duration.second * 1000)
