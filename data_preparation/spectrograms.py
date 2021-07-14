@@ -115,7 +115,7 @@ class SpectrogramCreator:
 
         return filtered_spectrogram
 
-    def contains_signal(self, spectrogram: numpy.ndarray, signal_threshold: int = 16, noise_threshold: int = 3):
+    def contains_signal(self, spectrogram: numpy.ndarray, signal_threshold: int = 3, noise_threshold: int = 1):
         filtered_spectrogram = self.filter_noise(spectrogram)
 
         # count rows with signal
@@ -127,7 +127,7 @@ class SpectrogramCreator:
 
         rows_with_signal = row_max.sum()
 
-        return rows_with_signal > signal_threshold, rows_with_signal < noise_threshold
+        return rows_with_signal >= signal_threshold, rows_with_signal < noise_threshold
 
     def save_spectrogram(self, target_file: str, spectrogram: numpy.ndarray):
         # scale amplitude values to range [0, 255]
@@ -182,7 +182,7 @@ class SpectrogramCreator:
 
         return []
 
-    def create_spectrograms_from_file(self, audio_file: str, target_dir: str):
+    def create_spectrograms_from_file(self, audio_file: str, target_dir: str, signal_threshold: int, noise_threshold: int):
         cached_spectrograms_for_current_file = self.get_cached_spectrograms(
             audio_file)
         if len(cached_spectrograms_for_current_file) > 0:
@@ -221,7 +221,7 @@ class SpectrogramCreator:
                     target_dir, "{}-{}.png".format(file_name, i))
 
                 contains_signal, is_noise = self.contains_signal(
-                    mel_spectrogram_db)
+                    mel_spectrogram_db, signal_threshold=signal_threshold, noise_threshold=noise_threshold)
 
                 if contains_signal:
                     self.save_spectrogram(target_file, mel_spectrogram_db)
@@ -230,7 +230,7 @@ class SpectrogramCreator:
                         target_dir, "{}-{}_noise.png".format(file_name, i))
                     self.save_spectrogram(target_file, mel_spectrogram_db)
 
-    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, desc: Optional[str] = None, spectrogram_creation_threads=25):
+    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int, desc: Optional[str] = None, spectrogram_creation_threads=25):
         # clean up target dir
         PathManager.empty_dir(target_dir)
 
@@ -243,12 +243,12 @@ class SpectrogramCreator:
         def spectrogram_task(file_name):
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
-                self.create_spectrograms_from_file(audio_path, target_dir)
+                self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
 
         jobs = [joblib.delayed(spectrogram_task)(file_name) for file_name in progress_bar.iterable()]
         joblib.Parallel(n_jobs=spectrogram_creation_threads, verbose=False)(jobs)
 
-    def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, clear_spectrogram_cache: bool = False):
+    def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, signal_threshold: int = 3, noise_threshold: int = 1, clear_spectrogram_cache: bool = False, ):
         if splits is None:
             splits = ["train", "val", "test", "nips4bplus", "nips4bplus_all"]
 
@@ -262,7 +262,7 @@ class SpectrogramCreator:
             audio_label_file = self.audio_path.audio_label_file(split)
             PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
-                audio_dir, spectrogram_dir, f"{split} set")
+                audio_dir, spectrogram_dir, signal_threshold, noise_threshold, f"{split} set")
             self.create_spectrogram_labels(split)
 
     def create_spectrogram_labels(self, split: str):

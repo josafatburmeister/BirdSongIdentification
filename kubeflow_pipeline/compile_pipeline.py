@@ -29,6 +29,8 @@ def compile_pipeline():
                  clear_label_cache=False,
                  chunk_length=1000,
                  include_noise_samples=True,
+                 signal_threshold=3,
+                 noise_threshold=1,
                  clear_spectrogram_cache=False,
                  architecture="resnet18",
                  batch_size=32,
@@ -70,6 +72,8 @@ def compile_pipeline():
             gcs_bucket=gcs_bucket,
             chunk_length=chunk_length,
             include_noise_samples=include_noise_samples,
+            signal_threshold=signal_threshold,
+            noise_threshold=noise_threshold,
             clear_spectrogram_cache=clear_spectrogram_cache,
             verbose_logging=verbose_logging
         )

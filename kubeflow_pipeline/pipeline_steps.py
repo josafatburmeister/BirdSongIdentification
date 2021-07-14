@@ -15,7 +15,9 @@ class PipelineSteps:
         xc_downloader = downloader.XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(**kwargs)
 
-    def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int,
+        xc_downloader.download_nips4bplus_dataset()
+
+    def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, signal_threshold=3, noise_threshold=1,
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
@@ -27,7 +29,10 @@ class PipelineSteps:
         shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())
 
         spectrogram_creator.create_spectrograms_for_splits(
-            splits=["train", "val", "test"], clear_spectrogram_cache=clear_spectrogram_cache)
+            splits=["train", "val", "test"], signal_threshold=signal_threshold, noise_threshold=noise_threshold, clear_spectrogram_cache=clear_spectrogram_cache)
+
+        spectrogram_creator.create_spectrograms_for_splits(
+            splits=["nips4bplus", "nips4bplus_all"], signal_threshold=0, noise_threshold=0, clear_spectrogram_cache=clear_spectrogram_cache)
 
         # clean up
         filepaths.PathManager.empty_dir(input_path)
