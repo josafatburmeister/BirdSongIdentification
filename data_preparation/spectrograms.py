@@ -1,4 +1,3 @@
-import joblib
 import librosa
 import math
 from multiprocessing.pool import ThreadPool
@@ -173,7 +172,6 @@ class SpectrogramCreator:
 
     def get_cached_spectrograms(self, audio_file: str):
         audio_file_id = os.path.splitext(os.path.basename(audio_file))[0]
-        logger.info("audio_file_id %s", audio_file_id)
 
         if self.include_noise_samples and audio_file_id in self.cached_spectrograms["with noise"]:
             return self.cached_spectrograms["with noise"][audio_file_id]
@@ -237,16 +235,18 @@ class SpectrogramCreator:
         audio_file_names = os.listdir(audio_dir)
 
         progress_bar = ProgressBar(
-            sequence=audio_file_names, desc="Create spectrograms for {}".format(desc), position=0,
+            total=len(audio_file_names), desc="Create spectrograms for {}".format(desc), position=0,
             is_pipeline_run=self.spectrogram_path.is_pipeline_run)
+
+        pool = ThreadPool(spectrogram_creation_threads)
 
         def spectrogram_task(file_name):
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
                 self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
 
-        jobs = [joblib.delayed(spectrogram_task)(file_name) for file_name in progress_bar.iterable()]
-        joblib.Parallel(n_jobs=spectrogram_creation_threads, verbose=False)(jobs)
+        for _ in pool.imap_unordered(lambda file_name: spectrogram_task(file_name), audio_file_names):
+            progress_bar.update(1)
 
     def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, signal_threshold: int = 3, noise_threshold: int = 1, clear_spectrogram_cache: bool = False, ):
         if splits is None:
