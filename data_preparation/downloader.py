@@ -439,13 +439,14 @@ class XenoCantoDownloader:
                 labels["file_name"] = f"nips4b_birds_trainfile{file_id}.wav"
                 labels["start"] = labels["start"] * 1000
                 labels["end"] = labels["start"] + labels["duration"] * 1000
-                labels = labels[["id", "file_name", "start", "end", "label"]]
 
                 if species_list and labels["label"].str.contains(selected_species).all():
                     nips4bplus_selected_labels.append(labels)
                 if species_list:
                     labels["label"] = labels["label"].apply(
                         lambda label: "noise" if label not in species_list else label)
+
+                labels = labels[["id", "file_name", "start", "end", "label"]]
 
                 self.append = nips4bplus_labels.append(labels)
 
