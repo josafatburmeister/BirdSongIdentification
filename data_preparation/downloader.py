@@ -409,7 +409,8 @@ class XenoCantoDownloader:
         nips4bplus_selected_labels = []
         nips4bplus_labels = []
 
-        species_names = [species_name for species_name, sound_types in XenoCantoDownloader.parse_species_list(species_list)]
+        species_names = [species_name for species_name, sound_types in
+                         XenoCantoDownloader.parse_species_list(species_list)]
         selected_species = '|'.join(species_names)
 
         for file in os.listdir(extracted_nips_annotations_folder):
@@ -419,16 +420,17 @@ class XenoCantoDownloader:
                 if row["label"] == "Unknown":
                     return "noise"
                 elif row["label"] == "Human":
-                    return "human"
+                    return "noise"
 
                 class_name = nips4b_species_list[nips4b_species_list["nips4b_class_name"] == row["label"]]
 
+                if len(class_name) != 1:
+                    raise NameError(f"No unique label found for class {row['label']}")
+
                 if class_name["Scientific_name"].item() not in species_names:
                     return "noise"
-                elif len(class_name) != 1:
-                    raise NameError(f"No unique label found for class {row['label']}")
                 else:
-                    return class_name["class name"].item().replace()
+                    return class_name["class name"].item()
 
             if file.endswith(".csv"):
                 try:
@@ -443,13 +445,13 @@ class XenoCantoDownloader:
                 labels["start"] = labels["start"] * 1000
                 labels["end"] = labels["start"] + labels["duration"] * 1000
 
-                contains_only_selected_species = True
+                contains_selected_species = False
                 for idx, label in labels.iterrows():
                     class_name = nips4b_species_list[nips4b_species_list["class name"] == label["label"]]
 
-                    if class_name["Scientific name"].item() in species_names:
-                        contains_only_selected_species = False
-                if contains_only_selected_species:
+                    if label["label"] != "noise" and class_name["Scientific_name"].item() in species_names:
+                        contains_selected_species = True
+                if contains_selected_species:
                     nips4bplus_selected_labels.append(labels)
 
                 labels = labels[["id", "file_name", "start", "end", "label"]]
@@ -500,8 +502,8 @@ class XenoCantoDownloader:
         species_list["nips4b_class_name"] = species_list["class name"]
 
         species_list["class name"] = species_list.apply(
-            lambda row: row["Scientific_name"].item().replace(" ", "_") + "_" + row["class name"].split("_")[1] if row[
-                                                                                               "class name"] != "Empty" else "noise sample",
+            lambda row: row["Scientific_name"].replace(" ", "_") + "_" + row["class name"].split("_")[1] if row[
+                                                                                                                "class name"] != "Empty" else "noise sample",
             axis=1)
 
         species_list.to_csv(nips4bplus_species_list)
