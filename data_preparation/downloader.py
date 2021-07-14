@@ -73,7 +73,7 @@ class XenoCantoDownloader:
         return list(species[column_name])
 
     @staticmethod
-    def train_test_split(labels, test_size: float = 0.35, random_state: int = 12):
+    def train_test_split(labels, test_size: float = 0.4, random_state: int = 12):
         train_labels, test_labels = [], []
         try:
             train_labels, test_labels = train_test_split(
@@ -194,7 +194,7 @@ class XenoCantoDownloader:
                         species_list: Optional[List[str]] = None,
                         use_nips4b_species_list: bool = True,
                         maximum_samples_per_class: int = 100,
-                        test_size: float = 0.35,
+                        test_size: float = 0.4,
                         min_quality: str = "E",
                         sound_types: Optional[List[str]] = None,
                         sexes: Optional[List[str]] = None,
@@ -332,7 +332,7 @@ class XenoCantoDownloader:
                 labels, test_size=test_size, random_state=random_state)
 
             val_labels, test_labels = self.train_test_split(
-                test_labels, test_size=test_size, random_state=random_state)
+                test_labels, test_size=0.5, random_state=random_state)
 
             if len(train_labels) == 0:
                 logger.info("No training samples for class", species_name)

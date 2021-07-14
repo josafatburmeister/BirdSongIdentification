@@ -28,8 +28,8 @@ inputs:
   - {
     name: Test Size,
     type: Float,
-    default: "0.35",
-    description: "Percentage of samples that should be used for model testing / validation",
+    default: "0.4",
+    description: "Percentage of samples that should be used for model testing and validation (validation and test set get one half of the samples each)",
   }
   - {
     name: Min Quality,
