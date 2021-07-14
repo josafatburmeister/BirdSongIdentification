@@ -469,8 +469,8 @@ class XenoCantoDownloader:
 
         for split in ["train", "test"]:
             folder_path = os.path.join(extracted_nips_audio_folder, split)
-            shutil.copytree(folder_path, nips4bplus_audio_folder, dirs_exist_ok=True)
-            shutil.copytree(folder_path, nips4bplus_all_audio_folder, dirs_exist_ok=True)
+            PathManager.copytree(folder_path, nips4bplus_audio_folder)
+            PathManager.copytree(folder_path, nips4bplus_all_audio_folder)
 
         os.remove(nips4bplus_audio_path)
         shutil.rmtree(extracted_nips_audio_folder)

@@ -1,11 +1,23 @@
 import os
 import subprocess
+import shutil
 
 from general.logging import logger
 from kubeflow import fairing
 
 
 class PathManager:
+    @staticmethod
+    def copytree(src, dest, symlinks=False, ignore=None):
+        # see https://stackoverflow.com/a/12514470
+        for item in os.listdir(src):
+            source_file = os.path.join(src, item)
+            dest_file = os.path.join(dest, item)
+            if os.path.isdir(source_file):
+                shutil.copytree(source_file, dest_file, symlinks, ignore)
+            else:
+                shutil.copy2(source_file, dest_file)
+
     @staticmethod
     def ensure_dir(dir_path: str):
         if not os.path.exists(dir_path):
