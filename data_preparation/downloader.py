@@ -412,7 +412,8 @@ class XenoCantoDownloader:
         for file in os.listdir(extracted_nips_annotations_folder):
             label_file_path = os.path.join(extracted_nips_annotations_folder, file)
             if species_list:
-                selected_species = '|'.join(species_list)
+                species_names = list(XenoCantoDownloader.parse_species_list(species_list).keys())
+                selected_species = '|'.join(species_names)
 
             def map_class_names(row):
                 if row["label"] == "Unknown":
