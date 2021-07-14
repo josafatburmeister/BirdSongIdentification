@@ -335,16 +335,16 @@ class XenoCantoDownloader:
                 test_labels, test_size=0.5, random_state=random_state)
 
             if len(train_labels) == 0:
-                logger.info("No training samples for class", species_name)
+                logger.info("No training samples for class %s", species_name)
             else:
                 train_frames.append(train_labels)
 
             if len(val_labels) == 0:
-                logger.info("No validation samples for class", species_name)
+                logger.info("No validation samples for class %s", species_name)
             else:
                 val_frames.append(val_labels)
             if len(test_labels) == 0:
-                logger.info("No test samples for class", species_name)
+                logger.info("No test samples for class %s", species_name)
             else:
                 test_frames.append(test_labels)
 
