@@ -201,6 +201,7 @@ class XenoCantoDownloader:
                         life_stages: Optional[List[str]] = None,
                         exclude_special_cases: bool = True,
                         maximum_number_of_background_species: Optional[int] = None,
+                        maximum_recording_length: int = None,
                         clear_audio_cache: bool = False,
                         clear_label_cache: bool = False,
                         random_state: int = 12):
@@ -317,9 +318,13 @@ class XenoCantoDownloader:
             labels["duration"] = labels["length"].apply(
                 lambda length: datetime.datetime.strptime(length, "%M:%S") if length.count(
                     ':') == 1 else datetime.datetime.strptime(length, "%H:%M:%S"))
+
             labels["start"] = 0
             labels["end"] = labels["duration"].apply(
-                lambda duration: duration.minute * 60 * 1000 + duration.second * 1000)
+                lambda duration: duration.hour * 60 * 60 * 1000 + duration.minute * 60 * 1000 + duration.second * 1000)
+            print("maximum_recording_length", maximum_recording_length)
+            if maximum_recording_length:
+                labels = labels[labels["end"] < maximum_recording_length * 1000]
 
             # select relevant columns
             labels = labels[["id", "file_name", "start", "end", "label", "sound_type"]]
@@ -328,8 +333,10 @@ class XenoCantoDownloader:
                 # obtain random subset if maximum_samples_per_class is set
                 if len(labels[labels["sound_type"] == sound_type]) > maximum_samples_per_class:
                     label_subset, _ = train_test_split(
-                        labels[labels["sound_type"] == sound_type], train_size=maximum_samples_per_class, random_state=random_state)
-
+                        labels[labels["sound_type"] == sound_type], train_size=maximum_samples_per_class,
+                        random_state=random_state)
+                else:
+                    label_subset = labels
 
                 # create train, test and val splits
                 train_labels, test_labels = self.train_test_split(

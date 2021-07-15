@@ -26,6 +26,12 @@ inputs:
     description: "Maximum number of samples per class",
   }
   - {
+    name: Maximum Recording Length,
+    type: Integer,
+    default: None,
+    description: "Maximum length of audio samples to include in the dataset in seconds",
+  }
+  - {
     name: Test Size,
     type: Float,
     default: "0.4",
@@ -105,6 +111,8 @@ implementation:
           { inputValue: Use NIPS4B Species List },
           --maximum_samples_per_class,
           { inputValue: Maximum Samples Per Class },
+          --maximum_recording_length,
+          { inputValue: Maximum Recording Length },
           --test_size,
           { inputValue: Test Size },
           --min_quality,

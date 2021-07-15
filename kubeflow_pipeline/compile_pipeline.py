@@ -25,6 +25,7 @@ def compile_pipeline():
                  life_stages=None,
                  exclude_special_cases=True,
                  maximum_number_of_background_species=None,
+                 maximum_recording_length=None,
                  clear_audio_cache=False,
                  clear_label_cache=False,
                  chunk_length=1000,
@@ -63,6 +64,7 @@ def compile_pipeline():
             life_stages=life_stages,
             exclude_special_cases=exclude_special_cases,
             maximum_number_of_background_species=maximum_number_of_background_species,
+            maximum_recording_length=maximum_recording_length,
             clear_audio_cache=clear_audio_cache,
             clear_label_cache=clear_label_cache,
             verbose_logging=verbose_logging
