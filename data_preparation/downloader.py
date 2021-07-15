@@ -322,7 +322,6 @@ class XenoCantoDownloader:
             labels["start"] = 0
             labels["end"] = labels["duration"].apply(
                 lambda duration: duration.hour * 60 * 60 * 1000 + duration.minute * 60 * 1000 + duration.second * 1000)
-            print("maximum_recording_length", maximum_recording_length)
             if maximum_recording_length:
                 labels = labels[labels["end"] < maximum_recording_length * 1000]
 
