@@ -47,6 +47,10 @@ class XenoCantoSpectrograms(Dataset):
             logger.info("Label distribution of %s set", split)
             for class_name in self.class_names():
                 logger.info("%s : %i", class_name, self.labels[class_name].sum())
+            if self.multi_label_classification:
+                number_noise_samples = len(self.labels[self.labels[self.class_names()].eq(0).all(axis = 1)])
+                logger.info("noise : %i", number_noise_samples)
+            logger.info("Total: %i", len(self.labels))
             logger.info("\n")
 
     def create_class_indices(self):
