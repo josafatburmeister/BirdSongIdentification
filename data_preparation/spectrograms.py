@@ -302,13 +302,15 @@ class SpectrogramCreator:
                 found_match = False
 
                 for idx, label in matching_labels.iterrows():
-                    if start <= label["start"] and label["start"] < end or start <= label["end"] and label["end"] < end:
+                    if start <= label["start"] and label["start"] < end or start <= label["end"] and label["end"] < end\
+                            or label["start"] <= start and end <= label["end"]:
                         final_label[label["label"]] = 1
                         final_label["id"] = file_id
                         final_label["file_name"] = file
                         found_match = True
 
                 if not found_match:
+                    assert split not in ["train", "val", "test"]
                     final_label["noise"] = 1
                     final_label["id"] = file_id
                     final_label["file_name"] = file
