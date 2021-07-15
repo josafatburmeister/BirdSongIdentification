@@ -14,7 +14,7 @@ from general.logging import logger
 
 class XenoCantoSpectrograms(Dataset):
     def __init__(self, path_manager: PathManager, chunk_length: int = 1000, include_noise_samples: bool = True,
-                 split: str = "train", multi_label_classification: bool = False):
+                 split: str = "train", multi_label_classification: bool = False, undersample_noise_samples: bool = True):
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -42,14 +42,24 @@ class XenoCantoSpectrograms(Dataset):
             if class_name not in self.labels.columns:
                 self.labels[class_name] = 0
 
+        max_samples_per_class = 0
         if logger:
             logger.info("\n")
             logger.info("Label distribution of %s set", split)
             for class_name in self.class_names():
-                logger.info("%s : %i", class_name, self.labels[class_name].sum())
-            if self.multi_label_classification:
-                number_noise_samples = len(self.labels[self.labels[self.class_names()].eq(0).all(axis = 1)])
-                logger.info("noise : %i", number_noise_samples)
+                class_samples = self.labels[class_name].sum()
+                max_samples_per_class = max(max_samples_per_class, class_samples)
+                logger.info("%s : %i", class_name, class_samples)
+
+        if undersample_noise_samples:
+            noise_samples_to_include = min(int(max_samples_per_class), len(self.labels[self.labels["noise"] == 1]))
+            noise_samples = self.labels[self.labels["noise"] == 1].sample(n=noise_samples_to_include, random_state=12)
+            species_samples = self.labels[self.labels["noise"] != 1]
+            self.labels = pd.concat([noise_samples, species_samples])
+
+        if logger:
+            number_noise_samples = len(self.labels[self.labels["noise"] == 1])
+            logger.info("noise : %i", number_noise_samples)
             logger.info("Total: %i", len(self.labels))
             logger.info("\n")
 
