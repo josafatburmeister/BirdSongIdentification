@@ -4,3 +4,4 @@ kubeflow-fairing==1.0.2
 msrestazure==0.6.4
 tornado==5.1
 verboselogs==1.7
+wandb==0.10.33
