@@ -12,7 +12,6 @@ from general.logging import logger
 from training import dataset, metrics, metric_logging, model_tracker as tracker
 
 
-
 class ModelTrainer:
     @staticmethod
     def setup_device() -> torch.device:
@@ -42,6 +41,7 @@ class ModelTrainer:
                  monitor="f1_score",
                  patience=0,
                  min_change=0.0,
+                 undersample_noise_samples=True,
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name=""):
@@ -63,6 +63,7 @@ class ModelTrainer:
         self.num_workers = number_workers
         self.optimizer = optimizer
         self.track_metrics = track_metrics
+        self.undersample_noise_samples = undersample_noise_samples
 
         # early stopping parameters
         self.monitor = monitor
@@ -92,7 +93,8 @@ class ModelTrainer:
             datasets[split] = dataset.XenoCantoSpectrograms(
                 self.spectrogram_path_manager, chunk_length=self.chunk_length,
                 include_noise_samples=self.include_noise_samples, split=split,
-                multi_label_classification=self.multi_label_classification)
+                multi_label_classification=self.multi_label_classification,
+                undersample_noise_samples=self.undersample_noise_samples)
 
             shuffle = (split == "train")
             dataloaders[split] = DataLoader(

@@ -103,6 +103,12 @@ inputs:
       description: "Whether the run metrics should be tracked in Weights and Biases",
     }
   - {
+      name: Undersample Noise Samples,
+      type: Boolean,
+      default: True,
+      description: "Whether the number of noise samples should be reduced to the maximum number of samples per species",
+    }
+  - {
       name: WandB Entity Name,
       type: String,
       description: "Name of Weights and Biases entity that should be used to track the run metrics (only used if 'Track Metrics' is set to true)",
@@ -163,6 +169,8 @@ implementation:
         { inputValue: Number Workers},
         --track_metrics,
         { inputValue: Track Metrics },
+        --undersample_noise_samples,
+        { inputValue: Undersample Noise Samples },
         --wandb_entity_name,
         { inputValue: WandB Entity Name },
         --wandb_key,

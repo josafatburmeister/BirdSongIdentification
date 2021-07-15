@@ -22,6 +22,7 @@ class ModelRunner:
                  multi_label_classification_threshold: float = 0.5,
                  number_workers=0,
                  track_metrics=True,
+                 undersample_noise_samples=True,
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name="",
@@ -38,6 +39,7 @@ class ModelRunner:
         self.multi_label_classification_threshold = multi_label_classification_threshold
         self.number_workers = number_workers
         self.track_metrics = track_metrics
+        self.undersample_noise_samples=undersample_noise_samples
         self.wandb_entity_name = wandb_entity_name
         self.wandb_key = wandb_key
         self.wandb_project_name = wandb_project_name
@@ -59,7 +61,7 @@ class ModelRunner:
             datasets[split] = dataset.XenoCantoSpectrograms(
                 self.spectrogram_path_manager, chunk_length=self.chunk_length,
                 include_noise_samples=self.include_noise_samples, split=split,
-                multi_label_classification=self.multi_label_classification)
+                multi_label_classification=self.multi_label_classification, undersample_noise_samples=self.undersample_noise_samples)
 
             shuffle = (split == "train")
             dataloaders[split] = DataLoader(
