@@ -228,7 +228,7 @@ class SpectrogramCreator:
                         target_dir, "{}-{}_noise.png".format(file_name, i))
                     self.save_spectrogram(target_file, mel_spectrogram_db)
 
-    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int, desc: Optional[str] = None, spectrogram_creation_threads=4):
+    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int, desc: Optional[str] = None, spectrogram_creation_threads=1):
         # clean up target dir
         PathManager.empty_dir(target_dir)
 
