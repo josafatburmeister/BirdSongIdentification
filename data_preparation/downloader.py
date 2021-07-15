@@ -327,13 +327,13 @@ class XenoCantoDownloader:
             for sound_type in selected_sound_types:
                 # obtain random subset if maximum_samples_per_class is set
                 if len(labels[labels["sound_type"] == sound_type]) > maximum_samples_per_class:
-                    labels, _ = train_test_split(
+                    label_subset, _ = train_test_split(
                         labels[labels["sound_type"] == sound_type], train_size=maximum_samples_per_class, random_state=random_state)
 
 
                 # create train, test and val splits
                 train_labels, test_labels = self.train_test_split(
-                    labels, test_size=test_size, random_state=random_state)
+                    label_subset, test_size=test_size, random_state=random_state)
 
                 val_labels, test_labels = self.train_test_split(
                     test_labels, test_size=0.5, random_state=random_state)
