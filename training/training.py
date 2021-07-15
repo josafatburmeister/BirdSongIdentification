@@ -155,6 +155,7 @@ class ModelTrainer:
 
         early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
 
+        logger.info("\n")
         for epoch in range(self.num_epochs):
             logger.info("Epoch %i/%i", epoch + 1, self.num_epochs)
             logger.info("----------")
