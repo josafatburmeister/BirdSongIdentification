@@ -322,33 +322,39 @@ class XenoCantoDownloader:
                 lambda duration: duration.minute * 60 * 1000 + duration.second * 1000)
 
             # select relevant columns
-            labels = labels[["id", "file_name", "start", "end", "label"]]
+            labels = labels[["id", "file_name", "start", "end", "label", "sound_type"]]
 
-            # obtain random subset if maximum_samples_per_class is set
-            if len(labels) > maximum_samples_per_class:
-                labels, _ = train_test_split(
-                    labels, train_size=maximum_samples_per_class, random_state=random_state)
+            for sound_type in selected_sound_types:
+                # obtain random subset if maximum_samples_per_class is set
+                if len(labels[labels["sound_type"] == sound_type]) > maximum_samples_per_class:
+                    labels, _ = train_test_split(
+                        labels[labels["sound_type"] == sound_type], train_size=maximum_samples_per_class, random_state=random_state)
 
-            # create train, test and val splits
-            train_labels, test_labels = self.train_test_split(
-                labels, test_size=test_size, random_state=random_state)
 
-            val_labels, test_labels = self.train_test_split(
-                test_labels, test_size=0.5, random_state=random_state)
+                # create train, test and val splits
+                train_labels, test_labels = self.train_test_split(
+                    labels, test_size=test_size, random_state=random_state)
 
-            if len(train_labels) == 0:
-                logger.info("No training samples for class %s", species_name)
-            else:
-                train_frames.append(train_labels)
+                val_labels, test_labels = self.train_test_split(
+                    test_labels, test_size=0.5, random_state=random_state)
 
-            if len(val_labels) == 0:
-                logger.info("No validation samples for class %s", species_name)
-            else:
-                val_frames.append(val_labels)
-            if len(test_labels) == 0:
-                logger.info("No test samples for class %s", species_name)
-            else:
-                test_frames.append(test_labels)
+                logger.info("%d train samples for %s_%s", len(train_labels), species_name, sound_type)
+                logger.info("%d val samples for %s_%s", len(val_labels), species_name, sound_type)
+                logger.info("%d test samples for %s_%s", len(test_labels), species_name, sound_type)
+
+                if len(train_labels) == 0:
+                    logger.info("No training samples for class %s", species_name)
+                else:
+                    train_frames.append(train_labels)
+
+                if len(val_labels) == 0:
+                    logger.info("No validation samples for class %s", species_name)
+                else:
+                    val_frames.append(val_labels)
+                if len(test_labels) == 0:
+                    logger.info("No test samples for class %s", species_name)
+                else:
+                    test_frames.append(test_labels)
 
         # save label files
         if len(train_frames) == 0:
