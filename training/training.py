@@ -17,7 +17,7 @@ class ModelTrainer:
     @staticmethod
     def setup_device() -> torch.device:
         device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
-        logger.info('Device set to:', device)
+        logger.info('Device set to: %s', device)
         return torch.device(device)
 
     def __init__(self,
