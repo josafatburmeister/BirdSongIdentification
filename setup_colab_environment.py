@@ -17,7 +17,7 @@ def setup_colab_environment(data_path: str, branch: str = "main"):
 
     try:
         subprocess.run(["pip3", "install", "-r", "requirements-colab.txt"], cwd=git_repo_dir, check=True)
-        subprocess.run(["pip3", "install", "-r", "google-cloud-logging== 2.5.0"], cwd=git_repo_dir, check=True)
+        subprocess.run(["pip3", "install", "google-cloud-logging==2.5.0"], cwd=git_repo_dir, check=True)
     except subprocess.CalledProcessError:
         raise NameError("Could not install requirements")
 
