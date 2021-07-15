@@ -1,3 +1,5 @@
+google-cloud-core==1.0.3
+google-cloud-logging==2.5.0
 kubeflow-fairing==1.0.2
 msrestazure==0.6.4
 tornado==5.1
