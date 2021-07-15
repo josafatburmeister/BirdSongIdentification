@@ -49,7 +49,5 @@ if __name__ == '__main__':
 
     if not args.branch:
         args.branch = "main"
-    if not args.imagesize:
-        args.imagesize = 300
 
     setup_colab_environment(args.data_path, args.branch)
