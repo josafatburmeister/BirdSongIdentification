@@ -27,13 +27,12 @@ class ModelEvaluator(model_runner.ModelRunner):
         self.dataloaders = dataloaders
         num_classes = self.datasets[split].num_classes()
 
-        self.experiment_name=model_name
         device = model_runner.ModelRunner.setup_device()
         model = self.setup_model(model, device, num_classes)
         model.to(device)
         model.eval()
 
-        metric_logger = super().setup_metric_logger()
+        metric_logger = super().setup_metric_logger({"experiment_name": model_name, "split": split})
 
         model_metrics = metrics.Metrics(num_classes=num_classes,
                                         multi_label=self.multi_label_classification)
