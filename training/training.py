@@ -23,6 +23,7 @@ class ModelTrainer:
                  experiment_name: str,
                  batch_size: int = 100,
                  include_noise_samples=True,
+                 is_hyperparameter_tuning=False,
                  layers_to_unfreeze=None,
                  learning_rate=0.001,
                  learning_rate_scheduler=None,
@@ -49,6 +50,7 @@ class ModelTrainer:
         self.chunk_length = chunk_length
         self.experiment_name = experiment_name
         self.include_noise_samples = include_noise_samples
+        self.is_hyperparameter_tuning = is_hyperparameter_tuning
         self.layers_to_unfreeze = layers_to_unfreeze
         self.learning_rate = learning_rate
         self.learning_rate_scheduler = learning_rate_scheduler
@@ -229,14 +231,15 @@ class ModelTrainer:
 
         model_tracker.save_best_models(self.logger.get_run_id())
 
-        # self.logger.print_model_summary(
-        #     model_tracker.best_average_epoch,
-        #     model_tracker.best_average_metrics,
-        #     model_tracker.best_minimum_epoch,
-        #     model_tracker.best_minimum_metrics,
-        #     model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-        #     model_tracker.best_metrics_per_class if self.multi_label_classification else None
-        # )
+        if not self.is_hyperparameter_tuning:
+            self.logger.print_model_summary(
+                model_tracker.best_average_epoch,
+                model_tracker.best_average_metrics,
+                model_tracker.best_minimum_epoch,
+                model_tracker.best_minimum_metrics,
+                model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+                model_tracker.best_metrics_per_class if self.multi_label_classification else None
+            )
 
         if self.is_pipeline_run:
             self.logger.log_metrics_in_kubeflow(
@@ -256,5 +259,6 @@ class ModelTrainer:
             model.load_state_dict(state_dict)
             best_models_per_class[class_name] = model
 
-        # return best_average_model, best_minimum_model, best_models_per_class
-        return model_tracker.best_average_metrics.f1_score()
+        if self.is_hyperparameter_tuning:
+            return model_tracker.best_average_metrics.f1_score()
+        return best_average_model, best_minimum_model, best_models_per_class
