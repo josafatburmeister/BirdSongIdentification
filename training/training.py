@@ -1,16 +1,13 @@
 import time
 
 import torch
-from torch import nn
 from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
-from torchvision import models
-from sklearn.model_selection import KFold
 from training.early_stopper import EarlyStopper
 
 from general.logging import logger
 from training import dataset, metrics, metric_logging, model_tracker as tracker
-
+from models import densenet, resnet
 
 class ModelTrainer:
     @staticmethod
@@ -37,6 +34,7 @@ class ModelTrainer:
                  number_epochs=25,
                  number_workers=0,
                  optimizer="Adam",
+                 p_dropout=0,
                  track_metrics=True,
                  monitor="f1_score",
                  patience=0,
@@ -62,6 +60,7 @@ class ModelTrainer:
         self.num_epochs = number_epochs
         self.num_workers = number_workers
         self.optimizer = optimizer
+        self.p_dropout = p_dropout
         self.track_metrics = track_metrics
         self.undersample_noise_samples = undersample_noise_samples
 
@@ -104,13 +103,33 @@ class ModelTrainer:
         return datasets, dataloaders
 
     def setup_model(self):
+        logger.info("Setup %s model: ", self.architecture)
         if self.architecture == "resnet18":
-            model = models.resnet18(pretrained=True, progress=(not self.is_pipeline_run))
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, self.num_classes)
-        else:
-            raise ValueError(f"Model architecture is unknown. Given architecture: {self.architecture}")
+            model = resnet.ResnetTransferLearning(architecture="resnet18",
+                                                  num_classes=self.num_classes,
+                                                  layers_to_unfreeze=self.layers_to_unfreeze,
+                                                  logger=logger,
+                                                  p_dropout=self.p_dropout)
+        if self.architecture == "resnet34":
+            model = resnet.ResnetTransferLearning(architecture="resnet34",
+                                                  num_classes=self.num_classes,
+                                                  layers_to_unfreeze=self.layers_to_unfreeze,
+                                                  logger=self.logger.get(),
+                                                  p_dropout=self.p_dropout)
+        elif self.architecture == "resnet50":
+            model = resnet.ResnetTransferLearning(architecture="resnet50",
+                                                  num_classes=self.num_classes,
+                                                  layers_to_unfreeze=self.layers_to_unfreeze,
+                                                  logger=self.logger.get(),
+                                                  p_dropout=self.p_dropout)
 
+        elif self.architecture == "densenet121":
+            model = densenet.DenseNet121TransferLearning(
+                num_classes=self.num_classes, layers_to_unfreeze=self.layers_to_unfreeze,
+                logger=self.logger.get(), p_dropout=self.p_dropout)
+
+        logger.info("\n")
+        model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping()
         return model
 
     def setup_optimization(self, model):
@@ -210,14 +229,14 @@ class ModelTrainer:
 
         model_tracker.save_best_models(self.logger.get_run_id())
 
-        self.logger.print_model_summary(
-            model_tracker.best_average_epoch,
-            model_tracker.best_average_metrics,
-            model_tracker.best_minimum_epoch,
-            model_tracker.best_minimum_metrics,
-            model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-            model_tracker.best_metrics_per_class if self.multi_label_classification else None
-        )
+        # self.logger.print_model_summary(
+        #     model_tracker.best_average_epoch,
+        #     model_tracker.best_average_metrics,
+        #     model_tracker.best_minimum_epoch,
+        #     model_tracker.best_minimum_metrics,
+        #     model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+        #     model_tracker.best_metrics_per_class if self.multi_label_classification else None
+        # )
 
         if self.is_pipeline_run:
             self.logger.log_metrics_in_kubeflow(
@@ -237,4 +256,5 @@ class ModelTrainer:
             model.load_state_dict(state_dict)
             best_models_per_class[class_name] = model
 
-        return best_average_model, best_minimum_model, best_models_per_class
+        # return best_average_model, best_minimum_model, best_models_per_class
+        return model_tracker.best_average_metrics.f1_score()
