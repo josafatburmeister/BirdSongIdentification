@@ -1,10 +1,10 @@
 from torchvision.models import resnet
 from torch.hub import load_state_dict_from_url
-from torch import nn
+from torch import flatten, nn, save, load
 
 
 class ResnetTransferLearning(resnet.ResNet):
-    def __init__(self, architecture: str = "resnet18", num_classes: int = 2, layers_to_unfreeze=None, logger=None):
+    def __init__(self, architecture: str = "resnet18", num_classes: int = 2, layers_to_unfreeze=None, logger=None, p_dropout=0):
         # initialize Resnet with 1000 classes to allow weight loading from pretrained model, in_features=512
         if architecture == "resnet18":
             super().__init__(resnet.BasicBlock, layers=[2, 2, 2, 2], num_classes=1000)
@@ -14,6 +14,8 @@ class ResnetTransferLearning(resnet.ResNet):
             super().__init__(resnet.Bottleneck, layers=[3, 4, 6, 3], num_classes=1000)
         else:
             raise NameError("Invalid architecture")
+
+        self.dropout = nn.Dropout(p=p_dropout)
 
         # load weights of pretrained model
         state_dict = load_state_dict_from_url(
@@ -41,5 +43,24 @@ class ResnetTransferLearning(resnet.ResNet):
         # only return the paramaters that should be re-trained
         return iter([parameter for parameter in params if parameter.requires_grad])
 
-    def load_state_dict(self, state_dict):
-        self.load_state_dict(state_dict)
+    def forward(self, x):
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x = flatten(x, 1)
+
+        if self.training:
+            x = self.dropout(x)
+
+        x = self.fc(x)
+
+        return x
