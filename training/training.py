@@ -37,6 +37,7 @@ class ModelTrainer:
                  number_workers=0,
                  optimizer="Adam",
                  p_dropout=0,
+                 save_all_models=False,
                  track_metrics=True,
                  monitor="f1_score",
                  patience=0,
@@ -65,6 +66,7 @@ class ModelTrainer:
         self.num_workers = number_workers
         self.optimizer = optimizer
         self.p_dropout = p_dropout
+        self.save_all_models = save_all_models
         self.track_metrics = track_metrics
         self.undersample_noise_samples = undersample_noise_samples
 
@@ -223,6 +225,9 @@ class ModelTrainer:
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 
+                if phase == "val" and self.save_all_models:
+                    model_tracker.save_epoch_model(model, epoch, self.logger.get_run_id())
+
             if self.early_stopping and early_stopper.check_early_stopping(model_metrics):
                 logger.info(f"Training stopped early, because {self.monitor}, did not improve by at least"
                             f"{self.min_change} for the last {self.patience} epochs.")
@@ -232,7 +237,8 @@ class ModelTrainer:
         logger.info("Training complete in {:.0f}m {:.0f}s".format(
             time_elapsed // 60, time_elapsed % 60))
 
-        model_tracker.save_best_models(self.logger.get_run_id())
+        if not self.save_all_models:
+            model_tracker.save_best_models(self.logger.get_run_id())
 
         if not self.is_hyperparameter_tuning:
             self.logger.print_model_summary(

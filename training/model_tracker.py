@@ -72,6 +72,14 @@ class ModelTracker:
             gcs_model_path = os.path.join(self.path.gcs_model_dir(), model_path.lstrip(self.path.model_dir()))
             self.path.gcs_copy_file(model_path, gcs_model_path)
 
+    def save_epoch_model(self, model, epoch: int, run_id: str):
+        current_time_str = datetime.now().strftime("%Y%m%d-%H.%M.%S")
+        model_name = f"{self.experiment_name}_{current_time_str}_epoch{str(epoch).zfill(2)}.pt"
+        model_path = os.path.join(self.path.model_dir(), self.experiment_name, model_name)
+        if run_id:
+            model_path.replace(".pt", f"_{run_id}.pt")
+        self.save_model(model, model_path)
+
     def save_best_models(self, run_id: str):
         current_time_str = datetime.now().strftime("%Y%m%d-%H.%M.%S")
         for model, model_name in [(self.best_average_model, f"{self.experiment_name}_avg_model_{current_time_str}.pt"),
