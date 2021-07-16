@@ -269,5 +269,5 @@ class ModelTrainer:
             best_models_per_class[class_name] = model
 
         if self.is_hyperparameter_tuning:
-            return model_tracker.best_average_metrics.f1_score()
+            return torch.mean(model_tracker.best_average_metrics.f1_score()).item()
         return best_average_model, best_minimum_model, best_models_per_class
