@@ -35,10 +35,22 @@ inputs:
       description: "Experiment Description"
     }
   - {
+      name: Early Stopping,
+      type: Boolean,
+      default: False,
+      description: "Whether early stopping should be used for model training"
+    }
+  - {
       name: Include Noise Samples,
       type: Bool,
       default: True,
       description: "Whether a class for noise samples should be used",
+    }
+  - {
+      name: Is Hyperparameter Tuning,
+      type: Boolean,
+      default: False,
+      description: "Whether the run is a hyperparameter tuning run"
     }
   - {
       name: Layers To Unfreeze,
@@ -67,6 +79,12 @@ inputs:
       description: "Step size for stepwise learning rate decay (only used if learning rate scheduler is set to 'step_lr')"
     }
   - {
+      name: Minimum Change,
+      type: Float,
+      default: 0.0,
+      description: "Minimum change parameter for early stopping (only used if early stopping is activated)"
+    }
+  - {
       name: Multi Label Classification,
       type: Bool,
       default: False,
@@ -77,6 +95,12 @@ inputs:
       type: Float,
       default: 0.5,
       description: "Threshold for assigning samples to positive class in multi-label classification",
+    }
+  - {
+      name: Monitor,
+      type: String,
+      default: "f1-score",
+      description: "Name of metric that should be used for early stopping (only used if early stopping is activated)",
     }
   - {
       name: Number Epochs,
@@ -95,6 +119,12 @@ inputs:
       type: String,
       default: "Adam",
       description: "Optimizer type",
+    }
+  - {
+      name: Patience,
+      type: Integer,
+      default: 3,
+      description: "Patience parameter for early stopping",
     }
   - {
       name: Track Metrics,
@@ -143,10 +173,14 @@ implementation:
         { inputValue: Batch Size },
         --chunk_length,
         { inputValue: Chunk Length },
+        --early_stopping,
+        { inputValue: Early Stopping },
         --experiment_name,
         { inputValue: Experiment Name },
         --include_noise_samples,
         { inputPath: Include Noise Samples },
+        --is_hyperparameter_tuning,
+        { inputValue: Is Hyperparameter Tuning },
         --layers_to_unfreeze,
         { inputValue: Layers To Unfreeze },
         --learning_rate,
@@ -157,6 +191,10 @@ implementation:
         { inputValue: Learning Rate Scheduler Gamma },
         --learning_rate_scheduler_step_size,
         { inputValue: Learning Rate Scheduler Step Size },
+        --min_change,
+        { inputValue: Minimum Change },
+        --monitor,
+        { inputValue: Monitor },
         --multi_label_classification,
         { inputValue: Multi Label Classification },
         --multi_label_classification_threshold,
@@ -165,6 +203,8 @@ implementation:
         { inputValue: Number Epochs },
         --optimizer,
         { inputValue: Optimizer },
+        --patience,
+        { inputValue: Patience },
         --number_workers,
         { inputValue: Number Workers},
         --track_metrics,
