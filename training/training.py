@@ -25,7 +25,7 @@ class ModelTrainer:
                  early_stopping=False,
                  include_noise_samples=True,
                  is_hyperparameter_tuning=False,
-                 layers_to_unfreeze=None,
+                 layers_to_unfreeze="all",
                  learning_rate=0.001,
                  learning_rate_scheduler=None,
                  learning_rate_scheduler_gamma=0.1,
