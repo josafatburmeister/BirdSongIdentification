@@ -22,6 +22,7 @@ class ModelTrainer:
                  chunk_length: int,
                  experiment_name: str,
                  batch_size: int = 100,
+                 early_stopping=False,
                  include_noise_samples=True,
                  is_hyperparameter_tuning=False,
                  layers_to_unfreeze=None,
@@ -47,6 +48,7 @@ class ModelTrainer:
         self.spectrogram_path_manager = spectrogram_path_manager
         self.architecture = architecture
         self.batch_size = batch_size
+        self.early_stopping = early_stopping
         self.chunk_length = chunk_length
         self.experiment_name = experiment_name
         self.include_noise_samples = include_noise_samples
@@ -176,7 +178,8 @@ class ModelTrainer:
 
         logger.info("Number of species: %i", self.num_classes)
 
-        early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
+        if self.early_stopping:
+            early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
 
         logger.info("\n")
         for epoch in range(self.num_epochs):
@@ -220,7 +223,7 @@ class ModelTrainer:
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 
-            if early_stopper.check_early_stopping(model_metrics):
+            if self.early_stopping and early_stopper.check_early_stopping(model_metrics):
                 logger.info(f"Training stopped early, because {self.monitor}, did not improve by at least"
                             f"{self.min_change} for the last {self.patience} epochs.")
                 break
