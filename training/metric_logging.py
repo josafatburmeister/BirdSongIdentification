@@ -133,9 +133,10 @@ class TrainingLogger:
         logger.info("Validation metrics of model with best minimum F1-Score (epoch %s):", best_minimum_epoch)
         self.print_metrics(best_minimum_metrics)
 
-        wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(best_average_metrics.f1_score())
-        wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(best_average_metrics.f1_score())
-        wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(best_average_metrics.f1_score())
+        if self.track_metrics:
+            wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(best_average_metrics.f1_score())
+            wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(best_average_metrics.f1_score())
+            wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(best_average_metrics.f1_score())
 
         if best_metrics_per_class:
             for class_name, best_class_metrics in best_metrics_per_class.items():
