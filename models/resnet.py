@@ -25,12 +25,12 @@ class ResnetTransferLearning(resnet.ResNet):
         fc_input_size = self.fc.in_features
         self.fc = nn.Linear(fc_input_size, num_classes)  # fc_input_size = 512
 
-        if layers_to_unfreeze is None:
+        if not layers_to_unfreeze:
             layers_to_unfreeze = ["layer3", "layer4", "avgpool", "fc"]
 
         # unfreeze the selected layers for fine-tuning
         for name, child in self.named_children():
-            if layers_to_unfreeze == "all" or name in layers_to_unfreeze:
+            if layers_to_unfreeze == "all" or "all" in layers_to_unfreeze or name in layers_to_unfreeze:
                 if logger:
                     logger.info(f"* {name} has been unfrozen.")
             else:

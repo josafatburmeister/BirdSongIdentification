@@ -17,7 +17,7 @@ class DenseNet121TransferLearning(densenet.DenseNet):
         fc_input_size = self.classifier.in_features
         self.classifier = nn.Linear(fc_input_size, num_classes)  # fc_input_size=1024
 
-        if layers_to_unfreeze is None:
+        if not layers_to_unfreeze:
             layers_to_unfreeze = ["denseblock3", "transition3", "denseblock4", "norm5", "classifier"]
 
         # unfreeze the selected layers for fine-tuning
@@ -31,7 +31,7 @@ class DenseNet121TransferLearning(densenet.DenseNet):
                         for _, params in child.named_parameters():
                             # freeze layer
                             params.requires_grad = False
-            elif layers_to_unfreeze == "all" or name in layers_to_unfreeze:
+            elif layers_to_unfreeze == "all" or "all" in layers_to_unfreeze or name in layers_to_unfreeze:
                 if logger:
                     logger.info(f"* {name} has been unfrozen.")
             else:
