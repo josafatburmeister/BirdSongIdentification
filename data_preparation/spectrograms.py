@@ -191,42 +191,45 @@ class SpectrogramCreator:
         else:
             logger.verbose("process %s", audio_file)
             # load audio file
-            amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
+            try:
+                amplitudes, sr = librosa.load(audio_file, sr=self.sampling_rate)
 
-            audio_length = amplitudes.shape[0]
+                audio_length = amplitudes.shape[0]
 
-            number_of_chunks = math.floor(
-                audio_length / self.samples_per_chunk)
+                number_of_chunks = math.floor(
+                    audio_length / self.samples_per_chunk)
 
-            # split audio file in chunks and create one spectrogram per chunk
-            for i in range(number_of_chunks):
-                # get samples of current chunk
-                chunk = amplitudes[i *
-                                   self.samples_per_chunk:(i + 1) * self.samples_per_chunk]
+                # split audio file in chunks and create one spectrogram per chunk
+                for i in range(number_of_chunks):
+                    # get samples of current chunk
+                    chunk = amplitudes[i *
+                                       self.samples_per_chunk:(i + 1) * self.samples_per_chunk]
 
-                # apply short time fourier transformation to extract frequency information from amplitude data
-                mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate,
-                                                                 hop_length=self.hop_length, n_fft=self.n_fft,
-                                                                 win_length=self.window_length, n_mels=112,
-                                                                 fmin=self.fmin, fmax=self.fmax)
+                    # apply short time fourier transformation to extract frequency information from amplitude data
+                    mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate,
+                                                                     hop_length=self.hop_length, n_fft=self.n_fft,
+                                                                     win_length=self.window_length, n_mels=112,
+                                                                     fmin=self.fmin, fmax=self.fmax)
 
-                # convert power spectrogram to dB-scaled spectrogram
-                mel_spectrogram_db = librosa.power_to_db(
-                    mel_spectrogram, ref=numpy.max)
+                    # convert power spectrogram to dB-scaled spectrogram
+                    mel_spectrogram_db = librosa.power_to_db(
+                        mel_spectrogram, ref=numpy.max)
 
-                file_name = os.path.splitext(os.path.basename(audio_file))[0]
-                target_file = os.path.join(
-                    target_dir, "{}-{}.png".format(file_name, i))
-
-                contains_signal, is_noise = self.contains_signal(
-                    mel_spectrogram_db, signal_threshold=signal_threshold, noise_threshold=noise_threshold)
-
-                if contains_signal:
-                    self.save_spectrogram(target_file, mel_spectrogram_db)
-                elif is_noise and self.include_noise_samples:
+                    file_name = os.path.splitext(os.path.basename(audio_file))[0]
                     target_file = os.path.join(
-                        target_dir, "{}-{}_noise.png".format(file_name, i))
-                    self.save_spectrogram(target_file, mel_spectrogram_db)
+                        target_dir, "{}-{}.png".format(file_name, i))
+
+                    contains_signal, is_noise = self.contains_signal(
+                        mel_spectrogram_db, signal_threshold=signal_threshold, noise_threshold=noise_threshold)
+
+                    if contains_signal:
+                        self.save_spectrogram(target_file, mel_spectrogram_db)
+                    elif is_noise and self.include_noise_samples:
+                        target_file = os.path.join(
+                            target_dir, "{}-{}_noise.png".format(file_name, i))
+                        self.save_spectrogram(target_file, mel_spectrogram_db)
+            except Exception:
+                logger.info("Could not process %s", audio_file)
 
     def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int, desc: Optional[str] = None, spectrogram_creation_threads=1):
         # clean up target dir
