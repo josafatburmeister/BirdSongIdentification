@@ -1,5 +1,14 @@
-ARG PY_VERSION="3.7.2"
-FROM python:${PY_VERSION}
+FROM nvidia/cuda:10.1-runtime-ubuntu18.04
+
+RUN apt update -y
+RUN apt -y install wget
+
+# Install Python
+RUN apt -y install python3.7
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN apt -y install python3-pip
+RUN ln -s /usr/bin/pip3 /usr/bin/pip
+RUN apt -y install python3-venv
 
 # Install google cloud sdk
 RUN wget -nv \
@@ -18,12 +27,12 @@ RUN wget -nv \
 # Path configuration
 ENV PATH $PATH:/root/tools/google-cloud-sdk/bin
 
-# install libsndfile1 and ffmpeg for audio processing
-RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential gcc \
+# Install libsndfile1 and ffmpeg for audio processing
+RUN apt-get install -y --no-install-recommends build-essential gcc \
     libsndfile1 \
     ffmpeg
 
-RUN pip install -U pip && mkdir -p /app
+RUN mkdir -p /app
 WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install pip==20.2.4
