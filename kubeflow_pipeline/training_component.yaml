@@ -153,6 +153,11 @@ inputs:
       type: String,
       description: "Name of Weights and Biases project that should be used to track the run metrics (only used if 'Track Metrics' is set to true)",
     }
+  - {
+    name: Weight Decay,
+    type: Float,
+    description: "Lambda parameter for L2-regularization",
+  }
 outputs:
   - { name: Pipeline Metrics, type: Metrics }
 implementation:
@@ -216,7 +221,9 @@ implementation:
         --wandb_key,
         { inputValue: WandB Key },
         --wandb_project_name,
-        { inputValue: WandB Project Name }
+        { inputValue: WandB Project Name },
+        --weight_decay,
+        { inputValue: Weight Decay }
     ]
     fileOutputs:
       Pipeline Metrics: /MLPipeline_Metrics.json

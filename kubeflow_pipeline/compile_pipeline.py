@@ -3,7 +3,6 @@ import os
 import kfp
 from kfp.compiler import compiler
 
-
 def compile_pipeline():
     download_data_container_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component.yaml'))
@@ -56,6 +55,7 @@ def compile_pipeline():
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name="",
+                 weight_decay=0,
                  verbose_logging=False):
         download_task = download_data_container_op(
             gcs_bucket=gcs_bucket,
@@ -114,6 +114,7 @@ def compile_pipeline():
             wandb_entity_name=wandb_entity_name,
             wandb_key=wandb_key,
             wandb_project_name=wandb_project_name,
+            weight_decay=weight_decay
         )
 
     pipeline_filename = "birdsong_pipeline.zip"

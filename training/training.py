@@ -45,7 +45,8 @@ class ModelTrainer:
                  undersample_noise_samples=True,
                  wandb_entity_name="",
                  wandb_key="",
-                 wandb_project_name=""):
+                 wandb_project_name="",
+                 weight_decay=0):
         self.spectrogram_path_manager = spectrogram_path_manager
         self.architecture = architecture
         self.batch_size = batch_size
@@ -69,6 +70,7 @@ class ModelTrainer:
         self.save_all_models = save_all_models
         self.track_metrics = track_metrics
         self.undersample_noise_samples = undersample_noise_samples
+        self.weight_decay = weight_decay
 
         # early stopping parameters
         self.monitor = monitor
@@ -145,11 +147,11 @@ class ModelTrainer:
             loss = torch.nn.CrossEntropyLoss()
         if self.optimizer == "Adam":
             optimizer = torch.optim.Adam(
-                model.parameters(), self.learning_rate
+                model.parameters(), self.learning_rate, weight_decay=self.weight_decay
             )
         elif self.optimizer == "SGD":
             optimizer = torch.optim.SGD(
-                model.parameters(), self.learning_rate, self.momentum
+                model.parameters(), self.learning_rate, self.momentum, weight_decay=self.weight_decay
             )
         else:
             optimizer = None
