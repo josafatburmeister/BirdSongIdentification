@@ -2,6 +2,7 @@ import os
 
 import kfp
 from kfp.compiler import compiler
+from kubernetes.client import V1Toleration
 
 def compile_pipeline():
     download_data_container_op = kfp.components.load_component_from_file(
@@ -116,6 +117,10 @@ def compile_pipeline():
             wandb_project_name=wandb_project_name,
             weight_decay=weight_decay
         )
+
+        training_task.add_node_selector_constraint('cloud.google.com/gke-accelerator', 'nvidia-tesla-p4')
+        gpu_toleration = V1Toleration(effect='NoSchedule', key='gpu', operator='Exists')
+        training_task.add_toleration(gpu_toleration)
 
     pipeline_filename = "birdsong_pipeline.zip"
     compiler.Compiler().compile(pipeline, pipeline_filename)
