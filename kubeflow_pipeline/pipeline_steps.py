@@ -2,7 +2,9 @@ import logging
 import shutil
 from typing import List
 
-from data_preparation import downloader, spectrograms
+from downloader import NIPS4BPlusDownloader, XenoCantoDownloader
+
+from data_preparation import spectrograms
 from training import model_evaluator, training, hyperparameter_tuner
 
 from general import filepaths
@@ -14,10 +16,11 @@ class PipelineSteps:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
         path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
-        xc_downloader = downloader.XenoCantoDownloader(path_manager)
+        xc_downloader = XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(species_list=species_list, **kwargs)
 
-        xc_downloader.download_nips4bplus_dataset(species_list=species_list)
+        nips4bplus_downloader = NIPS4BPlusDownloader(path_manager)
+        nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 
     def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, signal_threshold=3, noise_threshold=1,
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):
