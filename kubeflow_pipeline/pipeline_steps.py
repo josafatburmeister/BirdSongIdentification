@@ -3,7 +3,7 @@ import shutil
 from typing import List
 
 from data_preparation import filepaths, downloader, spectrograms
-from training import model_evaluator, training
+from training import model_evaluator, training, hyperparameter_tuner
 
 from general.logging import logger
 
@@ -43,22 +43,33 @@ class PipelineSteps:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
 
+        do_hyperparameter_tuning = False
+
+        for hyperparameter in hyperparameter_tuner.HyperparameterTuner.tunable_parameters():
+             if hyperparameter in kwargs and type(kwargs[hyperparameter]) == list:
+                do_hyperparameter_tuning = True
+
         spectrogram_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
 
-        trainer = training.ModelTrainer(spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
-        best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
+        if do_hyperparameter_tuning:
+            del kwargs["is_hyperparameter_tuning"]
+            model_tuner = hyperparameter_tuner.HyperparameterTuner(spectrogram_path_manager=spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
+            model_tuner.tune_model()
+        else:
+            trainer = training.ModelTrainer(spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
+            best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 
-        evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
+            evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
 
-        for split in ["test", "nips4bplus", "nips4bplus_all"]:
-            evaluator.evaluate_model(model=best_average_model,
-                                                 model_name=f"{experiment_name}_best_average_model", split=split)
-            evaluator.evaluate_model(model=best_minimum_model,
-                                                 model_name=f"{experiment_name}_best_minimum_model", split=split)
+            for split in ["test", "nips4bplus", "nips4bplus_all"]:
+                evaluator.evaluate_model(model=best_average_model,
+                                                     model_name=f"{experiment_name}_best_average_model", split=split)
+                evaluator.evaluate_model(model=best_minimum_model,
+                                                     model_name=f"{experiment_name}_best_minimum_model", split=split)
 
-            for class_name, model in best_models_per_class.items():
-                evaluator.evaluate_model(model=model,
-                                                 model_name=f"{experiment_name}_best_model_{class_name}", split=split)
+                for class_name, model in best_models_per_class.items():
+                    evaluator.evaluate_model(model=model,
+                                                     model_name=f"{experiment_name}_best_model_{class_name}", split=split)
 
         # clean up
         filepaths.PathManager.empty_dir(input_path)
