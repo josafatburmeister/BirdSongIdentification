@@ -12,7 +12,7 @@ import tarfile
 from typing import List, Optional
 import zipfile
 
-from data_preparation.filepaths import PathManager
+from general.filepaths import PathManager
 from general.logging import logger, ProgressBar
 
 import data_preparation

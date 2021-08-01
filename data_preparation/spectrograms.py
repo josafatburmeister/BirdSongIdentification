@@ -10,7 +10,7 @@ from skimage import io
 from typing import List, Optional
 import warnings
 
-from data_preparation.filepaths import PathManager
+from general.filepaths import PathManager
 from general.logging import logger, ProgressBar
 
 warnings.filterwarnings('ignore')

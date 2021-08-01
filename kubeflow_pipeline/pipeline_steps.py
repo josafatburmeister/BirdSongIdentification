@@ -2,9 +2,10 @@ import logging
 import shutil
 from typing import List
 
-from data_preparation import filepaths, downloader, spectrograms
+from data_preparation import downloader, spectrograms
 from training import model_evaluator, training, hyperparameter_tuner
 
+from general import filepaths
 from general.logging import logger
 
 
