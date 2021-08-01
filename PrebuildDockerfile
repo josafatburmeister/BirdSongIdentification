@@ -2,13 +2,14 @@ FROM nvidia/cuda:10.1-runtime-ubuntu18.04
 
 RUN apt update -y
 RUN apt -y install wget
+RUN apt -y install git
 
 # Install Python
 RUN apt -y install python3.7
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -s /usr/bin/python3.7 /usr/bin/python
 RUN apt -y install python3-pip
 RUN ln -s /usr/bin/pip3 /usr/bin/pip
-RUN apt -y install python3-venv
+RUN apt-get -y install python3.7-venv
 
 # Install google cloud sdk
 RUN wget -nv \
@@ -32,9 +33,11 @@ RUN apt-get install -y --no-install-recommends build-essential gcc \
     libsndfile1 \
     ffmpeg
 
+RUN python -m pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+RUN python -m pip install --ignore-installed six
+
 RUN mkdir -p /app
 WORKDIR /app
 COPY requirements.txt /app/
-RUN pip install pip==20.2.4
-RUN pip install torch==1.8.1
-RUN pip install -r requirements.txt
+RUN python -m pip install pip==20.2.4
+RUN python -m pip install -r requirements.txt

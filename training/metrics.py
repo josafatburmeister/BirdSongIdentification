@@ -47,15 +47,20 @@ class Metrics:
 
     def precision(self) -> Tensor:
         precision = self.tp / (self.tp + self.fp)
-        return torch.nan_to_num(precision)
+        precision[torch.isnan(precision)] = 0.0
+        return precision
+
+
 
     def recall(self) -> Tensor:
         recall = self.tp / (self.tp + self.fn)
-        return torch.nan_to_num(recall)
+        recall[torch.isnan(recall)] = 0.0
+        return recall
 
     def f1_score(self) -> Tensor:
         f1_score = 2 * (self.precision() * self.recall()) / (self.precision() + self.recall())
-        return torch.nan_to_num(f1_score)
+        f1_score[torch.isnan(f1_score)] = 0.0
+        return f1_score
 
     def accuracy(self) -> float:
         return (self.tp.sum() / (self.tp + self.fp + self.tn + self.fn)[0]).item()
