@@ -2,13 +2,11 @@ import copy
 import os
 import torch
 from datetime import datetime
-from data_preparation import filepaths
+from general.filepaths import PathManager
 from training import metrics
-from general.logging import logger
-
 
 class ModelTracker:
-    def __init__(self, pathmanager: filepaths.PathManager, experiment_name: str, id_to_class_mapping: dict,
+    def __init__(self, pathmanager: PathManager, experiment_name: str, id_to_class_mapping: dict,
                  is_pipeline_run: bool, model: torch.nn.Module, multi_label_classification: bool = True,
                  device: torch.device = torch.device('cpu')):
         self.path = pathmanager
