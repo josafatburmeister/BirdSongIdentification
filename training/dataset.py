@@ -8,12 +8,12 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from typing import List
 
-from data_preparation.filepaths import PathManager
+from general.filepaths import PathManager
 from general.logging import logger
 
 
 class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager: PathManager, chunk_length: int = 1000, include_noise_samples: bool = True,
+    def __init__(self, path_manager: PathManager, include_noise_samples: bool = True,
                  split: str = "train", multi_label_classification: bool = False, undersample_noise_samples: bool = True):
 
         normalize = transforms.Normalize(
@@ -26,8 +26,8 @@ class XenoCantoSpectrograms(Dataset):
 
         self.path_manager = path_manager
         self.data_dir = self.path_manager.data_folder(
-            split, "spectrograms", chunk_length=chunk_length)
-        self.label_file = self.path_manager.spectrogram_label_file(split, chunk_length=chunk_length)
+            split, "spectrograms")
+        self.label_file = self.path_manager.label_file(split, type="spectrograms")
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
             raise NameError("Data files missing: ", self.data_dir)

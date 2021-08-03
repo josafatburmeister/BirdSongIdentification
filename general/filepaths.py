@@ -133,11 +133,7 @@ class PathManager:
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_models_dir = os.path.join(self.GCS_BUCKET, "models")
 
-    def audio_label_file(self, split: str):
-        self.ensure_dir(os.path.join(self.data_dir, split))
-        return os.path.join(self.data_dir, split, f"{split}.csv")
-
-    def spectrogram_label_file(self, split: str, **kwargs):
+    def label_file(self, split: str, **kwargs):
         self.ensure_dir(os.path.join(self.data_dir, split))
         keywords = ""
         for key in kwargs.values():

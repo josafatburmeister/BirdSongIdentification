@@ -14,7 +14,6 @@ class ModelRunner:
     def __init__(self,
                  spectrogram_path_manager,
                  architecture: str,
-                 chunk_length: int,
                  experiment_name: str,
                  batch_size: int = 100,
                  include_noise_samples: bool = True,
@@ -33,7 +32,6 @@ class ModelRunner:
         self.architecture = architecture
         self.batch_size = batch_size
         self.experiment_name = experiment_name
-        self.chunk_length = chunk_length
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
         self.multi_label_classification_threshold = multi_label_classification_threshold
@@ -59,7 +57,7 @@ class ModelRunner:
 
         for split in splits:
             datasets[split] = dataset.XenoCantoSpectrograms(
-                self.spectrogram_path_manager, chunk_length=self.chunk_length,
+                self.spectrogram_path_manager,
                 include_noise_samples=self.include_noise_samples, split=split,
                 multi_label_classification=self.multi_label_classification, undersample_noise_samples=self.undersample_noise_samples)
 

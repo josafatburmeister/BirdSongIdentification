@@ -4,7 +4,7 @@ from typing import List
 
 from downloader import NIPS4BPlusDownloader, XenoCantoDownloader
 
-from data_preparation import spectrograms
+from spectrograms import SpectrogramCreator
 from training import model_evaluator, training, hyperparameter_tuner
 
 from general import logger, PathManager
@@ -27,7 +27,7 @@ class PipelineSteps:
             logger.setLevel(logging.VERBOSE)
         audio_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
         spectrogram_path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
-        spectrogram_creator = spectrograms.SpectrogramCreator(chunk_length, audio_path_manager,
+        spectrogram_creator = SpectrogramCreator(chunk_length, audio_path_manager,
                                                               spectrogram_path_manager, **kwargs)
 
         shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())

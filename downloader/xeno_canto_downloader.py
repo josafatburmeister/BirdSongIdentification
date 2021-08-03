@@ -302,33 +302,19 @@ class XenoCantoDownloader(Downloader):
                 else:
                     test_frames.append(test_labels)
 
-        # save label files
-        if len(train_frames) == 0:
-            raise NameError("Empty training set")
-        if len(val_frames) == 0:
-            raise NameError("Empty validation set")
-        if len(test_frames) == 0:
-            raise NameError("Empty test set")
-
-        training_set = pd.concat(train_frames)
-        validation_set = pd.concat(val_frames)
-        test_set = pd.concat(test_frames)
-        training_set.to_csv(self.path.audio_label_file("train"))
-        validation_set.to_csv(self.path.audio_label_file("val"))
-        test_set.to_csv(self.path.audio_label_file("test"))
         np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
 
-        # clear data folders
-        PathManager.empty_dir(self.path.data_folder("train", "audio"))
-        PathManager.empty_dir(self.path.data_folder("val", "audio"))
-        PathManager.empty_dir(self.path.data_folder("test", "audio"))
+        # save label files
+        for split_name,  frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
+            if len(frames) == 0:
+                raise NameError(f"Empty {split_name} set")
+            labels = pd.concat(frames)
 
-        # download audio files
-        self.download_audio_files_by_id(
-            self.path.data_folder("train", "audio"), training_set["id"], "Download training set...")
+            self.save_label_file(labels, split_name)
 
-        self.download_audio_files_by_id(
-            self.path.data_folder("val", "audio"), validation_set["id"], "Download validation set...")
+            # clear data folders
+            PathManager.empty_dir(self.path.data_folder(split_name, "audio"))
 
-        self.download_audio_files_by_id(
-            self.path.data_folder("test", "audio"), test_set["id"], "Download test set...")
+            # download audio files
+            self.download_audio_files_by_id(
+                self.path.data_folder(split_name, "audio"), labels["id"], f"Download {split_name} set...")

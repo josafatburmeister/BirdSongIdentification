@@ -94,7 +94,6 @@ def compile_pipeline():
             is_hyperparameter_tuning=is_hyperparameter_tuning,
             architecture=architecture,
             batch_size=batch_size,
-            chunk_length=chunk_length,
             early_stopping=early_stopping,
             experiment_name=experiment_name,
             layers_to_unfreeze=layers_to_unfreeze,

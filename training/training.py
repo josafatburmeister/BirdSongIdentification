@@ -19,7 +19,6 @@ class ModelTrainer:
     def __init__(self,
                  spectrogram_path_manager,
                  architecture: str,
-                 chunk_length: int,
                  experiment_name: str,
                  batch_size: int = 100,
                  early_stopping=False,
@@ -51,7 +50,6 @@ class ModelTrainer:
         self.architecture = architecture
         self.batch_size = batch_size
         self.early_stopping = early_stopping
-        self.chunk_length = chunk_length
         self.experiment_name = experiment_name
         self.include_noise_samples = include_noise_samples
         self.is_hyperparameter_tuning = is_hyperparameter_tuning
@@ -98,7 +96,7 @@ class ModelTrainer:
 
         for split in ["train", "val"]:
             datasets[split] = dataset.XenoCantoSpectrograms(
-                self.spectrogram_path_manager, chunk_length=self.chunk_length,
+                self.spectrogram_path_manager,
                 include_noise_samples=self.include_noise_samples, split=split,
                 multi_label_classification=self.multi_label_classification,
                 undersample_noise_samples=self.undersample_noise_samples)

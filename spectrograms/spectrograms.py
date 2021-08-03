@@ -264,18 +264,17 @@ class SpectrogramCreator:
             self.spectrogram_path.clear_cache("spectrograms", chunk_length=self.chunk_length)
 
         for split in splits:
-            spectrogram_dir = self.spectrogram_path.data_folder(
-                split, "spectrograms", chunk_length=self.chunk_length)
+            spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms")
             audio_dir = self.audio_path.data_folder(split, "audio")
-            audio_label_file = self.audio_path.audio_label_file(split)
+            audio_label_file = self.audio_path.label_file(split, type="audio")
             PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, signal_threshold, noise_threshold, f"{split} set")
             self.create_spectrogram_labels(split)
 
     def create_spectrogram_labels(self, split: str):
-        labels = pd.read_csv(self.audio_path.audio_label_file(split))
-        spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms", chunk_length=self.chunk_length)
+        labels = pd.read_csv(self.audio_path.label_file(split, type="audio"))
+        spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms")
 
         spectrogram_labels = []
 
@@ -324,7 +323,7 @@ class SpectrogramCreator:
             spectrogram_labels = pd.DataFrame(spectrogram_labels).sort_values(
                 by=['file_name']).fillna(0)
 
-            label_file = self.spectrogram_path.spectrogram_label_file(split, chunk_length=self.chunk_length)
+            label_file = self.spectrogram_path.label_file(split, type="spectrograms")
             spectrogram_labels.to_csv(label_file)
         else:
             raise NameError("No spectrograms found")
