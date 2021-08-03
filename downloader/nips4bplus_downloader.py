@@ -6,7 +6,6 @@ from typing import List
 import zipfile
 
 from .downloader import Downloader
-from .xeno_canto_downloader import XenoCantoDownloader
 from general import logger, PathManager
 
 
@@ -46,7 +45,7 @@ class NIPS4BPlusDownloader(Downloader):
         nips4bplus_labels = []
 
         species_names = [species_name for species_name, sound_types in
-                         XenoCantoDownloader.parse_species_list(species_list)]
+                         self.parse_species_list(species_list, {})]
         selected_species = '|'.join(species_names)
 
         for file in os.listdir(extracted_nips_annotations_folder):

@@ -3,14 +3,43 @@ import pandas as pd
 import requests
 import shutil
 from sklearn.model_selection import train_test_split
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from general import logger, PathManager
+
 
 class Downloader:
     """
     A base class for custom dataset downloaders.
     """
+
+    @staticmethod
+    def parse_species_list(species_list: List[str], default_sound_types: Union[List[str], Set[str]]) -> Dict[str, str]:
+        """
+        Parses a list of strings, where each string contains a species name and its sound types.
+        The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
+        Returns a dictionary that maps species names to sound types.
+
+        param: species_list: list of species and sound types in the above mentioned  format
+        param: default_sound_types: default sound types that are used when no sound types are provided for a species
+        """
+
+        sound_types = set(default_sound_types)
+        species = {}
+
+        for item in species_list:
+            species_name = item.split(",")[0].rstrip()
+
+            if species_name not in species:
+                species[species_name] = set()
+
+            if len(item.split(",")) > 1:
+                for sound_type in item.split(",")[1:]:
+                    species[species_name].add(sound_type.lstrip().rstrip())
+            else:
+                species[species_name] = species[species_name].union(sound_types)
+
+        return species.items()
 
     @staticmethod
     def train_test_split(labels: pd.DataFrame, test_size: float = 0.4, random_state: int = 12) -> Tuple[

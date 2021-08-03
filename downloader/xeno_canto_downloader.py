@@ -9,8 +9,7 @@ import requests
 from sklearn.model_selection import train_test_split
 from typing import List, Optional
 
-import data_preparation
-from downloader import Downloader
+from downloader import Downloader, NIPS4BPlusDownloader
 from general import logger, PathManager, ProgressBar
 
 
@@ -26,23 +25,7 @@ class XenoCantoDownloader(Downloader):
     xc_life_stages = {"adult", "juvenile", "hatchling or nestling", "life stage uncertain"}
     xc_special_cases = {"aberrant", "mimicry/imitation", "bird in hand"}
 
-    @staticmethod
-    def parse_species_list(species_list: List[str]):
-        species = {}
 
-        for item in species_list:
-            species_name = item.split(",")[0].rstrip()
-
-            if species_name not in species:
-                species[species_name] = set()
-
-            if len(item.split(",")) > 1:
-                for sound_type in item.split(",")[1:]:
-                    species[species_name].add(sound_type.lstrip().rstrip())
-            else:
-                species[species_name] = species[species_name].union(XenoCantoDownloader.xc_sound_types)
-
-        return species.items()
 
     @staticmethod
     def download_xeno_canto_page(species_name: str, page: int = 1):
@@ -155,8 +138,8 @@ class XenoCantoDownloader(Downloader):
                         clear_label_cache: bool = False,
                         random_state: int = 12):
         if use_nips4b_species_list or not species_list:
-            with pkg_resources.path(data_preparation, 'nips4b_species_list.csv') as species_file:
-                species_list = self.download_nips4b_species_list()["nips4b_class_name"]
+            nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
+            species_list = nips4bplus_downloader.download_nips4b_species_list()["nips4b_class_name"]
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
@@ -189,7 +172,7 @@ class XenoCantoDownloader(Downloader):
         val_frames = []
         categories = []
 
-        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list):
+        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list, XenoCantoDownloader.xc_sound_types):
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception as e:
