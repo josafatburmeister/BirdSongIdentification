@@ -163,7 +163,7 @@ class PathManager:
         file_name = os.path.basename(file_path)
         return os.path.join(self.cache(subdir, **kwargs), file_name)
 
-    def data_folder(self, split: str, subdir: str, **kwargs):
+    def data_folder(self, split: str, subdir: str = "", **kwargs):
         if subdir == "spectrograms":
             for key in kwargs.values():
                 subdir += f"_{key}"

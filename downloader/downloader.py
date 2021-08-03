@@ -125,6 +125,6 @@ class Downloader:
         assert type(labels) == pd.DataFrame
         for column_name in ["id", "file_name", "label", "start", "end"]:
             assert column_name in labels.columns
-        split_folder = self.path.data_folder(split_name, "")
+        split_folder = self.path.data_folder(split_name)
 
         labels.to_csv(os.path.join(split_folder, f"{split_name}.csv"))

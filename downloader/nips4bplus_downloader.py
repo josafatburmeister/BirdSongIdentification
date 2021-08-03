@@ -19,8 +19,8 @@ class NIPS4BPlusDownloader(Downloader):
     def __init__(self, path_manager: PathManager):
         super().__init__(path_manager)
 
-        self.nips4bplus_folder = self.path.data_folder("nips4bplus", "")
-        self.nips4bplus_folder_all = self.path.data_folder("nips4bplus_all", "")
+        self.nips4bplus_folder = self.path.data_folder("nips4bplus")
+        self.nips4bplus_folder_all = self.path.data_folder("nips4bplus_all")
         self.extracted_nips_annotations_folder = os.path.join(self.nips4bplus_folder,
                                                               NIPS4BPlusDownloader.nips4bplus_annotations_folder_name)
         self.extracted_nips_audio_folder = os.path.join(self.nips4bplus_folder, NIPS4BPlusDownloader.nips4b_audio_folder_name)
