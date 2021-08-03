@@ -24,8 +24,7 @@ class XenoCantoDownloader(Downloader):
     xc_sexes = {"male", "female", "sex uncertain"}
     xc_life_stages = {"adult", "juvenile", "hatchling or nestling", "life stage uncertain"}
     xc_special_cases = {"aberrant", "mimicry/imitation", "bird in hand"}
-
-
+    nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     @staticmethod
     def download_xeno_canto_page(species_name: str, page: int = 1):
@@ -139,7 +138,15 @@ class XenoCantoDownloader(Downloader):
                         random_state: int = 12):
         if use_nips4b_species_list or not species_list:
             nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
-            species_list = nips4bplus_downloader.download_nips4b_species_list()["nips4b_class_name"]
+            species_list = nips4bplus_downloader.download_nips4b_species_list()
+            species_list["sound_type"] = species_list["sound_type"].apply(
+                lambda sound_type: XenoCantoDownloader.nips4bplus_sound_types_to_xc_sound_types[
+                    sound_type] if sound_type in XenoCantoDownloader.nips4bplus_sound_types_to_xc_sound_types else "")
+            species_list["species_sound_type"] = species_list.apply(
+                lambda row: row["Scientific_name"] + ", " + row["sound_type"] if row["sound_type"] else row[
+                    "Scientific_name"], axis=1)
+            species_list = species_list["species_sound_type"].tolist()
+            species_list = [item for item in species_list if item]
         if len(species_list) < 1:
             raise ValueError("Empty species list")
         if maximum_samples_per_class < 3:
@@ -172,7 +179,8 @@ class XenoCantoDownloader(Downloader):
         val_frames = []
         categories = []
 
-        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list, XenoCantoDownloader.xc_sound_types):
+        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list,
+                                                                                        XenoCantoDownloader.xc_sound_types):
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception as e:

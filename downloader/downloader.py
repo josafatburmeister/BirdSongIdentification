@@ -114,3 +114,17 @@ class Downloader:
                         self.path.copy_file_to_gcs_cache(cached_file_path, cache_subdir)
             else:
                 raise NameError("File couldn\'t be retrieved")
+
+    def save_label_file(self, labels: pd.DataFrame, split_name: str):
+        """
+        Creates label file from pandas dataframe.
+
+        param: labels: dataframe containing the file labels, has to contain the columns "id", "file_name", "label", "start", and "end"
+        param: split_name: name of the data split (e.g., "train", "val" or "test)
+        """
+        assert type(labels) == pd.DataFrame
+        for column_name in ["id", "file_name", "label", "start", "end"]:
+            assert column_name in labels.columns
+        split_folder = self.path.data_folder(split_name, "")
+
+        labels.to_csv(os.path.join(split_folder, f"{split_name}.csv"))
