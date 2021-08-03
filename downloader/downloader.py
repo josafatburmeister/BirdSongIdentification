@@ -5,8 +5,7 @@ import shutil
 from sklearn.model_selection import train_test_split
 from typing import Optional, Tuple
 
-from general.filepaths import PathManager
-from general.logging import logger
+from general import logger, PathManager
 
 class Downloader:
     """

@@ -7,15 +7,14 @@ from downloader import NIPS4BPlusDownloader, XenoCantoDownloader
 from data_preparation import spectrograms
 from training import model_evaluator, training, hyperparameter_tuner
 
-from general import filepaths
-from general.logging import logger
+from general import logger, PathManager
 
 
 class PipelineSteps:
     def download_xeno_canto_data(self, gcs_bucket: str, output_path: str, species_list: List[str], verbose_logging: bool, **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
-        path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
+        path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
         xc_downloader = XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(species_list=species_list, **kwargs)
 
@@ -26,8 +25,8 @@ class PipelineSteps:
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
-        audio_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
-        spectrogram_path_manager = filepaths.PathManager(output_path, gcs_bucket=gcs_bucket)
+        audio_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
+        spectrogram_path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
         spectrogram_creator = spectrograms.SpectrogramCreator(chunk_length, audio_path_manager,
                                                               spectrogram_path_manager, **kwargs)
 
@@ -40,7 +39,7 @@ class PipelineSteps:
             splits=["nips4bplus", "nips4bplus_all"], signal_threshold=0, noise_threshold=0, clear_spectrogram_cache=clear_spectrogram_cache)
 
         # clean up
-        filepaths.PathManager.empty_dir(input_path)
+        PathManager.empty_dir(input_path)
 
     def train_model(self, input_path: str, gcs_bucket: str, experiment_name: str = "", verbose_logging: bool = False,
                     **kwargs):
@@ -53,7 +52,7 @@ class PipelineSteps:
              if hyperparameter in kwargs and type(kwargs[hyperparameter]) == list:
                 do_hyperparameter_tuning = True
 
-        spectrogram_path_manager = filepaths.PathManager(input_path, gcs_bucket=gcs_bucket)
+        spectrogram_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
 
         if do_hyperparameter_tuning:
             del kwargs["is_hyperparameter_tuning"]
@@ -76,4 +75,4 @@ class PipelineSteps:
                                                      model_name=f"{experiment_name}_best_model_{class_name}", split=split)
 
         # clean up
-        filepaths.PathManager.empty_dir(input_path)
+        PathManager.empty_dir(input_path)

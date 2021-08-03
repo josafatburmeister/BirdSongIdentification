@@ -5,12 +5,9 @@ import tarfile
 from typing import List
 import zipfile
 
-from general.filepaths import PathManager
-from general.logging import logger
-
-
 from .downloader import Downloader
 from .xeno_canto_downloader import XenoCantoDownloader
+from general import logger, PathManager
 
 
 class NIPS4BPlusDownloader(Downloader):

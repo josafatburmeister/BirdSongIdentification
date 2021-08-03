@@ -9,12 +9,9 @@ import requests
 from sklearn.model_selection import train_test_split
 from typing import List, Optional
 
-from general.filepaths import PathManager
-from general.logging import logger, ProgressBar
-
 import data_preparation
-
 from downloader import Downloader
+from general import logger, PathManager, ProgressBar
 
 
 class XenoCantoDownloader(Downloader):
