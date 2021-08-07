@@ -1,7 +1,9 @@
-google-cloud-core==1.0.3
-google-cloud-logging==2.5.0
+azure-common==1.1.27
+azure-storage-file==2.1.0
+azure-mgmt-storage==18.0.0
+boto3==1.15.0
+cryptography==3.4.7
 kubeflow-fairing==1.0.2
 msrestazure==0.6.4
-tornado==5.1
 verboselogs==1.7
 wandb==0.10.33
