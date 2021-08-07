@@ -17,7 +17,6 @@ def setup_colab_environment(data_path: str, branch: str = "main"):
 
     try:
         subprocess.run(["pip3", "install", "-r", "requirements-colab.txt"], cwd=git_repo_dir, check=True)
-        subprocess.run(["pip3", "install", "google-cloud-logging==2.5.0"], cwd=git_repo_dir, check=True)
     except subprocess.CalledProcessError:
         raise NameError("Could not install requirements")
 
@@ -38,6 +37,9 @@ def setup_colab_environment(data_path: str, branch: str = "main"):
                                cwd=colab_data_dir, check=True)
             except subprocess.CalledProcessError:
                 raise NameError(f"Could unzip {split} data set")
+
+    # force restart of runtime
+    os.kill(os.getpid(), 9)
 
 if __name__ == '__main__':
 
