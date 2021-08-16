@@ -240,15 +240,14 @@ class ModelTrainer:
         if not self.save_all_models:
             model_tracker.save_best_models(self.logger.get_run_id())
 
-        if not self.is_hyperparameter_tuning:
-            self.logger.print_model_summary(
-                model_tracker.best_average_epoch,
-                model_tracker.best_average_metrics,
-                model_tracker.best_minimum_epoch,
-                model_tracker.best_minimum_metrics,
-                model_tracker.best_epochs_per_class if self.multi_label_classification else None,
-                model_tracker.best_metrics_per_class if self.multi_label_classification else None
-            )
+        self.logger.print_model_summary(
+            model_tracker.best_average_epoch,
+            model_tracker.best_average_metrics,
+            model_tracker.best_minimum_epoch,
+            model_tracker.best_minimum_metrics,
+            model_tracker.best_epochs_per_class if self.multi_label_classification else None,
+            model_tracker.best_metrics_per_class if self.multi_label_classification else None
+        )
 
         if self.is_pipeline_run:
             self.logger.log_metrics_in_kubeflow(
