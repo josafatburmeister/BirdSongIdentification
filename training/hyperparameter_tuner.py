@@ -39,7 +39,7 @@ class HyperparameterTuner:
             for hyperparameter in self.tuned_parameters:
                 logger.info(f"{hyperparameter} = {parameters[hyperparameter]}")
             logger.info("\n")
-            experiment_name = self.experiment_name
+            experiment_name = experiment_name
             model_trainer = ModelTrainer(self.spectrogram_path_manager, experiment_name=experiment_name,
                                          is_hyperparameter_tuning=True, **parameters)
             best_average_f1_score = model_trainer.train_model()
