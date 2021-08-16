@@ -7,7 +7,7 @@ from typing import List
 class HyperparameterTuner:
     @staticmethod
     def tunable_parameters():
-        return ["batch_size", "learning_rate", "momentum", "weight_decay"]
+        return ["batch_size", "include_noise_samples", "layers_to_unfreeze", "learning_rate", "momentum", "p_dropout", "weight_decay"]
 
     def __init__(self,
                  spectrogram_path_manager,
