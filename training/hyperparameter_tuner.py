@@ -34,7 +34,7 @@ class HyperparameterTuner:
                 for parameter_value in parameters[hyperparameter]:
                     new_params = parameters
                     new_params[hyperparameter] = parameter_value
-                    experiment_name = experiment_name + hyperparameter + str(parameter_value)
+                    experiment_name = experiment_name + "_" + hyperparameter + "_" + str(parameter_value)
                     self.tune(new_params, experiment_name)
 
         if not unresolved_parameters:
