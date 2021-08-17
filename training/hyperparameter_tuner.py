@@ -25,7 +25,7 @@ class HyperparameterTuner:
     def tune(self, parameters: dict, experiment_name):
         unresolved_parameters = False
         for hyperparameter in HyperparameterTuner.tunable_parameters():
-            if hyperparameter in parameters and type(parameters[hyperparameter]) == list:
+            if hyperparameter in parameters and (hyperparameter != "hyperparameter" and type(parameters[hyperparameter]) == list or type(parameters[hyperparameter]) == list and type(parameters[hyperparameter][0]) == list):
                 self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True
                 for parameter_value in parameters[hyperparameter]:
