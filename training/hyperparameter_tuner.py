@@ -7,7 +7,8 @@ from typing import List
 class HyperparameterTuner:
     @staticmethod
     def tunable_parameters():
-        return ["batch_size", "include_noise_samples", "layers_to_unfreeze", "learning_rate", "momentum", "p_dropout", "weight_decay"]
+        return ["batch_size", "include_noise_samples", "layers_to_unfreeze", "learning_rate", "momentum", "p_dropout",
+                "weight_decay"]
 
     def __init__(self,
                  spectrogram_path_manager,
@@ -25,7 +26,9 @@ class HyperparameterTuner:
     def tune(self, parameters: dict, experiment_name):
         unresolved_parameters = False
         for hyperparameter in HyperparameterTuner.tunable_parameters():
-            if hyperparameter in parameters and (hyperparameter != "hyperparameter" and type(parameters[hyperparameter]) == list or type(parameters[hyperparameter]) == list and type(parameters[hyperparameter][0]) == list):
+            if hyperparameter in parameters and (hyperparameter != "layers_to_unfreeze" and type(
+                    parameters[hyperparameter]) == list or hyperparameter == "layers_to_unfreeze" and type(
+                    parameters[hyperparameter]) == list and type(parameters[hyperparameter][0]) == list):
                 self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True
                 for parameter_value in parameters[hyperparameter]:
@@ -80,4 +83,3 @@ class HyperparameterTuner:
         logger.info("Hyperparameter Tuning \n")
         self.tune(self.kwargs.copy(), self.experiment_name)
         self.log_summary()
-
