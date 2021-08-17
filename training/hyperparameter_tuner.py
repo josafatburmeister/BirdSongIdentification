@@ -34,15 +34,14 @@ class HyperparameterTuner:
                 for parameter_value in parameters[hyperparameter]:
                     new_params = parameters
                     new_params[hyperparameter] = parameter_value
-                    experiment_name = experiment_name + "_" + hyperparameter + "_" + str(parameter_value)
-                    self.tune(new_params, experiment_name)
+                    name = experiment_name + "_" + hyperparameter + "_" + str(parameter_value)
+                    self.tune(new_params, name)
 
         if not unresolved_parameters:
             logger.info("-" * 25)
             for hyperparameter in self.tuned_parameters:
                 logger.info(f"{hyperparameter} = {parameters[hyperparameter]}")
             logger.info("\n")
-            experiment_name = experiment_name
             model_trainer = ModelTrainer(self.spectrogram_path_manager, experiment_name=experiment_name,
                                          is_hyperparameter_tuning=True, **parameters)
             best_average_f1_score = model_trainer.train_model()
