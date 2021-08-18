@@ -312,10 +312,12 @@ class SpectrogramCreator:
                         found_match = True
 
                 if not found_match:
-                    assert split not in ["train", "val", "test"]
-                    final_label["noise"] = 1
-                    final_label["id"] = file_id
-                    final_label["file_name"] = file
+                    if split in ["train", "val", "test"]:
+                        logger.info("Unlabeled spectrograms for file %s", file)
+                    else:
+                        final_label["noise"] = 1
+                        final_label["id"] = file_id
+                        final_label["file_name"] = file
 
                 spectrogram_labels.append(final_label)
 
