@@ -15,6 +15,7 @@ class NIPS4BPlusDownloader(Downloader):
     nips4b_audio_files_url = "http://sabiod.univ-tln.fr/nips4b/media/birds/NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV.tar.gz"
     nips4b_audio_folder_name = "NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV"
     species_list_url = "https://ndownloader.figshare.com/files/13390469"
+    nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     def __init__(self, path_manager: PathManager):
         super().__init__(path_manager)
@@ -29,6 +30,10 @@ class NIPS4BPlusDownloader(Downloader):
         super().__del__
 
     def download_nips4b_audio_files(self):
+        """
+        Downloads audio files of NIPS4B dataset
+        """
+
         nips4bplus_audio_path = os.path.join(self.nips4bplus_folder, "nips4bplus_audio.tar.gz")
 
         logger.info("Download NIPS4BPlus audio files...")
@@ -43,6 +48,10 @@ class NIPS4BPlusDownloader(Downloader):
         os.remove(nips4bplus_audio_path)
 
     def download_nips4b_plus_annotations(self):
+        """
+        Downloads temporal annotations for NIPS4B audio files from NIPS4BPlus dataset
+        """
+
         nips4bplus_annotations_path = os.path.join(self.nips4bplus_folder, "nips4bplus_annotations.zip")
 
         logger.info("Download NIPS4BPlus label files...")
@@ -68,6 +77,9 @@ class NIPS4BPlusDownloader(Downloader):
         species_list["nips4b_class_name"] = species_list["class name"]
         species_list["sound_type"] = species_list["nips4b_class_name"].apply(
             lambda class_name: class_name.split("_")[1] if len(class_name.split("_")) > 1 else "")
+        species_list["sound_type"] = species_list["sound_type"].apply(
+            lambda sound_type: NIPS4BPlusDownloader.nips4bplus_sound_types_to_xc_sound_types[
+                sound_type] if sound_type in NIPS4BPlusDownloader.nips4bplus_sound_types_to_xc_sound_types else "")
 
         species_list["class name"] = species_list.apply(
             lambda row: row["Scientific_name"].replace(" ", "_") + "_" + row["class name"].split("_")[1] if row[
@@ -79,6 +91,13 @@ class NIPS4BPlusDownloader(Downloader):
         return species_list
 
     def create_label_file(self, species_list: List[str]):
+        """
+        Creates label file for the NIPS4BPlus dataset using the categories from the provided species list.
+        The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
+
+        param: species_list: list of species and sound types in the above mentioned  format
+        """
+
         nips4bplus_audio_folder = self.path.data_folder("nips4bplus", "audio")
         nips4bplus_all_audio_folder = self.path.data_folder("nips4bplus_all", "audio")
 
@@ -87,9 +106,7 @@ class NIPS4BPlusDownloader(Downloader):
         nips4bplus_selected_labels = []
         nips4bplus_labels = []
 
-        species_names = [species_name for species_name, sound_types in
-                         self.parse_species_list(species_list, {})]
-        selected_species = '|'.join(species_names)
+        species_to_sound_types = self.parse_species_list(species_list, {"song", "call"})
 
         for file in os.listdir(self.extracted_nips_annotations_folder):
             label_file_path = os.path.join(self.extracted_nips_annotations_folder, file)
@@ -105,7 +122,7 @@ class NIPS4BPlusDownloader(Downloader):
                 if len(class_name) != 1:
                     raise NameError(f"No unique label found for class {row['label']}")
 
-                if class_name["Scientific_name"].item() not in species_names:
+                if class_name["Scientific_name"].item() not in species_to_sound_types or class_name["sound_type"].item() not in species_to_sound_types[class_name["Scientific_name"].item()]:
                     return "noise"
                 else:
                     return class_name["class name"].item()
@@ -127,7 +144,7 @@ class NIPS4BPlusDownloader(Downloader):
                 for idx, label in labels.iterrows():
                     class_name = nips4b_species_list[nips4b_species_list["class name"] == label["label"]]
 
-                    if label["label"] != "noise" and class_name["Scientific_name"].item() in species_names:
+                    if label["label"] != "noise" and class_name["Scientific_name"].item() in species_to_sound_types:
                         contains_selected_species = True
                 if contains_selected_species:
                     nips4bplus_selected_labels.append(labels)
@@ -140,7 +157,9 @@ class NIPS4BPlusDownloader(Downloader):
         self.save_label_file(nips4bplus_labels, "nips4bplus_all")
         if len(nips4bplus_selected_labels) > 0:
             nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
-            self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
+        else:
+            nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_name", "label", "start", "end"])
+        self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
 
         for split in ["train", "test"]:
             folder_path = os.path.join(self.extracted_nips_audio_folder, split)
@@ -156,6 +175,13 @@ class NIPS4BPlusDownloader(Downloader):
                 os.remove(os.path.join(nips4bplus_all_audio_folder, file))
 
     def download_nips4bplus_dataset(self, species_list: List[str]):
+        """
+        Downloads whole NIPS4BPlus dataset and creates labels using the categories from the provided species list.
+        The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
+
+        param: species_list: list of species and sound types in the above mentioned  format
+        """
+
         self.path.empty_dir(self.nips4bplus_folder)
 
         self.download_nips4b_audio_files()

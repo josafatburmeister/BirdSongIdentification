@@ -139,9 +139,6 @@ class XenoCantoDownloader(Downloader):
         if use_nips4b_species_list or not species_list:
             nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
             species_list = nips4bplus_downloader.download_nips4b_species_list()
-            species_list["sound_type"] = species_list["sound_type"].apply(
-                lambda sound_type: XenoCantoDownloader.nips4bplus_sound_types_to_xc_sound_types[
-                    sound_type] if sound_type in XenoCantoDownloader.nips4bplus_sound_types_to_xc_sound_types else "")
             species_list["species_sound_type"] = species_list.apply(
                 lambda row: row["Scientific_name"] + ", " + row["sound_type"] if row["sound_type"] else row[
                     "Scientific_name"], axis=1)
@@ -180,7 +177,7 @@ class XenoCantoDownloader(Downloader):
         categories = []
 
         for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list,
-                                                                                        XenoCantoDownloader.xc_sound_types):
+                                                                                        XenoCantoDownloader.xc_sound_types).items():
             try:
                 labels, _ = self.download_species_metadata(species_name)
             except Exception as e:
@@ -267,6 +264,7 @@ class XenoCantoDownloader(Downloader):
 
             # select relevant columns
             labels = labels[["id", "file_name", "start", "end", "label", "sound_type"]]
+            labels = labels[labels["end"] > 0]
 
             for sound_type in selected_sound_types:
                 # obtain random subset if maximum_samples_per_class is set

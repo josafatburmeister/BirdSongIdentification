@@ -39,7 +39,7 @@ class Downloader:
             else:
                 species[species_name] = species[species_name].union(sound_types)
 
-        return species.items()
+        return species
 
     @staticmethod
     def train_test_split(labels: pd.DataFrame, test_size: float = 0.4, random_state: int = 12) -> Tuple[
