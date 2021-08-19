@@ -1,8 +1,3 @@
----
-title: "Blackbird or Robin? - Implementation of a Fully Automated Machine Learning Pipeline for Bird Vocalization Recognition"
-author: Josafat-Mattias Burmeister, Maximilian Götz
----
-
 # Blackbird or Robin? - Implementation of a Fully Automated Machine Learning Pipeline for Bird Vocalization Recognition
 
 #### Josafat-Mattias Burmeister, Maximilian Götz
