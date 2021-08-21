@@ -47,6 +47,12 @@ Following a similar approach, Koh et al. won the BirdCLEF challenge in 2018. The
 
 ## Methods
 
+### Use Case Specification
+
+Our work aims to implement an end-to-end machine learning pipeline that automates the training bird sound recognition models. Based on promising results of previous work, we focus on training deep convolutional neural networks (DCNN) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [\cite{koh-2018}]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
+
+To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database, which is the largest publicly available collection of bird sound recordings. To train DCNN models, we convert the audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto are usually dominated by the vocalizations of one focus species, but may include other bird vocalizations in the background. Since Xeno-Canto only includes file-level annotations, but no time-accurate annotations, we use only the focal species for spectrogram labeling and ignore the background species. In contrast to recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations. To generalize our models to such use cases, we train multi-label classification models, even though our training data is single-label data. In order to obtain time-accurate predictions, we split the audio files into fixed-length chunks (1 second) and create separate spectrograms and thus separate predictions for each chunk.
+
 # References
 
 <div style="text-align: justify">
