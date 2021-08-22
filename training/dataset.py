@@ -33,6 +33,7 @@ class XenoCantoSpectrograms(Dataset):
             raise NameError("Data files missing: ", self.data_dir)
 
         self.labels = pd.read_csv(self.label_file)
+        self.labels = self.labels[self.labels["file_name"].str.endswith(".png")]
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
         self.class_to_idx = {}
