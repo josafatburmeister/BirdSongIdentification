@@ -45,7 +45,7 @@ Following a similar approach, Koh et al. won the BirdCLEF challenge in 2018. The
 
 </div>
 
-## Methods
+## Our Approach
 
 ### Use Case Specification
 
@@ -54,6 +54,44 @@ Following a similar approach, Koh et al. won the BirdCLEF challenge in 2018. The
 Our work aims to implement an end-to-end machine learning pipeline that automates the training bird sound recognition models. Based on promising results of previous work, we focus on training deep convolutional neural networks (DCNN) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [\cite{koh-2018}]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
 
 To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database, which is the largest publicly available collection of bird sound recordings. To train DCNN models, we convert the audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto are usually dominated by the vocalizations of one focus species, but may include other bird vocalizations in the background. Since Xeno-Canto only includes file-level annotations, but no time-accurate annotations, we use only the focal species for spectrogram labeling and ignore the background species. In contrast to recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations. To generalize our models to such use cases, we train multi-label classification models, even though our training data is single-label data. To evaluate the performance of our models in such a scenario, we use the NIPS4BPlus dataset as an additional test dataset [\cite{nips4bplus}]. In order to obtain time-accurate predictions, we split the audio files into fixed-length chunks (1 second) and create separate spectrograms and thus separate predictions for each chunk.
+
+</div>
+
+### Pipeline Architecture
+
+<div style="text-align: justify">
+
+Conceptually, our machine learning pipeline consists of the following four stages:
+
+(1) Download of audio data and labels
+
+(2) Conversion of audio files into spectrograms and filtering of spectrograms containing only noise
+
+(3) Training of DCNN image classification models on the spectrograms and tuning of model hyperparameters
+
+(4) Model evaluation on test datasets
+
+All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook and a Kubeflow pipeline. Both variants use the same Python implementation, with the definition of our Kubeflow pipeline providing a wrapper for the interface of our Python classes.
+
+</div>
+
+### Stage 1: Data Download
+
+<div style="text-align: justify">
+
+The downloader stage is responsible for downloading the audio files and labels needed for model training and evalution, and converting them into a consistent format. Our pipeline uses CSV files with the table structure shown in Table 1 as label format. One table row is created per labeld bird vocalization, storing the path of the associated audio file and the start and end time of the vocalization. By means of this label format, both single- and multi-label classification tasks can be supported. In addition, both time-annotated and file-level annotated datasets can be handled. In the latter case, only one label is created per file, with the start time set to 0 and the end time set to the length of the audio file.
+
+| id     | file_name  | start | end    | label                        |
+| ------ | ---------- | ----- | ------ | ---------------------------- |
+| 368261 | 368261.mp3 | 0     | 47000  | Phylloscopus_collybita_song  |
+| 619980 | 619980.mp3 | 0     | 11000  | Turdus_philomelos_song       |
+| 619980 | 619980.mp3 | 11000 | 174000 | Troglodytes_troglodytes_song |
+
+Table 1: Example of a label file in CSV format used by our pipeline.
+
+To demonstrate the capability of our pipeline, we use both audio data from the Xeno-Canto database (for model training, validation and testing) and the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from a common base class. For downloading audio files from Xeno-Canto, we use the public Xeno-Canto API. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files. Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API. Based on the criteria defined by the pipeline user, the downloader compiles training, validation and test sets. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+
+To speed up the download phase, our downloader classes use multithreading where possible. In addition, we implement local caching of files such that subsequent pipeline runs do not need to download them again. When the pipeline is run as a Jupyter notebook, an ordinary directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage bucket is used for file caching.
 
 </div>
 
