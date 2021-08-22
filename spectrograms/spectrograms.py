@@ -324,6 +324,7 @@ class SpectrogramCreator:
         if len(spectrogram_labels) > 0:
             spectrogram_labels = pd.DataFrame(spectrogram_labels).sort_values(
                 by=['file_name']).fillna(0)
+            spectrogram_labels = spectrogram_labels[spectrogram_labels["file_name"] != 0]
 
             label_file = self.spectrogram_path.label_file(split, type="spectrograms")
             spectrogram_labels.to_csv(label_file)
