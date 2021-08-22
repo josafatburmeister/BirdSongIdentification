@@ -41,7 +41,7 @@ noise were applied [\cite{sprengel-2016}].
 
 In their winning submission to the 2017 BirdCLEF challenge, Sevilla employed an Inception-v4 model for classification of bird vocalizations. The model was trained using transfer learning and standard augmentation techniques, such as random hue, contrast, brightness, and saturation modifications. To guide the model's focus to relevant spectrogram regions, attention layers were added to Inception-v4 architecture [\cite{sevilla-2017}].
 
-Following a similar approach, Koh et al. won the BirdCLEF challenge in 2018. They trained Resnet18 and Inception models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address data imbalanced, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [\cite{koh2018}].
+Following a similar approach, Koh et al. achieved second place in the BirdCLEF challenge in 2019. They trained Resnet18 and Inception models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address data imbalanced, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [\cite{koh2019}].
 
 </div>
 
@@ -93,6 +93,22 @@ To demonstrate the capability of our pipeline, we use both audio data from the X
 
 To speed up the download phase, our downloader classes use multithreading where possible. In addition, we implement local caching of files such that subsequent pipeline runs do not need to download them again. When the pipeline is run as a Jupyter notebook, an ordinary directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage bucket is used for file caching.
 
+### Stage 2: Spectrogram Creation
+
+For spectrogram creation, we largely follow the approach described by Kot et al. [\cite{koh-2018}]. As in the work of Koh et al, we divide the audio files into non-overlapping 1-second chunks and create a mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_. We choose the parameters of the STFT so that the resulting spectrograms have a size of approximately 224 x 112 pixels. Table 2 provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [\cite{koh-2018}]. The spectrogram images are stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
+
+| Parameter         | Value     |
+| ----------------- | --------- |
+| Sampling rate     | 44100 Hz  |
+| Window length     | 1024      |
+| Hop length        | 196       |
+| Minimum frequency | 500 Hz    |
+| Maximum frequency | 15,000 Hz |
+
+Table 2: Parameter settings of the short-time Fourier transform used for spectrogram creation.
+
+Since the audio files from Xeno-Canto are only labeled at the file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value. First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshhold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows to include noise spectrograms for training as a separate class.
+
 </div>
 
 # References
@@ -119,6 +135,10 @@ To speed up the download phase, our downloader classes use multithreading where 
 
 [5] Hervé Goëau et al. “Overview of BirdCLEF 2018: Monospecies vs. Sundscape Bird Identification”. In: Working Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–12. URL: http://ceur-ws.org/Vol-2125/invited%5C_paper%5C_9.pdf.
 
+<!-- kahl-2017 -->
+
+Stefan Kahl et al. “Large-Scale Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–14. URL: http://ceur-ws.org/Vol-1866/paper_143.pdff.
+
 <!-- bird-clef-2019 -->
 
 [6] Stefan Kahl et al. “Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
@@ -127,7 +147,7 @@ To speed up the download phase, our downloader classes use multithreading where 
 
 [7] Stefan Kahl et al. “Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments”. In: Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper%5C_262.pdf.
 
-<!-- koh2018 -->
+<!-- koh2019 -->
 
 [8] Chih-Yuan Koh et al. “Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–10. URL: http://ceur-ws.org/Vol-2380/paper_68.pdf.
 
