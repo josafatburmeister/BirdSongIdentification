@@ -220,8 +220,8 @@ class ModelTrainer:
 
                     model_metrics.update(predictions, labels, loss)
 
-                    if phase == "val":
-                        model_tracker.track_best_model(model, model_metrics, epoch)
+                if phase == "val":
+                    model_tracker.track_best_model(model, model_metrics, epoch)
 
                 self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
 

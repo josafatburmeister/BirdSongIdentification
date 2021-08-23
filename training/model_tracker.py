@@ -37,16 +37,17 @@ class ModelTracker:
 
     def track_best_model(self, model: torch.nn.Module, model_metrics: metrics.Metrics, epoch: int):
         model_mean_f1 = torch.mean(model_metrics.f1_score())
+        print("Average F1-score of current epoch: {model_mean_f1}")
         if torch.mean(self.best_average_metrics.f1_score()) < model_mean_f1:
             self.best_average_epoch = epoch + 1
-            self.best_average_metrics = model_metrics
+            self.best_average_metrics = copy.deepcopy(model_metrics)
             self.best_average_model = copy.deepcopy(model.state_dict())
 
         if torch.min(self.best_minimum_metrics.f1_score()) < torch.min(model_metrics.f1_score()) \
                 or torch.min(self.best_minimum_metrics.f1_score()) == torch.min(model_metrics.f1_score()) \
                 and torch.mean(self.best_minimum_metrics.f1_score()) < model_mean_f1:
             self.best_minimum_epoch = epoch + 1
-            self.best_minimum_metrics = model_metrics
+            self.best_minimum_metrics = copy.deepcopy(model_metrics)
             self.best_minimum_model = copy.deepcopy(model.state_dict())
 
         if self.multi_label_classification:
@@ -56,8 +57,9 @@ class ModelTracker:
                 best_mean_f1 = torch.mean(self.best_metrics_per_class[class_name].f1_score())
                 if best_f1 < model_f1 or (best_f1 == model_f1 and best_mean_f1 < model_mean_f1):
                     self.best_epochs_per_class[class_name] = epoch + 1
-                    self.best_metrics_per_class[class_name] = model_metrics
+                    self.best_metrics_per_class[class_name] = copy.deepcopy(model_metrics)
                     self.best_models_per_class[class_name] = copy.deepcopy(model.state_dict())
+        logger.info(f"Best average F1-score: {torch.mean(self.best_average_metrics.f1_score())}")
 
     def save_model(self, model, model_path: str):
         self.path.ensure_dir(os.path.split(model_path)[0])
