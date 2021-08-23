@@ -3,6 +3,7 @@ import os
 import torch
 from datetime import datetime
 from general.filepaths import PathManager
+from general.logging import logger
 from training import metrics
 
 class ModelTracker:
@@ -37,7 +38,7 @@ class ModelTracker:
 
     def track_best_model(self, model: torch.nn.Module, model_metrics: metrics.Metrics, epoch: int):
         model_mean_f1 = torch.mean(model_metrics.f1_score())
-        print("Average F1-score of current epoch: {model_mean_f1}")
+        logger.info(f"Average F1-score of current epoch: {model_mean_f1}")
         if torch.mean(self.best_average_metrics.f1_score()) < model_mean_f1:
             self.best_average_epoch = epoch + 1
             self.best_average_metrics = copy.deepcopy(model_metrics)
