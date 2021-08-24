@@ -109,6 +109,52 @@ Table 2: Parameter settings of the short-time Fourier transform used for spectro
 
 Since the audio files from Xeno-Canto are only labeled at the file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value. First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshhold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows to include noise spectrograms for training as a separate class.
 
+### Stage 3: Model Training
+
+### Stage 4: Model Evaluation
+
+## Experiments
+
+To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and are not longer than 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2.
+
+For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset.
+
+| Class name                    | No. recordings in training set | No. spectrograms in training set | No. recordings in validation set | No. spectrograms in validation set | No. recordings in test set | No. spectrograms in test set |
+| ----------------------------- | ------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------- | -------------------------- | ---------------------------- |
+| Cyanistes caeruleus, song     | 163                            |                                  | 55                               |                                    | 55                         |                              |
+| Erithacus rubecula, song      | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Fringilla coelebs, song       | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Luscinia megarhynchos, song   | 298                            |                                  | 99                               |                                    | 100                        |                              |
+| Parus major, song             | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Phylloscopus collybita, call  | 201                            |                                  | 67                               |                                    | 68                         |                              |
+| Phylloscopus collybita, song  | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Sylvia atricapilla, song      | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Troglodytes troglodytes, song | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| Turdusphilomelos, song        | 300                            |                                  | 100                              |                                    | 100                        |                              |
+| **Total**                     | **2762**                       |                                  | **921**                          |                                    | **923**                    |                              |
+
+Table 2: Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters
+
+### Baseline Setting
+
+To establish a baseline for our experiments, we first train a model with a standard setting (Table 2). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F1-score and report the average of the F1-scores of these best models.
+
+| Parameter               | Baseline Setting                                                  |
+| ----------------------- | ----------------------------------------------------------------- |
+| Model architecture      | ResNet18                                                          |
+| Fine-tuned model layers | conv. layer 3-4, fc.                                              |
+| Optimizer               | Adam                                                              |
+| Learning rate           | 0.0001                                                            |
+| Learning rate scheduler | cosine annealing learning rate scheduler with η<sub>min</sub> = 0 |
+| Batch size              | 1024                                                              |
+| Loss function           | Cross-entropy loss                                                |
+
+Table 3: Training setting of our baseline model
+
+### Hyperparameter-Tuning
+
+With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, regularization, probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch Size and learning Rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
+
 </div>
 
 # References
