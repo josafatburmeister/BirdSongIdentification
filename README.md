@@ -115,29 +115,48 @@ Since the audio files from Xeno-Canto are only labeled at the file level, it is 
 
 ## Experiments
 
-To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and are not longer than 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2.
+To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and are not longer than 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
 
-For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset.
+For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in Table 3.
 
 | Class name                    | No. recordings in training set | No. spectrograms in training set | No. recordings in validation set | No. spectrograms in validation set | No. recordings in test set | No. spectrograms in test set |
 | ----------------------------- | ------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------- | -------------------------- | ---------------------------- |
-| Cyanistes caeruleus, song     | 163                            |                                  | 55                               |                                    | 55                         |                              |
-| Erithacus rubecula, song      | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Fringilla coelebs, song       | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Luscinia megarhynchos, song   | 298                            |                                  | 99                               |                                    | 100                        |                              |
-| Parus major, song             | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Phylloscopus collybita, call  | 201                            |                                  | 67                               |                                    | 68                         |                              |
-| Phylloscopus collybita, song  | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Sylvia atricapilla, song      | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Troglodytes troglodytes, song | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| Turdusphilomelos, song        | 300                            |                                  | 100                              |                                    | 100                        |                              |
-| **Total**                     | **2762**                       |                                  | **921**                          |                                    | **923**                    |                              |
+| Cyanistes caeruleus, song     | 163                            | 5,374                            | 55                               | 1,426                              | 55                         | 1,407                        |
+| Erithacus rubecula, song      | 300                            | 13,269                           | 100                              | 4,668                              | 100                        | 5,027                        |
+| Fringilla coelebs, song       | 300                            | 9,890                            | 100                              | 3,145                              | 100                        | 3,260                        |
+| Luscinia megarhynchos, song   | 298                            | 18,156                           | 99                               | 5,817                              | 100                        | 6,472                        |
+| Parus major, song             | 300                            | 11,026                           | 100                              | 3,721                              | 100                        | 3,552                        |
+| Phylloscopus collybita, call  | 201                            | 4,990                            | 67                               | 1,352                              | 68                         | 1,599                        |
+| Phylloscopus collybita, song  | 300                            | 12,474                           | 100                              | 4,219                              | 100                        | 4,006                        |
+| Sylvia atricapilla, song      | 300                            | 14,786                           | 100                              | 5,304                              | 100                        | 4,968                        |
+| Troglodytes troglodytes, song | 300                            | 11,001                           | 100                              | 2,990                              | 100                        | 3,225                        |
+| Turdus philomelos, song       | 300                            | 22,291                           | 100                              | 6,901                              | 100                        | 6,995                        |
+| Noise                         | -                              | 22,291                           | -                                | 6,901                              | -                          | 6,995                        |
+| **Total**                     | **2,762**                      | **145,548**                      | **921**                          | **46,444**                         | **923**                    | **47,506**                   |
 
 Table 2: Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters
 
+| Class name                                   | No. recordings in NIPS4BPlus dataset | No. spectrograms in NIPS4BPlus dataset |
+| -------------------------------------------- | ------------------------------------ | -------------------------------------- |
+| Cyanistes caeruleus, song                    | 9                                    | 30                                     |
+| Erithacus rubecula, song                     | 19                                   | 47                                     |
+| Fringilla coelebs, song                      | 12                                   | 24                                     |
+| Luscinia megarhynchos, song                  | 18                                   | 38                                     |
+| Parus major, song                            | 15                                   | 40                                     |
+| Phylloscopus collybita, call                 | 9                                    | 12                                     |
+| Phylloscopus collybita, song                 | 14                                   | 31                                     |
+| Sylvia atricapilla, song                     | 8                                    | 17                                     |
+| Troglodytes troglodytes, song                | 9                                    | 31                                     |
+| Turdus philomelos, song                      | 17                                   | 55                                     |
+| Noise (whole NIPS4BPlus dataset)             | 549                                  | 2147                                   |
+| Noise (filtered NIPS4BPlus dataset)          | 87                                   | 333                                    |
+| **Total (filtered NIPS4BPlus / NIPS4BPlus)** | **107 / 569**                        | **486 / 2,300**                        |
+
+Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
+
 ### Baseline Setting
 
-To establish a baseline for our experiments, we first train a model with a standard setting (Table 2). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F1-score and report the average of the F1-scores of these best models.
+To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F1-score and report the average of the F1-scores of these best models.
 
 | Parameter               | Baseline Setting                                                  |
 | ----------------------- | ----------------------------------------------------------------- |
@@ -149,7 +168,7 @@ To establish a baseline for our experiments, we first train a model with a stand
 | Batch size              | 1024                                                              |
 | Loss function           | Cross-entropy loss                                                |
 
-Table 3: Training setting of our baseline model
+Table 4: Training setting of our baseline model
 
 ### Hyperparameter-Tuning
 
