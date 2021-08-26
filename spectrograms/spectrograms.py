@@ -1,6 +1,7 @@
+import joblib
+from joblib._parallel_backends import LokyBackend
 import librosa
 import math
-from multiprocessing.pool import ThreadPool
 import numpy
 import pandas as pd
 import os
@@ -46,7 +47,6 @@ class SpectrogramCreator:
     def __del__(self):
         if self.spectrogram_path.is_pipeline_run:
             self.spectrogram_path.empty_dir(self.spectrogram_path.cache_dir)
-
 
     def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
                       max_value_source: Optional[float] = None):
@@ -180,7 +180,8 @@ class SpectrogramCreator:
 
         return []
 
-    def create_spectrograms_from_file(self, audio_file: str, target_dir: str, signal_threshold: int, noise_threshold: int):
+    def create_spectrograms_from_file(self, audio_file: str, target_dir: str, signal_threshold: int,
+                                      noise_threshold: int):
         cached_spectrograms_for_current_file = self.get_cached_spectrograms(
             audio_file)
         if len(cached_spectrograms_for_current_file) > 0:
@@ -231,7 +232,8 @@ class SpectrogramCreator:
             except Exception:
                 logger.info("Could not process %s", audio_file)
 
-    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int, desc: Optional[str] = None, spectrogram_creation_threads=1):
+    def create_spectrograms_from_dir(self, audio_dir: str, target_dir: str, signal_threshold: int, noise_threshold: int,
+                                     desc: Optional[str] = None, spectrogram_creation_threads=5):
         # clean up target dir
         PathManager.empty_dir(target_dir)
 
@@ -246,17 +248,22 @@ class SpectrogramCreator:
                 audio_path = os.path.join(audio_dir, file_name)
                 self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
 
-        if self.spectrogram_path.is_pipeline_run or spectrogram_creation_threads <= 1:
+        if spectrogram_creation_threads <= 1:
             for file_name in audio_file_names:
                 spectrogram_task(file_name)
                 progress_bar.update(1)
         else:
-            pool = ThreadPool(spectrogram_creation_threads)
+            batch_size = 20
+            audio_file_names_batches = [audio_file_names[x:x + batch_size] for x in
+                                        range(0, len(audio_file_names), batch_size)]
+            for audio_file_names in audio_file_names_batches:
+                jobs = [joblib.delayed(spectrogram_task)(file_name) for file_name in audio_file_names]
+                joblib.Parallel(n_jobs=spectrogram_creation_threads)(jobs)
 
-            for _ in pool.imap_unordered(lambda file_name: spectrogram_task(file_name), audio_file_names):
-                progress_bar.update(1)
+                progress_bar.update(len(audio_file_names))
 
-    def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, signal_threshold: int = 3, noise_threshold: int = 1, clear_spectrogram_cache: bool = False, ):
+    def create_spectrograms_for_splits(self, splits: Optional[List[str]] = None, signal_threshold: int = 3,
+                                       noise_threshold: int = 1, clear_spectrogram_cache: bool = False):
         if splits is None:
             splits = ["train", "val", "test", "nips4bplus", "nips4bplus_all"]
 
@@ -266,7 +273,6 @@ class SpectrogramCreator:
         for split in splits:
             spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms")
             audio_dir = self.audio_path.data_folder(split, "audio")
-            audio_label_file = self.audio_path.label_file(split, type="audio")
             PathManager.ensure_dir(spectrogram_dir)
             self.create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, signal_threshold, noise_threshold, f"{split} set")
@@ -288,7 +294,7 @@ class SpectrogramCreator:
                 file_number = int(file_number)
 
                 start = file_number * self.chunk_length
-                end = (file_number+1) * self.chunk_length
+                end = (file_number + 1) * self.chunk_length
                 matching_labels = labels[labels["id"].astype(str) == file_id]
 
                 if file.endswith("noise.png"):
@@ -304,7 +310,7 @@ class SpectrogramCreator:
                 found_match = False
 
                 for idx, label in matching_labels.iterrows():
-                    if start <= label["start"] and label["start"] < end or start <= label["end"] and label["end"] < end\
+                    if start <= label["start"] and label["start"] < end or start <= label["end"] and label["end"] < end \
                             or label["start"] <= start and end <= label["end"]:
                         final_label[label["label"]] = 1
                         final_label["id"] = file_id
