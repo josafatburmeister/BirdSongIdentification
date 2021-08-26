@@ -269,6 +269,7 @@ class SpectrogramCreator:
 
         if clear_spectrogram_cache:
             self.spectrogram_path.clear_cache("spectrograms", chunk_length=self.chunk_length)
+            self.index_cached_spectrograms()
 
         for split in splits:
             spectrogram_dir = self.spectrogram_path.data_folder(split, "spectrograms")
