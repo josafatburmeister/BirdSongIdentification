@@ -117,11 +117,15 @@ The model training stage of our pipeline can be used either to train DCNN models
 
 We train the models using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [\cite{image-net}]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
 
+To select the best model from each training run, we use a macro-averaged F1-score as performance metric. The macro F1-score weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on the frequent classes.
+
 <sup>2</sup> https://pytorch.org
 
 <sup>3</sup> https://pytorch.org/vision/stable/index.html
 
 ### Stage 4: Model Evaluation
+
+In the model evaluation stage, the best model from the training stage is evaluated on test datasets that have not been used for model training or validation. In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models. As in the training stage, the macro-average F1 score is used as the primary evauation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component. Although model evaluation is conceptually a separate pipeline stage, in Kubeflow we have implemented model training and evaluation as a joint pipeline component for performance reasons.
 
 ## Experiments
 
