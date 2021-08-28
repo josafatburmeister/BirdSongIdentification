@@ -51,5 +51,6 @@ class ModelEvaluator(model_runner.ModelRunner):
                 model_metrics.update(predictions, labels)
         logger.info("Model performance of %s on %s set:", model_name, split)
         metric_logger.log_metrics(model_metrics, "test", 0)
+        metric_logger.store_summary_metrics(model_metrics)
 
         metric_logger.finish()

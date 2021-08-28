@@ -124,6 +124,11 @@ class TrainingLogger:
         with open("/MLPipeline_Metrics.json", mode="w") as json_file:
             json.dump(metrics, json_file)
 
+    def store_summary_metrics(self, metrics):
+        wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(metrics.f1_score())
+        wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(metrics.f1_score())
+        wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(metrics.f1_score())
+
     def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics,
                             best_epochs_per_class=None, best_metrics_per_class=None):
         logger.info("Summary")
@@ -134,10 +139,7 @@ class TrainingLogger:
         self.print_metrics(best_minimum_metrics)
 
         if self.track_metrics:
-            wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(best_average_metrics.f1_score())
-            wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(best_average_metrics.f1_score())
-            wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(best_average_metrics.f1_score())
-
+            self.store_summary_metrics(best_average_metrics)
         if best_metrics_per_class:
             for class_name, best_class_metrics in best_metrics_per_class.items():
                 logger.info("Validation metrics of best model for class %s (epoch %s):", class_name,
