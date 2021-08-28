@@ -113,7 +113,9 @@ Since the audio files from Xeno-Canto are only labeled at the file level, it is 
 
 ### Stage 3: Model Training
 
-The model training stage of our pipeline can be used either to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It was implemented using the Pytorch framework<sup>2</sup> and the Torchvision library<sup>3</sup>. Building on the convetions of the Torchvision library, the training component is designed in such a way that the model architecture used can be easily exchanged. For our use case, we mainly use the ResNet18 architecture, as it has been successfully used for bird sound classification in previous work [\cite{koh-2017}]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird calls may occur simultaneously in the spectrograms. We train the models using a transfer learning approach. For this, we use models pre-trained on the ImageNet dataset and then fine-tune some of the model layers on our data. We obtain the weights of the pre-trained models from the Torchvision library and replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks. Our implementation supports various degrees of transfer learning, from re-training only the fully-connected layer to fine-tuning all model layers.
+The model training stage of our pipeline can be used either to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It was implemented using the Pytorch framework<sup>2</sup> and the Torchvision library<sup>3</sup>. Building on the convetions of the Torchvision library, the training component is designed in such a way that the model architecture used can be easily exchanged. For our use case, we mainly use the ResNet18 architecture, as it has been successfully applied to bird sound classification in previous work [\cite{koh-2017}]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird calls may occur simultaneously in some recordings.
+
+We train the models using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [\cite{image-net}]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
 
 <sup>2</sup> https://pytorch.org
 
@@ -187,6 +189,10 @@ With the goal of improving the performance of our baseline models, we tuned seve
 # References
 
 <div style="text-align: justify">
+
+<!-- image-net -->
+
+Jia Deng et al. “ImageNet: A large-scale hierarchical image database”. In: Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition (San Francisco, USA). IEEE, 2009, pp. 248–255. ISBN: 978-1-4244-3992-8. DOI: 10.1109/CVPR.2009.5206848.
 
 <!-- bird-clef-2014 -->
 

@@ -184,6 +184,6 @@ class PathManager:
         PathManager.gcs_copy_file(file_path, self.gcs_cache(subdir, **kwargs))
 
     def clear_cache(self, subdir: str, **kwargs):
-        PathManager.empty_dir(self.cache(subdir))
+        PathManager.empty_dir(self.cache(subdir, **kwargs))
         if self.is_pipeline_run:
             PathManager.gcs_remove_dir(self.gcs_cache(subdir, **kwargs))
