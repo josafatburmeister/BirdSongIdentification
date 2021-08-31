@@ -26,9 +26,6 @@ class NIPS4BPlusDownloader(Downloader):
                                                               NIPS4BPlusDownloader.nips4bplus_annotations_folder_name)
         self.extracted_nips_audio_folder = os.path.join(self.nips4bplus_folder, NIPS4BPlusDownloader.nips4b_audio_folder_name)
 
-    def __del__(self):
-        super().__del__
-
     def download_nips4b_audio_files(self):
         """
         Downloads audio files of NIPS4B dataset

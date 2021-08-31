@@ -53,9 +53,6 @@ class XenoCantoDownloader(Downloader):
     def __init__(self, path_manager: PathManager):
         super().__init__(path_manager)
 
-    def __del__(self):
-        super().__del__
-
     def metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)

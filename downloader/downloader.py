@@ -76,11 +76,6 @@ class Downloader:
             self.path.copy_cache_from_gcs("audio")
             self.path.copy_cache_from_gcs("labels")
 
-    def __del__(self):
-        # clean up
-        if self.path.is_pipeline_run:
-            PathManager.empty_dir(self.path.cache_dir)
-
     def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None):
         """
         Downloads file from given URL and saves it in target path. If cache_dir parameter is set the downloaded file is cached to speedup later download request of the same file.

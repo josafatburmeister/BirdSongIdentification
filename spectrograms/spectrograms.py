@@ -44,10 +44,6 @@ class SpectrogramCreator:
 
         self.index_cached_spectrograms()
 
-    def __del__(self):
-        if self.spectrogram_path.is_pipeline_run:
-            self.spectrogram_path.empty_dir(self.spectrogram_path.cache_dir)
-
     def scale_min_max(self, x, min_value: float = 0.0, max_value: float = 1.0, min_value_source: Optional[float] = None,
                       max_value_source: Optional[float] = None):
         invert_image = False

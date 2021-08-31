@@ -21,6 +21,8 @@ class PipelineSteps:
         nips4bplus_downloader = NIPS4BPlusDownloader(path_manager)
         nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 
+        PathManager.empty_dir(path_manager.cache_dir)
+
     def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, signal_threshold=3, noise_threshold=1,
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):
         if verbose_logging:
@@ -40,6 +42,7 @@ class PipelineSteps:
 
         # clean up
         PathManager.empty_dir(input_path)
+        PathManager.empty_dir(spectrogram_path_manager.cache_dir)
 
     def train_model(self, input_path: str, gcs_bucket: str, experiment_name: str = "", verbose_logging: bool = False,
                     **kwargs):
