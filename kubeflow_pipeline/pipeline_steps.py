@@ -52,7 +52,9 @@ class PipelineSteps:
         do_hyperparameter_tuning = False
 
         for hyperparameter in hyperparameter_tuner.HyperparameterTuner.tunable_parameters():
-             if hyperparameter in kwargs and type(kwargs[hyperparameter]) == list:
+             if hyperparameter in kwargs and (hyperparameter != "layers_to_unfreeze" and type(
+                     kwargs[hyperparameter]) == list or hyperparameter == "layers_to_unfreeze" and type(
+                 kwargs[hyperparameter]) == list and type(kwargs[hyperparameter][0]) == list):
                 do_hyperparameter_tuning = True
 
         spectrogram_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
