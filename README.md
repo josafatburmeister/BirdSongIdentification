@@ -293,3 +293,75 @@ Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ n
 [21] Dan Stowell et al. “Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge”. In: Methods in Ecology and Evolution 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: 10.1111/2041-210X.13103.
 
 </div>
+
+# Technical Documentation
+
+## Running the pipeline in a Jupyter notebook
+
+Our pipeline can be run in a Jupyter notebook by creating instances of the pipeline components and calling specific methods on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as an Jupyter notebook named demo.ipynb.
+
+Our pipeline requires Python 3.7 and Jupyter, please make sure that both are installed.
+
+To install the dependencies of our pipeline, we recommend using a virtual environment. A virtual environment can be created and activated with the following commands:
+
+```bash
+python3 -m venv env
+```
+
+```bash
+source ./env/bin/activate
+```
+
+The dependencies can then be installed with the following command:
+
+```bash
+python3 -m pip install -r requirements-notebook.txt
+```
+
+The components of our pipeline do not communicate directly with each other, but pass files through a shared directory. The management of the file paths within the shared directory is implemented in the `PathManager` class. The following code creates an instance of the PathManager class. The path of the directory in which the data of the pipeline is to be stored is passed to the constructor of the PathManager class:
+
+```python
+from general import PathManager
+
+path_manager = PathManager("./data")
+```
+
+All our pipeline components use a shared logger to output status information. For the demo pipeline, we set the logging level to verbose:
+
+```python
+import logging
+
+from general import logger
+
+logger.setLevel(logging.VERBOSE)
+```
+
+With this, we can now run the data download stage of the pipeline. For this, instances of the respective downloader classes must be created. In our example, we download audio data from Xeno-Canto and compile train, validation and test split from it. To do this, we create an instance of the `XenoCantoDownloader` class and then call the `create_datasets` method on it. The `create_datasets` has a number of parameters that can be used to specify which data should be downloaded from Xeno-Canto. Among the most important is the parameter `species_list`, which specifies which bird species and sound categories should be included in the compiled dataset, and the parameter `maximum_samples_per_class`, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+
+```python
+from downloader import XenoCantoDownloader
+
+xc_downloader = XenoCantoDownloader(path_manager)
+
+species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
+
+xc_downloader.create_datasets(
+    species_list=species_list,
+    use_nips4b_species_list=False,
+    maximum_samples_per_class=10,
+    maximum_recording_length=180,
+    test_size=0.4,
+    min_quality="A",
+    sound_types=["song", "call"],
+    sexes=None,
+    life_stages=None,
+    exclude_special_cases=True,
+    maximum_number_of_background_species=0,
+    clear_audio_cache=False,
+    clear_label_cache=False,
+    )
+```
+
+## Running the pipeline in Kubeflow
+
+## Implementing custom pipeline components
