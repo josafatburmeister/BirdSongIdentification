@@ -25,11 +25,6 @@ inputs:
       description: "Size of the training batches",
     }
   - {
-      name: Chunk Length,
-      type: Integer,
-      description: "Chunk length in milliseconds",
-    }
-  - {
       name: Experiment Name,
       type: String,
       description: "Experiment Description"
@@ -176,8 +171,6 @@ implementation:
         { inputValue: Architecture },
         --batch_size,
         { inputValue: Batch Size },
-        --chunk_length,
-        { inputValue: Chunk Length },
         --early_stopping,
         { inputValue: Early Stopping },
         --experiment_name,
