@@ -1,9 +1,12 @@
 import json
-from tabulate import tabulate
+
 import torch
 import wandb
+from sklearn.metrics import f1_score
+from tabulate import tabulate
 
 from general.logging import logger
+from training.metrics import Metrics
 
 
 class TrainingLogger:
@@ -24,7 +27,7 @@ class TrainingLogger:
     }
 
     def __init__(self, model_trainer, config=None, is_pipeline_run: bool = False, track_metrics=False,
-                 wandb_entity_name="", wandb_project_name="", wandb_key=""):
+                 wandb_entity_name="", wandb_project_name="", wandb_key="") -> None:
         if not config:
             config = {}
         self.trainer = model_trainer
@@ -40,13 +43,13 @@ class TrainingLogger:
             wandb.init(project=wandb_project_name, entity=wandb_entity_name, config=config)
             wandb.run.name = config["experiment_name"]
 
-    def get_run_id(self):
+    def get_run_id(self) -> str:
         if self.track_metrics:
             return wandb.run.id
         else:
             return ""
 
-    def print_metrics(self, metrics_object):
+    def __print_metrics(self, metrics_object: Metrics) -> None:
         logger.info("")
 
         table_headers = ["metric"]
@@ -68,8 +71,8 @@ class TrainingLogger:
         logger.info(tabulate(metric_rows, headers=table_headers, tablefmt='github', floatfmt=".4f", numalign="center"))
         logger.info("")
 
-    def log_metrics(self, model_metrics, phase, epoch, loss=None):
-        self.print_metrics(model_metrics)
+    def log_metrics(self, model_metrics: Metrics, phase: str, epoch: int, loss=None) -> None:
+        self.__print_metrics(model_metrics)
 
         if self.track_metrics:
             tolog = {'phase': phase, 'epoch': epoch, 'loss': loss}
@@ -86,7 +89,8 @@ class TrainingLogger:
                         tolog[metric_name] = metric[class_id]
             wandb.log(tolog, step=epoch)
 
-    def log_metrics_in_kubeflow(self, best_average_metrics, best_minimum_metrics, best_metrics_per_class=None):
+    def log_metrics_in_kubeflow(self, best_average_metrics: {f1_score}, best_minimum_metrics: {f1_score},
+                                best_metrics_per_class=None) -> None:
         metrics = {
             'metrics': [
                 {
@@ -124,19 +128,19 @@ class TrainingLogger:
         with open("/MLPipeline_Metrics.json", mode="w") as json_file:
             json.dump(metrics, json_file)
 
-    def store_summary_metrics(self, metrics):
+    def store_summary_metrics(self, metrics: {f1_score}) -> None:
         wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(metrics.f1_score())
         wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(metrics.f1_score())
         wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(metrics.f1_score())
 
     def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics,
-                            best_epochs_per_class=None, best_metrics_per_class=None):
+                            best_epochs_per_class=None, best_metrics_per_class=None) -> None:
         logger.info("Summary")
         logger.info('-' * 10)
         logger.info("Validation metrics of model with best average F1-Scores (epoch %s):", best_average_epoch)
-        self.print_metrics(best_average_metrics)
+        self.__print_metrics(best_average_metrics)
         logger.info("Validation metrics of model with best minimum F1-Score (epoch %s):", best_minimum_epoch)
-        self.print_metrics(best_minimum_metrics)
+        self.__print_metrics(best_minimum_metrics)
 
         if self.track_metrics:
             self.store_summary_metrics(best_average_metrics)
@@ -144,14 +148,15 @@ class TrainingLogger:
             for class_name, best_class_metrics in best_metrics_per_class.items():
                 logger.info("Validation metrics of best model for class %s (epoch %s):", class_name,
                             best_epochs_per_class[class_name])
-                self.print_metrics(best_class_metrics)
+                self.__print_metrics(best_class_metrics)
 
                 if self.track_metrics:
                     for metric_name, get_method in self.metrics.items():
                         metric = get_method(best_class_metrics)
-                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[self.class_to_id_mapping[class_name]].item()
-                        wandb.run.summary[f"{class_name}_{metric_name}_best_epoch_val"] = best_epochs_per_class[class_name]
-
+                        wandb.run.summary[f"{class_name}_{metric_name}_best_model_val"] = metric[
+                            self.class_to_id_mapping[class_name]].item()
+                        wandb.run.summary[f"{class_name}_{metric_name}_best_epoch_val"] = best_epochs_per_class[
+                            class_name]
 
         if self.track_metrics:
             for metric_name, get_method in self.metrics.items():
@@ -163,7 +168,6 @@ class TrainingLogger:
                     wandb.run.summary[f"{class_name}_{metric_name}_min_model"] = min_metric[class_id].item()
                     wandb.run.summary[f"{class_name}_best_epoch_min_model"] = best_minimum_epoch
 
-
-    def finish(self):
+    def finish(self) -> None:
         if self.track_metrics:
             wandb.run.finish()

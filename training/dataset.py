@@ -1,12 +1,13 @@
-import numpy as np
 import os
+from typing import KeysView, T_co
+
+import numpy as np
 import pandas as pd
-from PIL import Image
 import torch
+from PIL import Image
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
-from typing import List
 
 from general.filepaths import PathManager
 from general.logging import logger
@@ -14,7 +15,8 @@ from general.logging import logger
 
 class XenoCantoSpectrograms(Dataset):
     def __init__(self, path_manager: PathManager, include_noise_samples: bool = True,
-                 split: str = "train", multi_label_classification: bool = False, undersample_noise_samples: bool = True):
+                 split: str = "train", multi_label_classification: bool = False,
+                 undersample_noise_samples: bool = True) -> None:
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -64,7 +66,7 @@ class XenoCantoSpectrograms(Dataset):
             logger.info("Total: %i", len(self.labels))
             logger.info("\n")
 
-    def create_class_indices(self):
+    def create_class_indices(self) -> None:
         categories = list(np.loadtxt(self.path_manager.categories_file(), delimiter=",", dtype=str))
 
         if self.include_noise_samples and not self.multi_label_classification:
@@ -75,28 +77,28 @@ class XenoCantoSpectrograms(Dataset):
         for idx, class_name in enumerate(sorted(categories)):
             self.class_to_idx[class_name] = idx
 
-    def class_to_id_mapping(self):
+    def class_to_id_mapping(self) -> dict:
         return self.class_to_idx
 
-    def id_to_class_mapping(self):
+    def id_to_class_mapping(self) -> dict:
         return {value: key for key, value in self.class_to_idx.items()}
 
-    def id_to_class_name(self, id: int):
-        return self.id_to_class_mapping()[id]
+    def id_to_class_name(self, identifier: int):
+        return self.id_to_class_mapping()[identifier]
 
     def class_name_to_id(self, class_name: str):
         return self.class_to_idx[str(class_name)]
 
-    def class_names(self):
+    def class_names(self) -> KeysView:
         return self.class_to_idx.keys()
 
-    def num_classes(self):
+    def num_classes(self) -> int:
         return len(self.class_to_idx)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.labels)
 
-    def __getitem__(self, idx: [int] or Tensor):
+    def __getitem__(self, idx: [int] or Tensor) -> T_co:
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
@@ -116,8 +118,10 @@ class XenoCantoSpectrograms(Dataset):
             for class_name, class_id in self.class_to_idx.items():
                 if label[class_name] == 1:
                     label_tensor = class_id
-                    # in the single label case there should be only one positive class per spectrogram, so we can stop here
+                    # in the single label case there should be only one positive class per spectrogram,
+                    # so we can stop here
                     break
+            # TODO ist label_tensor hier gesetzt?
             if torch.sum(label_tensor) == 0 and self.include_noise_samples:
                 label_tensor[self.class_name_to_id("noise")] = 1
 

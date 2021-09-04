@@ -1,9 +1,11 @@
 import argparse
-from google.colab import drive
 import os
 import shutil
 import subprocess
 import sys
+
+from google.colab import drive
+
 
 def setup_colab_environment(data_path: str, branch: str = "main"):
     git_repo_dir = "/content/BirdSongIdentification"
@@ -40,6 +42,7 @@ def setup_colab_environment(data_path: str, branch: str = "main"):
 
     # force restart of runtime
     os.kill(os.getpid(), 9)
+
 
 if __name__ == '__main__':
 

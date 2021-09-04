@@ -1,19 +1,21 @@
-from training.training import ModelTrainer
-from general.logging import logger
-from tabulate import tabulate
 from typing import List
+
+from tabulate import tabulate
+
+from general.logging import logger
+from training.training import ModelTrainer
 
 
 class HyperparameterTuner:
     @staticmethod
-    def tunable_parameters():
+    def tunable_parameters() -> List[str]:
         return ["batch_size", "include_noise_samples", "layers_to_unfreeze", "learning_rate", "momentum", "p_dropout",
                 "weight_decay"]
 
     def __init__(self,
                  spectrogram_path_manager,
                  experiment_name: str,
-                 **kwargs):
+                 **kwargs) -> None:
         self.experiment_name = experiment_name
         self.spectrogram_path_manager = spectrogram_path_manager
         self.kwargs = kwargs
@@ -23,19 +25,22 @@ class HyperparameterTuner:
         self.best_average_f1_score = 0.0
         self.best_parameters = None
 
-    def tune(self, parameters: dict, experiment_name):
+    def __tune(self, parameters: dict, experiment_name: str) -> None:
         unresolved_parameters = False
         for hyperparameter in HyperparameterTuner.tunable_parameters():
-            if hyperparameter in parameters and (hyperparameter != "layers_to_unfreeze" and type(
-                    parameters[hyperparameter]) == list or hyperparameter == "layers_to_unfreeze" and type(
-                    parameters[hyperparameter]) == list and type(parameters[hyperparameter][0]) == list):
+            if hyperparameter in parameters and \
+                    (hyperparameter != "layers_to_unfreeze"
+                     and type(parameters[hyperparameter]) == list
+                     or hyperparameter == "layers_to_unfreeze"
+                     and type(parameters[hyperparameter]) == list
+                     and type(parameters[hyperparameter][0]) == list):
                 self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True
                 for parameter_value in parameters[hyperparameter]:
                     new_params = parameters
                     new_params[hyperparameter] = parameter_value
                     name = experiment_name + "_" + hyperparameter + "_" + str(parameter_value)
-                    self.tune(new_params, name)
+                    self.__tune(new_params, name)
 
         if not unresolved_parameters:
             logger.info("-" * 25)
@@ -54,7 +59,7 @@ class HyperparameterTuner:
                 self.best_average_f1_score = best_average_f1_score
                 self.best_parameters = parameters.copy()
 
-    def log_summary(self):
+    def __log_summary(self) -> None:
         logger.info("\n")
         logger.info("Best hyperparamater combination:")
         for hyperparameter in self.tuned_parameters:
@@ -78,7 +83,7 @@ class HyperparameterTuner:
                 logger.info(
                     tabulate(metrics, headers=table_headers, tablefmt='github', floatfmt=".4f", numalign="center"))
 
-    def tune_model(self):
+    def tune_model(self) -> None:
         logger.info("Hyperparameter Tuning \n")
-        self.tune(self.kwargs.copy(), self.experiment_name)
-        self.log_summary()
+        self.__tune(self.kwargs.copy(), self.experiment_name)
+        self.__log_summary()

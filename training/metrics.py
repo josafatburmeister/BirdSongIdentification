@@ -3,7 +3,7 @@ from torch import Tensor
 
 
 class Metrics:
-    def __init__(self, num_classes: int, multi_label: bool = False, device: torch.device = torch.device('cpu')):
+    def __init__(self, num_classes: int, multi_label: bool = False, device: torch.device = torch.device('cpu')) -> None:
         self.num_classes = num_classes
         self.multi_label = multi_label
         self.device = device
@@ -13,14 +13,14 @@ class Metrics:
         self.tn = torch.zeros(self.num_classes).to(device)
         self.loss = 0.0
 
-    def reset(self):
+    def reset(self) -> None:
         self.tp = torch.zeros(self.num_classes).to(self.device)
         self.fp = torch.zeros(self.num_classes).to(self.device)
         self.fn = torch.zeros(self.num_classes).to(self.device)
         self.tn = torch.zeros(self.num_classes).to(self.device)
         self.loss = 0.0
 
-    def update(self, predictions: torch.tensor, labels: torch.tensor, loss: torch.tensor = None):
+    def update(self, predictions: torch.tensor, labels: torch.tensor, loss: torch.tensor = None) -> None:
         if loss is not None:
             self.loss += loss.item() * predictions.shape[0]
         for prediction, label in zip(predictions, labels):
@@ -40,7 +40,7 @@ class Metrics:
                     self.tp += torch.zeros(self.num_classes).to(self.device).scatter_(0, prediction, 1)
                     self.tn += torch.ones(self.num_classes).to(self.device).scatter_(0, prediction, 0)
                 else:
-                    self.tn += torch.ones(self.num_classes).to(self.device)\
+                    self.tn += torch.ones(self.num_classes).to(self.device) \
                         .scatter_(0, torch.tensor([prediction, label]).to(self.device), 0)
                     self.fp += torch.zeros(self.num_classes).to(self.device).scatter_(0, prediction, 1)
                     self.fn += torch.zeros(self.num_classes).to(self.device).scatter_(0, label, 1)
@@ -49,8 +49,6 @@ class Metrics:
         precision = self.tp / (self.tp + self.fp)
         precision[torch.isnan(precision)] = 0.0
         return precision
-
-
 
     def recall(self) -> Tensor:
         recall = self.tp / (self.tp + self.fn)

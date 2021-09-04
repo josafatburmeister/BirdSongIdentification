@@ -1,7 +1,9 @@
+import logging
 import os
 from datetime import datetime
-import logging
+
 from kubeflow.metadata import metadata
+from kubeflow.metadata.metadata import Workspace, Execution
 
 from kubeflow_utils.config import settings
 
@@ -11,47 +13,49 @@ METADATA_STORE_PORT = settings.artifact_store.port
 
 
 class ArtifactStore(object):
-    def __init__(self):
+    def __init__(self) -> None:
         if os.environ.get(ARTIFACT_STORE_ENABLED_NAME) is not None:
             self.enabled = os.environ.get(ARTIFACT_STORE_ENABLED_NAME)
         else:
             self.enabled = False
 
         if self.enabled:
-            self.workspace = self.create_workspace()
-            self.exec = self.create_execution()
+            self.workspace = self.__create_workspace()
+            self.exec = self.__create_execution()
 
-    def re_init(self, pipeline_run: bool = False):
+    def re_init(self, pipeline_run: bool = False) -> None:
         if self.enabled:
             return
 
         self.enabled = pipeline_run
 
         if self.enabled:
-            self.workspace = self.create_workspace()
-            self.exec = self.create_execution()
+            self.workspace = self.__create_workspace()
+            self.exec = self.__create_execution()
 
-    def create_workspace(self):
+    def __create_workspace(self) -> Workspace:
         logging.info('create workspace')
         return metadata.Workspace(
             store=metadata.Store(grpc_host=METADATA_STORE_HOST, grpc_port=METADATA_STORE_PORT),
             name=settings.artifact_store.workspace.name,
             description=settings.artifact_store.workspace.description)
 
-    def create_execution(self):
+    def __create_execution(self) -> Execution:
         logging.info('create execution')
         r = metadata.Run(
             workspace=self.workspace,
             name="run" + datetime.utcnow().isoformat("T"),
-            description=settings.artifact_store.run.description)
+            description=settings.artifact_store.run.description
+        )
 
         return metadata.Execution(
             name="execution" + datetime.utcnow().isoformat("T"),
             workspace=self.workspace,
             run=r,
-            description=settings.artifact_store.execution.description)
+            description=settings.artifact_store.execution.description
+        )
 
-    def log_execution_input(self, dataset_name, dataset_description, owner, dataset_path, dataset_version):
+    def log_execution_input(self, dataset_name, dataset_description, owner, dataset_path, dataset_version) -> None:
         if not self.enabled:
             return
 
@@ -60,10 +64,11 @@ class ArtifactStore(object):
             description=dataset_description,
             owner=owner,
             uri=dataset_path,
-            version=dataset_version))
+            version=dataset_version)
+        )
         logging.info("Logged Metadata Dataset")
 
-    def log_execution_output(self, model_name, owner, dataset_path, evaluation):
+    def log_execution_output(self, model_name, owner, dataset_path, evaluation) -> None:
         if not self.enabled:
             return
 
@@ -77,7 +82,7 @@ class ArtifactStore(object):
         logging.info("Logged Metadata Metric")
 
     def log_model(self, model_name, model_version, model_description, owner, gs_path, hyperparameters, model_type,
-                  training_framework_name, training_framework_version):
+                  training_framework_name, training_framework_version) -> None:
         if not self.enabled:
             return
 

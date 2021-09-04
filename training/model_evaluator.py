@@ -1,12 +1,16 @@
-import torch
 from typing import Union
+
+import torch
 
 from general.logging import logger
 from training import metrics, model_runner
 
+
 class ModelEvaluator(model_runner.ModelRunner):
-    def __init__(self, spectrogram_path_manager, architecture: str, **kwargs):
+    def __init__(self, spectrogram_path_manager, architecture: str, **kwargs) -> None:
         super().__init__(spectrogram_path_manager, architecture, experiment_name="", **kwargs)
+        self.datasets = None
+        self.dataloaders = None
 
     def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device, num_classes: int):
         if type(model) == str:
@@ -19,7 +23,7 @@ class ModelEvaluator(model_runner.ModelRunner):
 
         return model
 
-    def evaluate_model(self, model: Union[str, torch.nn.Module], model_name: str, split: str):
+    def evaluate_model(self, model: Union[str, torch.nn.Module], model_name: str, split: str) -> None:
 
         # setup datasets
         datasets, dataloaders = self.setup_dataloaders([split])

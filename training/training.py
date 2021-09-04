@@ -1,17 +1,18 @@
 import time
 
 import torch
-from torch.utils.data import DataLoader
 from torch.optim import lr_scheduler
-from training.early_stopper import EarlyStopper
+from torch.utils.data import DataLoader
 
 from general.logging import logger
-from training import dataset, metrics, metric_logging, model_tracker as tracker
 from models import densenet, resnet
+from training import dataset, metrics, metric_logging, model_tracker as tracker
+from training.early_stopper import EarlyStopper
+
 
 class ModelTrainer:
     @staticmethod
-    def setup_device() -> torch.device:
+    def __setup_device() -> torch.device:
         device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info('Device set to: %s', device)
         return torch.device(device)
@@ -45,7 +46,7 @@ class ModelTrainer:
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name="",
-                 weight_decay=0):
+                 weight_decay=0) -> None:
         self.spectrogram_path_manager = spectrogram_path_manager
         self.architecture = architecture
         self.batch_size = batch_size
@@ -76,7 +77,7 @@ class ModelTrainer:
         self.min_change = min_change
 
         # setup datasets
-        datasets, dataloaders = self.setup_dataloaders()
+        datasets, dataloaders = self.__setup_dataloaders()
         self.datasets = datasets
         self.dataloaders = dataloaders
         self.num_classes = self.datasets["train"].num_classes()
@@ -85,12 +86,12 @@ class ModelTrainer:
 
         config = locals().copy()
         del config['spectrogram_path_manager']
-        device = self.setup_device()
+        device = self.__setup_device()
         self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
 
-    def setup_dataloaders(self):
+    def __setup_dataloaders(self):
         datasets = {}
         dataloaders = {}
 
@@ -108,7 +109,7 @@ class ModelTrainer:
 
         return datasets, dataloaders
 
-    def setup_model(self):
+    def __setup_model(self):
         logger.info("Setup %s model: ", self.architecture)
         if self.architecture == "resnet18":
             model = resnet.ResnetTransferLearning(architecture="resnet18",
@@ -138,7 +139,7 @@ class ModelTrainer:
         model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping()
         return model
 
-    def setup_optimization(self, model):
+    def __setup_optimization(self, model):
         if self.multi_label_classification:
             loss = torch.nn.BCEWithLogitsLoss()
         else:
@@ -163,9 +164,9 @@ class ModelTrainer:
         return loss, optimizer, scheduler
 
     def train_model(self):
-        model = self.setup_model()
-        device = ModelTrainer.setup_device()
-        loss_function, optimizer, scheduler = self.setup_optimization(model)
+        model = self.__setup_model()
+        device = ModelTrainer.__setup_device()
+        loss_function, optimizer, scheduler = self.__setup_optimization(model)
 
         model_tracker = tracker.ModelTracker(self.spectrogram_path_manager,
                                              self.experiment_name,
