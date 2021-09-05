@@ -80,12 +80,13 @@ class NIPS4BPlusDownloader(Downloader):
             lambda sound_type: NIPS4BPlusDownloader.nips4bplus_sound_types_to_xc_sound_types[
                 sound_type] if sound_type in NIPS4BPlusDownloader.nips4bplus_sound_types_to_xc_sound_types else "")
 
-        # FIXME multiline lambda gibt es glaube ich nicht, das sieht hier generell irgendwie kaputt aus,
-        #  sollte vielleicht generell etwas lesbarer werden
-        species_list["class name"] = species_list.apply(
-            lambda row: row["Scientific_name"].replace(" ", "_") + "_" + row["class name"].split("_")[1] if row[
-                                                                                                                "class name"] != "Empty" else "noise sample",
-            axis=1)
+        def get_class_name(row):
+            if row["class name"] != "Empty":
+                return row["Scientific_name"].replace(" ", "_") + "_" + row["class name"].split("_")[1]
+            else:
+                return "noise sample"
+
+        species_list["class name"] = species_list.apply(get_class_name, axis=1)
 
         species_list.to_csv(nips4bplus_species_list)
 

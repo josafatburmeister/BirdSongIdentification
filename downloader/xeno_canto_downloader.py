@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 from multiprocessing.pool import ThreadPool
-from typing import List, Optional, Union, Tuple, Any
+from typing import List, Optional, Union, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 
 from downloader import Downloader, NIPS4BPlusDownloader
 from general import logger, PathManager, ProgressBar
+from general.custom_types import JSON
 
 
 class XenoCantoDownloader(Downloader):
@@ -63,7 +64,7 @@ class XenoCantoDownloader(Downloader):
             progress_bar.update(1)
 
     # TODO fix annotations
-    def __download_species_metadata(self, species_name: str) -> Tuple[Any, int]:
+    def __download_species_metadata(self, species_name: str) -> Tuple[JSON, int]:
         metadata_file_path = self.__metadata_cache_path(species_name)
 
         # check if metadata file is in cache
@@ -121,11 +122,14 @@ class XenoCantoDownloader(Downloader):
         if use_nips4b_species_list or not species_list:
             nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
             species_list = nips4bplus_downloader.download_nips4b_species_list()
-            # FIXME multiline lambda ist problematisch
-            species_list["species_sound_type"] = species_list.apply(
-                lambda sl_row: sl_row["Scientific_name"] + ", " + sl_row["sound_type"] if sl_row["sound_type"] else
-                sl_row[
-                    "Scientific_name"], axis=1)
+
+            def get_species_sound_type(row):
+                if row["sound_type"]:
+                    return row["Scientific_name"] + ", " + row["sound_type"]
+                else:
+                    return row["Scientific_name"]
+
+            species_list["species_sound_type"] = species_list.apply(get_species_sound_type, axis=1)
             species_list = species_list["species_sound_type"].tolist()
             species_list = [item for item in species_list if item]
         if len(species_list) < 1:
