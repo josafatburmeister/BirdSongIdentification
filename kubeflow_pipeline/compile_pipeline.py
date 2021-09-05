@@ -1,5 +1,6 @@
 import os
 
+import fire
 import kfp
 from kfp.compiler import compiler
 from kubernetes.client import V1Toleration
@@ -123,3 +124,6 @@ def compile_pipeline():
 
     pipeline_filename = "birdsong_pipeline.zip"
     compiler.Compiler().compile(pipeline, pipeline_filename)
+
+if __name__ == "__main__":
+    fire.Fire(compile_pipeline)
