@@ -35,5 +35,3 @@ urllib3==1.26.5
 verboselogs==1.7
 wandb==0.10.33
 tabulate==0.8.9
-matplotlib~=3.4.2
-argparse~=1.4.0
