@@ -1,9 +1,10 @@
 import os
+import shutil
+from typing import Dict, List, Optional, Set, Tuple, Union
+
 import pandas as pd
 import requests
-import shutil
 from sklearn.model_selection import train_test_split
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 from general import logger, PathManager
 
@@ -14,7 +15,7 @@ class Downloader:
     """
 
     @staticmethod
-    def parse_species_list(species_list: List[str], default_sound_types: Union[List[str], Set[str]]) -> Dict[str, str]:
+    def parse_species_list(species_list: List[str], default_sound_types: Union[List[str], Set[str]]) -> Dict[str, set]:
         """
         Parses a list of strings, where each string contains a species name and its sound types.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
@@ -42,8 +43,11 @@ class Downloader:
         return species
 
     @staticmethod
-    def train_test_split(labels: pd.DataFrame, test_size: float = 0.4, random_state: int = 12) -> Tuple[
-        pd.DataFrame, pd.DataFrame]:
+    def train_test_split(
+        labels: pd.DataFrame,
+        test_size: float = 0.4,
+        random_state: int = 12
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Splits pandas dataframe into train and test set.
 
@@ -76,18 +80,21 @@ class Downloader:
             self.path.copy_cache_from_gcs("audio")
             self.path.copy_cache_from_gcs("labels")
 
-    def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None):
+    def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None) -> None:
         """
-        Downloads file from given URL and saves it in target path. If cache_dir parameter is set the downloaded file is cached to speedup later download request of the same file.
+        Downloads file from given URL and saves it in target path. If cache_dir parameter is set the downloaded file is
+        cached to speedup later download request of the same file.
 
         param: url: url of file to download
         param: target_file: path where downloaded file should be stored
-        param: cache_subdir: Name of a subfolder of the cache folder where the downloaded file should be cached. If not existing, the subfolder is created inside the cache folder.
+        param: cache_subdir: Name of a subfolder of the cache folder where the downloaded file should be cached. If not
+            existing, the subfolder is created inside the cache folder.
         """
 
         if cache_subdir:
             cached_file_path = self.path.cached_file_path(cache_subdir, target_file)
         # check if file is in cache
+        # FIXME würde die "if"s gerne ander schachteln hier
         if cache_subdir and os.path.exists(cached_file_path):
             logger.verbose("cached %s", url)
             shutil.copy(cached_file_path, target_file)
@@ -110,7 +117,7 @@ class Downloader:
             else:
                 raise NameError("File couldn\'t be retrieved")
 
-    def save_label_file(self, labels: pd.DataFrame, split_name: str):
+    def save_label_file(self, labels: pd.DataFrame, split_name: str) -> None:
         """
         Creates label file from pandas dataframe.
 

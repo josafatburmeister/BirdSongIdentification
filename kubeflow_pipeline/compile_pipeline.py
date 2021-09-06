@@ -5,7 +5,8 @@ import kfp
 from kfp.compiler import compiler
 from kubernetes.client import V1Toleration
 
-def compile_pipeline():
+
+def compile_pipeline() -> None:
     download_data_container_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component.yaml'))
 

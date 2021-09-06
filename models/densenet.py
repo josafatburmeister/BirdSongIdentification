@@ -1,9 +1,13 @@
-from torchvision.models import densenet
-from torch import flatten, nn, save, load
+from typing import Iterator
+
 import torch.nn.functional as F
+from torch import flatten, nn, load, Tensor
+from torch.nn import Parameter
+from torchvision.models import densenet
+
 
 class DenseNet121TransferLearning(densenet.DenseNet):
-    def __init__(self, num_classes=2, layers_to_unfreeze=None, logger=None, p_dropout=0):
+    def __init__(self, num_classes=2, layers_to_unfreeze=None, logger=None, p_dropout=0) -> None:
         # initialize Densest with 1000 classes to allow weight loading from pretrained model, in_features=1024
         # arch, growth_rate=32, block_config=(6, 12, 24, 16), num_init_features=64, pretrained, progress
         super().__init__(growth_rate=32, block_config=(6, 12, 24, 16),
@@ -20,6 +24,7 @@ class DenseNet121TransferLearning(densenet.DenseNet):
         if not layers_to_unfreeze:
             layers_to_unfreeze = ["denseblock3", "transition3", "denseblock4", "norm5", "classifier"]
 
+        # TODO name/child shadowed variable
         # unfreeze the selected layers for fine-tuning
         for name, child in self.named_children():
             if name == "features":
@@ -39,7 +44,7 @@ class DenseNet121TransferLearning(densenet.DenseNet):
                     # freeze layer
                     params.requires_grad = False
 
-    def forward(self, x):
+    def forward(self, x) -> Tensor:
         features = self.features(x)
         out = F.relu(features, inplace=True)
         out = F.adaptive_avg_pool2d(out, (1, 1))
@@ -49,11 +54,12 @@ class DenseNet121TransferLearning(densenet.DenseNet):
         out = self.classifier(out)
         return out
 
-    def parameters(self):
+    def parameters(self, recurse=True) -> Iterator[Parameter]:
         params = super().parameters()
         # only return the parameters that should be re-trained
         return iter([parameter for parameter in params if parameter.requires_grad])
 
+    # TODO unused method
     @classmethod
     def load_model(cls, path: str):
         """
