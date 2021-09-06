@@ -246,7 +246,7 @@ class SpectrogramCreator:
         def spectrogram_task(file_name: str) -> List[str]:
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
-                return self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
+                return self.__create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
             return []
 
         if spectrogram_creation_threads <= 1:
