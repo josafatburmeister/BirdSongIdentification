@@ -1,3 +1,5 @@
+import copy
+
 from training.training import ModelTrainer
 from general.logging import logger
 from tabulate import tabulate
@@ -29,13 +31,15 @@ class HyperparameterTuner:
             if hyperparameter in parameters and (hyperparameter != "layers_to_unfreeze" and type(
                     parameters[hyperparameter]) == list or hyperparameter == "layers_to_unfreeze" and type(
                     parameters[hyperparameter]) == list and type(parameters[hyperparameter][0]) == list):
-                self.tuned_parameters.append(hyperparameter)
+                if hyperparameter not in self.tuned_parameters:
+                    self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True
                 for parameter_value in parameters[hyperparameter]:
-                    new_params = parameters
+                    new_params = copy.deepcopy(parameters)
                     new_params[hyperparameter] = parameter_value
                     name = experiment_name + "_" + hyperparameter + "_" + str(parameter_value)
                     self.tune(new_params, name)
+                break
 
         if not unresolved_parameters:
             logger.info("-" * 25)
