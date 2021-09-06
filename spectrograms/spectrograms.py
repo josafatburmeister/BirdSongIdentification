@@ -243,7 +243,7 @@ class SpectrogramCreator:
             total=len(audio_file_names), desc="Create spectrograms for {}".format(desc), position=0,
             is_pipeline_run=self.spectrogram_path.is_pipeline_run)
 
-        def spectrogram_task(f_name: str) -> List[str]:
+        def spectrogram_task(file_name: str) -> List[str]:
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
                 return self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
