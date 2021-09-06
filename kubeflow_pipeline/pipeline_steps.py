@@ -1,6 +1,8 @@
 import logging
+import os
 import shutil
 from typing import List
+import zipfile
 
 from downloader import NIPS4BPlusDownloader, XenoCantoDownloader
 
@@ -22,6 +24,21 @@ class PipelineSteps:
         nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 
         PathManager.empty_dir(path_manager.cache_dir)
+
+    def download_demo_data(self, gcs_bucket: str, output_path: str, verbose_logging: bool):
+        if verbose_logging:
+            logger.setLevel(logging.VERBOSE)
+        path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
+
+        zip_path = os.path.join(output_path, "demo_data.zip")
+
+        logger.info("Download dataset...")
+        path_manager.gcs_copy_file(f"gs://{gcs_bucket}/demo_data.zip", zip_path)
+
+        with zipfile.ZipFile(zip_path, 'r') as zip_file:
+            logger.info("Unzip dataset to %s...", output_path)
+            zip_file.extractall(output_path)
+        logger.info("Unzipped dataset")
 
     def create_spectrograms(self, input_path: str, gcs_bucket: str, output_path: str, chunk_length: int, signal_threshold=3, noise_threshold=1,
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs):

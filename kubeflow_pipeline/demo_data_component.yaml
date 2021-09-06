@@ -1,0 +1,32 @@
+name: Download Demo Data
+description: Loads pre-build demo dataset from a Google Cloud Storage bucket
+inputs:
+  - {
+      name: GCS Bucket,
+      type: String,
+      default: "bird-song-identification",
+      description: "Name of Google Cloud Storage bucket that contains the pre-build dataset",
+    }
+  - {
+      name: Verbose Logging,
+      type: Bool,
+      default: False,
+      description: "Whether logging should be verbose",
+    }
+outputs:
+  - { name: Output, type: Directory }
+implementation:
+  container:
+    image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
+    command:
+      [
+        python,
+        kubeflow_pipeline/run_pipeline.py,
+        download_demo_data,
+        --gcs_bucket,
+        { inputValue: GCS Bucket },
+        --output_path,
+        { outputPath: Output },
+        --verbose_logging,
+        { inputValue: Verbose Logging },
+      ]
