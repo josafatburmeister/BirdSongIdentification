@@ -201,9 +201,9 @@ class PathManager:
 
     def copy_file_to_gcs_cache(self, file_path: str, subdir: str, **kwargs) -> None:
         if type(file_path) == list:
-            PathManager.gcs_copy_files(file_path, self.gcs_cache(subdir, **kwargs))
+            PathManager.gcs_copy_files(file_path, self.__gcs_cache(subdir, **kwargs))
         else:
-            PathManager.gcs_copy_file(file_path, self.gcs_cache(subdir, **kwargs))
+            PathManager.gcs_copy_file(file_path, self.__gcs_cache(subdir, **kwargs))
 
     def clear_cache(self, subdir: str, **kwargs) -> None:
         PathManager.empty_dir(self.cache(subdir, **kwargs))
