@@ -121,19 +121,19 @@ class ModelTrainer:
             model = resnet.ResnetTransferLearning(architecture="resnet34",
                                                   num_classes=self.num_classes,
                                                   layers_to_unfreeze=self.layers_to_unfreeze,
-                                                  logger=self.logger.get(),
+                                                  logger=logger,
                                                   p_dropout=self.p_dropout)
         elif self.architecture == "resnet50":
             model = resnet.ResnetTransferLearning(architecture="resnet50",
                                                   num_classes=self.num_classes,
                                                   layers_to_unfreeze=self.layers_to_unfreeze,
-                                                  logger=self.logger.get(),
+                                                  logger=logger,
                                                   p_dropout=self.p_dropout)
 
         elif self.architecture == "densenet121":
             model = densenet.DenseNet121TransferLearning(
                 num_classes=self.num_classes, layers_to_unfreeze=self.layers_to_unfreeze,
-                logger=self.logger.get(), p_dropout=self.p_dropout)
+                logger=logger, p_dropout=self.p_dropout)
 
         logger.info("\n")
         model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping()
