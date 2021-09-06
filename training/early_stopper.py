@@ -1,7 +1,8 @@
 from training.metrics import Metrics
 
+
 class EarlyStopper:
-    def __init__(self, monitor, patience, min_change):
+    def __init__(self, monitor, patience, min_change) -> None:
         if monitor in {'f1_score', 'accuracy', 'average_loss'}:
             self.monitor = monitor
         else:
@@ -12,7 +13,7 @@ class EarlyStopper:
         self.waitCounter = 0
         self.best_value = -1e15
 
-    def check_early_stopping(self, model_metrics: Metrics):
+    def check_early_stopping(self, model_metrics: Metrics) -> bool:
         if not self.monitor:
             raise Exception('Early Stopping has not been setup.')
         if self.monitor == 'f1_score':

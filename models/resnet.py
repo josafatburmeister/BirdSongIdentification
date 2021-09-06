@@ -1,10 +1,14 @@
-from torchvision.models import resnet
+from typing import Iterator
+
+from torch import flatten, nn, Tensor
 from torch.hub import load_state_dict_from_url
-from torch import flatten, nn, save, load
+from torch.nn import Parameter
+from torchvision.models import resnet
 
 
 class ResnetTransferLearning(resnet.ResNet):
-    def __init__(self, architecture: str = "resnet18", num_classes: int = 2, layers_to_unfreeze=None, logger=None, p_dropout=0):
+    def __init__(self, architecture: str = "resnet18", num_classes: int = 2, layers_to_unfreeze=None, logger=None,
+                 p_dropout=0) -> None:
         # initialize Resnet with 1000 classes to allow weight loading from pretrained model, in_features=512
         if architecture == "resnet18":
             super().__init__(resnet.BasicBlock, layers=[2, 2, 2, 2], num_classes=1000)
@@ -38,12 +42,12 @@ class ResnetTransferLearning(resnet.ResNet):
                     # freeze layer
                     params.requires_grad = False
 
-    def parameters(self):
+    def parameters(self, recurse=True) -> Iterator[Parameter]:
         params = super().parameters()
         # only return the paramaters that should be re-trained
         return iter([parameter for parameter in params if parameter.requires_grad])
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.conv1(x)
 
         x = self.bn1(x)

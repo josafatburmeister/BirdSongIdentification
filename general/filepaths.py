@@ -1,6 +1,6 @@
 import os
-import subprocess
 import shutil
+import subprocess
 from typing import List
 
 from general.logging import logger
@@ -9,7 +9,7 @@ from kubeflow import fairing
 
 class PathManager:
     @staticmethod
-    def copytree(src, dest, symlinks=False, ignore=None):
+    def copytree(src, dest, symlinks=False, ignore=None) -> None:
         # see https://stackoverflow.com/a/12514470
         for item in os.listdir(src):
             source_file = os.path.join(src, item)
@@ -20,17 +20,18 @@ class PathManager:
                 shutil.copy2(source_file, dest_file)
 
     @staticmethod
-    def ensure_dir(dir_path: str):
+    def ensure_dir(dir_path: str) -> None:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
+    # TODO methode ist ungenutzt?
     @staticmethod
-    def ensure_dirs(dir_paths: [str]):
+    def ensure_dirs(dir_paths: [str]) -> None:
         for dir_path in dir_paths:
             PathManager.ensure_dir(dir_path)
 
     @staticmethod
-    def empty_dir(dir_path: str):
+    def empty_dir(dir_path: str) -> None:
         logger.verbose("empty dir %s", dir_path)
         # from https://gist.github.com/jagt/6759127
         for root, dirs, files in os.walk(dir_path, topdown=False):
@@ -42,13 +43,13 @@ class PathManager:
                 os.rmdir(subdir_path)
 
     @staticmethod
-    def ensure_trailing_slash(path: str):
+    def ensure_trailing_slash(path: str) -> str:
         if not path.endswith("/"):
             return path + "/"
         return path
 
     @staticmethod
-    def gcs_copy_file(src_path: str, dest_path: str, quiet: bool = True):
+    def gcs_copy_file(src_path: str, dest_path: str, quiet: bool = True) -> None:
         try:
             subprocess.run(["gsutil", "-q", "cp", src_path, dest_path], check=True)
             if not quiet:
@@ -59,7 +60,7 @@ class PathManager:
             raise NameError(error_message)
 
     @staticmethod
-    def gcs_copy_files(src_paths: List[str], dest_path: str, quiet: bool = True):
+    def gcs_copy_files(src_paths: List[str], dest_path: str, quiet: bool = True) -> None:
         if len(src_paths) > 0:
             try:
                 subprocess.run(["gsutil", "-m", "-q", "cp", "-I", dest_path], check=True,
@@ -72,7 +73,7 @@ class PathManager:
                 raise NameError(error_message)
 
     @staticmethod
-    def gcs_remove_dir(dir_path: str):
+    def gcs_remove_dir(dir_path: str) -> None:
         if PathManager.gcs_file_exists(dir_path):
             try:
                 subprocess.run(["gsutil", "-q", "rm", "-r", dir_path], check=True)
@@ -83,7 +84,7 @@ class PathManager:
                 raise NameError(error_message)
 
     @staticmethod
-    def gcs_copy_dir(src_path: str, dest_path: str):
+    def gcs_copy_dir(src_path: str, dest_path: str) -> None:
         src_path = PathManager.ensure_trailing_slash(src_path)
         try:
             if src_path.startswith("gs://"):
@@ -97,7 +98,7 @@ class PathManager:
             raise NameError(error_message)
 
     @staticmethod
-    def gcs_make_bucket(bucket_path: str, project_name: str):
+    def gcs_make_bucket(bucket_path: str, project_name: str) -> None:
         try:
             subprocess.run(["gsutil", "-q", "mb", "-p", project_name, bucket_path], check=True)
             logger.info(f"Created bucket {bucket_path}")
@@ -107,7 +108,7 @@ class PathManager:
             raise NameError(error_message)
 
     @staticmethod
-    def gcs_bucket_exists(bucket_path: str):
+    def gcs_bucket_exists(bucket_path: str) -> bool:
         bucket_path = PathManager.ensure_trailing_slash(bucket_path)
         try:
             # if the bucket does not exist, this will throw a BucketNotFoundException
@@ -120,9 +121,9 @@ class PathManager:
             return False
 
     @staticmethod
-    def gcs_file_exists(file_path: str, quiet: bool = True):
+    def gcs_file_exists(file_path: str, quiet: bool = True) -> bool:
         try:
-            result = subprocess.run(
+            subprocess.run(
                 ["gsutil", "ls", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
             if not quiet:
                 logger.info(f"File {file_path} exists")
@@ -132,7 +133,7 @@ class PathManager:
                 logger.info(f"File {file_path} does not exist")
             return False
 
-    def __init__(self, data_dir: str, gcs_bucket: str = None):
+    def __init__(self, data_dir: str, gcs_bucket: str = None) -> None:
         self.data_dir = data_dir
         self.cache_dir = os.path.join(self.data_dir, "cache")
         self.is_pipeline_run = False
@@ -150,33 +151,33 @@ class PathManager:
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_models_dir = os.path.join(self.GCS_BUCKET, "models")
 
-    def label_file(self, split: str, **kwargs):
+    def label_file(self, split: str, **kwargs) -> str:
         self.ensure_dir(os.path.join(self.data_dir, split))
         keywords = ""
         for key in kwargs.values():
             keywords += f"_{key}"
         return os.path.join(self.data_dir, split, f"{split}{keywords}.csv")
 
-    def categories_file(self):
+    def categories_file(self) -> str:
         return os.path.join(self.data_dir, "categories.txt")
 
-    def cache(self, subdir: str, **kwargs):
+    def cache(self, subdir: str, **kwargs) -> str:
         for key in kwargs.values():
             subdir += f"_{key}"
         cache_dir = os.path.join(self.cache_dir, subdir)
         PathManager.ensure_dir(cache_dir)
         return cache_dir
 
-    def gcs_cache(self, subdir: str, **kwargs):
+    def __gcs_cache(self, subdir: str, **kwargs) -> str:
         for key in kwargs.values():
             subdir += f"_{key}"
         return PathManager.ensure_trailing_slash(os.path.join(self.gcs_cache_dir, subdir))
 
-    def cached_file_path(self, subdir: str, file_path: str, **kwargs):
+    def cached_file_path(self, subdir: str, file_path: str, **kwargs) -> str:
         file_name = os.path.basename(file_path)
         return os.path.join(self.cache(subdir, **kwargs), file_name)
 
-    def data_folder(self, split: str, subdir: str = "", **kwargs):
+    def data_folder(self, split: str, subdir: str = "", **kwargs) -> str:
         if subdir == "spectrograms":
             for key in kwargs.values():
                 subdir += f"_{key}"
@@ -184,26 +185,27 @@ class PathManager:
         PathManager.ensure_dir(data_folder_path)
         return data_folder_path
 
-    def model_dir(self):
+    def model_dir(self) -> str:
         return os.path.join(self.data_dir, "models")
 
-    def gcs_model_dir(self):
+    def gcs_model_dir(self) -> str:
         return self.gcs_models_dir
 
-    def copy_cache_to_gcs(self, subdir: str, **kwargs):
-        PathManager.gcs_copy_dir(self.cache(subdir), self.gcs_cache(subdir, **kwargs))
+    # TODO unused function
+    def copy_cache_to_gcs(self, subdir: str, **kwargs) -> None:
+        PathManager.gcs_copy_dir(self.cache(subdir), self.__gcs_cache(subdir, **kwargs))
 
-    def copy_cache_from_gcs(self, subdir: str, **kwargs):
-        if self.gcs_file_exists(self.gcs_cache(subdir, **kwargs)):
-            PathManager.gcs_copy_dir(self.gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
+    def copy_cache_from_gcs(self, subdir: str, **kwargs) -> None:
+        if self.gcs_file_exists(self.__gcs_cache(subdir, **kwargs)):
+            PathManager.gcs_copy_dir(self.__gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
 
-    def copy_file_to_gcs_cache(self, file_path: str, subdir: str, **kwargs):
+    def copy_file_to_gcs_cache(self, file_path: str, subdir: str, **kwargs) -> None:
         if type(file_path) == list:
             PathManager.gcs_copy_files(file_path, self.gcs_cache(subdir, **kwargs))
         else:
             PathManager.gcs_copy_file(file_path, self.gcs_cache(subdir, **kwargs))
 
-    def clear_cache(self, subdir: str, **kwargs):
+    def clear_cache(self, subdir: str, **kwargs) -> None:
         PathManager.empty_dir(self.cache(subdir, **kwargs))
         if self.is_pipeline_run:
-            PathManager.gcs_remove_dir(self.gcs_cache(subdir, **kwargs))
+            PathManager.gcs_remove_dir(self.__gcs_cache(subdir, **kwargs))

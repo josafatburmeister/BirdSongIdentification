@@ -1,15 +1,18 @@
 import copy
 import os
-import torch
 from datetime import datetime
+
+import torch
+
 from general.filepaths import PathManager
 from general.logging import logger
 from training import metrics
 
+
 class ModelTracker:
     def __init__(self, pathmanager: PathManager, experiment_name: str, id_to_class_mapping: dict,
                  is_pipeline_run: bool, model: torch.nn.Module, multi_label_classification: bool = True,
-                 device: torch.device = torch.device('cpu')):
+                 device: torch.device = torch.device('cpu')) -> None:
         self.path = pathmanager
         self.experiment_name = experiment_name
         self.id_to_class_mapping = id_to_class_mapping
@@ -36,7 +39,7 @@ class ModelTracker:
                                                                       device=device)
             self.best_models_per_class[class_name] = copy.deepcopy(model.state_dict())
 
-    def track_best_model(self, model: torch.nn.Module, model_metrics: metrics.Metrics, epoch: int):
+    def track_best_model(self, model: torch.nn.Module, model_metrics: metrics.Metrics, epoch: int) -> None:
         model_mean_f1 = torch.mean(model_metrics.f1_score())
         logger.info(f"Average F1-score of current epoch: {model_mean_f1}")
         if torch.mean(self.best_average_metrics.f1_score()) < model_mean_f1:
@@ -62,7 +65,7 @@ class ModelTracker:
                     self.best_models_per_class[class_name] = copy.deepcopy(model.state_dict())
         logger.info(f"Best average F1-score: {torch.mean(self.best_average_metrics.f1_score())}")
 
-    def save_model(self, model, model_path: str):
+    def __save_model(self, model, model_path: str) -> None:
         self.path.ensure_dir(os.path.split(model_path)[0])
         torch.save({
             'state_dict': model,
@@ -73,22 +76,22 @@ class ModelTracker:
             gcs_model_path = os.path.join(self.path.gcs_model_dir(), model_path.lstrip(self.path.model_dir()))
             self.path.gcs_copy_file(model_path, gcs_model_path)
 
-    def save_epoch_model(self, model, epoch: int, run_id: str):
+    def save_epoch_model(self, model, epoch: int, run_id: str) -> None:
         current_time_str = datetime.now().strftime("%Y%m%d-%H.%M.%S")
         model_name = f"{self.experiment_name}_{current_time_str}_epoch{str(epoch).zfill(2)}.pt"
         model_path = os.path.join(self.path.model_dir(), self.experiment_name, model_name)
         if run_id:
             model_path.replace(".pt", f"_{run_id}.pt")
-        self.save_model(model, model_path)
+        self.__save_model(model, model_path)
 
-    def save_best_models(self, run_id: str):
+    def save_best_models(self, run_id: str) -> None:
         current_time_str = datetime.now().strftime("%Y%m%d-%H.%M.%S")
         for model, model_name in [(self.best_average_model, f"{self.experiment_name}_avg_model_{current_time_str}.pt"),
                                   (self.best_minimum_model, f"{self.experiment_name}_min_model_{current_time_str}.pt")]:
             model_path = os.path.join(self.path.model_dir(), self.experiment_name, model_name)
             if run_id:
                 model_path.replace(".pt", f"_{run_id}.pt")
-            self.save_model(model, model_path)
+            self.__save_model(model, model_path)
 
         if self.multi_label_classification:
             for class_name, model in self.best_models_per_class.items():
@@ -96,4 +99,4 @@ class ModelTracker:
                                           f"{self.experiment_name}_{class_name}_{current_time_str}.pt")
                 if run_id:
                     model_path.replace(".pt", f"_{run_id}.pt")
-                self.save_model(model, model_path)
+                self.__save_model(model, model_path)

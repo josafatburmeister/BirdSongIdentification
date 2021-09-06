@@ -1,16 +1,17 @@
 import datetime
-import importlib.resources as pkg_resources
 import json
-from multiprocessing.pool import ThreadPool
-import numpy as np
 import os
+from multiprocessing.pool import ThreadPool
+from typing import List, Optional, Union, Tuple
+
+import numpy as np
 import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
-from typing import List, Optional
 
 from downloader import Downloader, NIPS4BPlusDownloader
 from general import logger, PathManager, ProgressBar
+from general.custom_types import JSON
 
 
 class XenoCantoDownloader(Downloader):
@@ -34,31 +35,15 @@ class XenoCantoDownloader(Downloader):
 
         return response.json()
 
-    @staticmethod
-    def load_species_list_from_file(file_path: str, column_name: str = "class name"):
-        if not file_path.endswith(".csv") and not file_path.endswith(".json"):
-            return []
-
-        if ".csv" in file_path:
-            species = pd.read_csv(file_path)
-
-        elif ".json" in file_path:
-            species = pd.read_json(file_path)
-
-        else:
-            raise ValueError('wrong file ending')
-
-        return list(species[column_name])
-
     def __init__(self, path_manager: PathManager):
         super().__init__(path_manager)
 
-    def metadata_cache_path(self, species_name: str):
+    def __metadata_cache_path(self, species_name: str):
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
 
-    def download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
-                                   download_threads=25):
+    def __download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
+                                     download_threads=25):
 
         progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0,
                                    is_pipeline_run=self.path.is_pipeline_run)
@@ -78,8 +63,9 @@ class XenoCantoDownloader(Downloader):
         for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
             progress_bar.update(1)
 
-    def download_species_metadata(self, species_name: str):
-        metadata_file_path = self.metadata_cache_path(species_name)
+    # TODO fix annotations
+    def __download_species_metadata(self, species_name: str) -> Tuple[JSON, int]:
+        metadata_file_path = self.__metadata_cache_path(species_name)
 
         # check if metadata file is in cache
         if os.path.exists(metadata_file_path):
@@ -92,8 +78,7 @@ class XenoCantoDownloader(Downloader):
             first_page = XenoCantoDownloader.download_xeno_canto_page(species_name)
 
             if int(first_page["numSpecies"]) != 1:
-                raise NameError(
-                    "Multiple species found for {}".format(species_name))
+                raise NameError("Multiple species found for {}".format(species_name))
 
             number_of_pages = int(first_page["numPages"])
             metadata = first_page["recordings"]
@@ -132,13 +117,19 @@ class XenoCantoDownloader(Downloader):
                         maximum_recording_length: int = None,
                         clear_audio_cache: bool = False,
                         clear_label_cache: bool = False,
-                        random_state: int = 12):
+                        random_state: int = 12
+                        ) -> None:
         if use_nips4b_species_list or not species_list:
             nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
             species_list = nips4bplus_downloader.download_nips4b_species_list()
-            species_list["species_sound_type"] = species_list.apply(
-                lambda row: row["Scientific_name"] + ", " + row["sound_type"] if row["sound_type"] else row[
-                    "Scientific_name"], axis=1)
+
+            def get_species_sound_type(row):
+                if row["sound_type"]:
+                    return row["Scientific_name"] + ", " + row["sound_type"]
+                else:
+                    return row["Scientific_name"]
+
+            species_list["species_sound_type"] = species_list.apply(get_species_sound_type, axis=1)
             species_list = species_list["species_sound_type"].tolist()
             species_list = [item for item in species_list if item]
         if len(species_list) < 1:
@@ -173,10 +164,10 @@ class XenoCantoDownloader(Downloader):
         val_frames = []
         categories = []
 
-        for species_name, species_sound_types in XenoCantoDownloader.parse_species_list(species_list,
-                                                                                        XenoCantoDownloader.xc_sound_types).items():
+        species_sounds_dict = XenoCantoDownloader.parse_species_list(species_list, XenoCantoDownloader.xc_sound_types)
+        for species_name, species_sound_types in species_sounds_dict.items():
             try:
-                labels, _ = self.download_species_metadata(species_name)
+                labels, _ = self.__download_species_metadata(species_name)
             except Exception as e:
                 logger.info(f"{e}")
                 logger.info("Skipping class %s", species_name)
@@ -246,16 +237,19 @@ class XenoCantoDownloader(Downloader):
                     if sound_type in row["type"]:
                         labels.loc[idx, "sound_type"] = sound_type
                         break
-            labels["label"] = labels["gen"] + "_" + \
-                              labels["sp"] + "_" + labels["sound_type"]
+            labels["label"] = labels["gen"] + "_" + labels["sp"] + "_" + labels["sound_type"]
+
+            def st(length, time_format):
+                return datetime.datetime.strptime(length, time_format)
 
             labels["duration"] = labels["length"].apply(
-                lambda length: datetime.datetime.strptime(length, "%M:%S") if length.count(
-                    ':') == 1 else datetime.datetime.strptime(length, "%H:%M:%S"))
+                lambda length: st(length, "%M:%S") if length.count(':') == 1 else st(length, "%H:%M:%S")
+            )
 
             labels["start"] = 0
             labels["end"] = labels["duration"].apply(
-                lambda duration: duration.hour * 60 * 60 * 1000 + duration.minute * 60 * 1000 + duration.second * 1000)
+                lambda duration: duration.hour * 60 * 60 * 1000 + duration.minute * 60 * 1000 + duration.second * 1000
+            )
             if maximum_recording_length:
                 labels = labels[labels["end"] < maximum_recording_length * 1000]
 
@@ -297,10 +291,11 @@ class XenoCantoDownloader(Downloader):
                 else:
                     test_frames.append(test_labels)
 
+        # noinspection PyTypeChecker
         np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
 
         # save label files
-        for split_name,  frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
+        for split_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
             if len(frames) == 0:
                 raise NameError(f"Empty {split_name} set")
             labels = pd.concat(frames)
@@ -311,5 +306,6 @@ class XenoCantoDownloader(Downloader):
             PathManager.empty_dir(self.path.data_folder(split_name, "audio"))
 
             # download audio files
-            self.download_audio_files_by_id(
-                self.path.data_folder(split_name, "audio"), labels["id"], f"Download {split_name} set...")
+            self.__download_audio_files_by_id(
+                self.path.data_folder(split_name, "audio"), labels["id"], f"Download {split_name} set..."
+            )
