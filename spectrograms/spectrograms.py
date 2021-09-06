@@ -1,5 +1,5 @@
 import joblib
-from joblib._parallel_backends import LokyBackend
+from multiprocessing.pool import ThreadPool
 import librosa
 import math
 import numpy
@@ -140,10 +140,6 @@ class SpectrogramCreator:
             "spectrograms", target_file, chunk_length=self.chunk_length)
         shutil.copy(target_file, cached_file_path)
 
-        if self.spectrogram_path.is_pipeline_run:
-            self.spectrogram_path.copy_file_to_gcs_cache(cached_file_path, "spectrograms",
-                                                         chunk_length=self.chunk_length)
-
     def index_cached_spectrograms(self):
         cache_path = self.spectrogram_path.cache("spectrograms", chunk_length=self.chunk_length)
 
@@ -185,6 +181,8 @@ class SpectrogramCreator:
             for file in cached_spectrograms_for_current_file:
                 shutil.copy(file, target_dir)
 
+            return []
+
         else:
             logger.verbose("process %s", audio_file)
             # load audio file
@@ -195,6 +193,8 @@ class SpectrogramCreator:
 
                 number_of_chunks = math.floor(
                     audio_length / self.samples_per_chunk)
+
+                spectrogram_paths = []
 
                 # split audio file in chunks and create one spectrogram per chunk
                 for i in range(number_of_chunks):
@@ -220,11 +220,15 @@ class SpectrogramCreator:
                         mel_spectrogram_db, signal_threshold=signal_threshold, noise_threshold=noise_threshold)
 
                     if contains_signal:
+                        spectrogram_paths.append(target_file)
                         self.save_spectrogram(target_file, mel_spectrogram_db)
                     elif is_noise and self.include_noise_samples:
                         target_file = os.path.join(
                             target_dir, "{}-{}_noise.png".format(file_name, i))
+                        spectrogram_paths.append(target_file)
                         self.save_spectrogram(target_file, mel_spectrogram_db)
+
+                return spectrogram_paths
             except Exception:
                 logger.info("Could not process %s", audio_file)
 
@@ -242,19 +246,25 @@ class SpectrogramCreator:
         def spectrogram_task(file_name):
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
                 audio_path = os.path.join(audio_dir, file_name)
-                self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
+                return self.create_spectrograms_from_file(audio_path, target_dir, signal_threshold, noise_threshold)
+            return []
 
         if spectrogram_creation_threads <= 1:
             for file_name in audio_file_names:
                 spectrogram_task(file_name)
                 progress_bar.update(1)
         else:
-            batch_size = 20
+            batch_size = 50 if self.spectrogram_path.is_pipeline_run else 20
             audio_file_names_batches = [audio_file_names[x:x + batch_size] for x in
                                         range(0, len(audio_file_names), batch_size)]
             for audio_file_names in audio_file_names_batches:
                 jobs = [joblib.delayed(spectrogram_task)(file_name) for file_name in audio_file_names]
-                joblib.Parallel(n_jobs=spectrogram_creation_threads)(jobs)
+                spectrogram_paths = joblib.Parallel(n_jobs=spectrogram_creation_threads)(jobs)
+                spectrogram_paths = [spectrogram_path for sublist in spectrogram_paths for spectrogram_path in sublist]
+
+                if self.spectrogram_path.is_pipeline_run:
+                    self.spectrogram_path.copy_file_to_gcs_cache(spectrogram_paths, "spectrograms",
+                                                                 chunk_length=self.chunk_length)
 
                 progress_bar.update(len(audio_file_names))
 

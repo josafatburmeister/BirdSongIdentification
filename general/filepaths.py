@@ -1,6 +1,7 @@
 import os
 import subprocess
 import shutil
+from typing import List
 
 from general.logging import logger
 from kubeflow import fairing
@@ -58,6 +59,19 @@ class PathManager:
             raise NameError(error_message)
 
     @staticmethod
+    def gcs_copy_files(src_paths: List[str], dest_path: str, quiet: bool = True):
+        if len(src_paths) > 0:
+            try:
+                subprocess.run(["gsutil", "-m", "-q", "cp", "-I", dest_path], check=True,
+                               input="\n".join(src_paths), text=True)
+                if not quiet:
+                    logger.info(f"Copied files to {dest_path}")
+            except subprocess.CalledProcessError:
+                error_message = f"Copying files to {dest_path} failed"
+                logger.error(error_message)
+                raise NameError(error_message)
+
+    @staticmethod
     def gcs_remove_dir(dir_path: str):
         if PathManager.gcs_file_exists(dir_path):
             try:
@@ -72,7 +86,10 @@ class PathManager:
     def gcs_copy_dir(src_path: str, dest_path: str):
         src_path = PathManager.ensure_trailing_slash(src_path)
         try:
-            subprocess.run(["gsutil", "-q", "-m", "cp", "-r", f"{src_path}*", dest_path], check=True)
+            if src_path.startswith("gs://"):
+                subprocess.run(["gsutil", "-m", "rsync", "-r", src_path, dest_path], check=True)
+            else:
+                subprocess.run(["gsutil", "-q", "-m", "cp", "-n", "-r", f"{src_path}*", dest_path], check=True)
             logger.info(f"Copied {src_path} to {dest_path}")
         except subprocess.CalledProcessError:
             error_message = f"Copying {src_path} to {dest_path} failed"
@@ -181,7 +198,10 @@ class PathManager:
             PathManager.gcs_copy_dir(self.gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
 
     def copy_file_to_gcs_cache(self, file_path: str, subdir: str, **kwargs):
-        PathManager.gcs_copy_file(file_path, self.gcs_cache(subdir, **kwargs))
+        if type(file_path) == list:
+            PathManager.gcs_copy_files(file_path, self.gcs_cache(subdir, **kwargs))
+        else:
+            PathManager.gcs_copy_file(file_path, self.gcs_cache(subdir, **kwargs))
 
     def clear_cache(self, subdir: str, **kwargs):
         PathManager.empty_dir(self.cache(subdir, **kwargs))
