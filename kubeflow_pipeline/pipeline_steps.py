@@ -69,7 +69,6 @@ class PipelineSteps:
 
         do_hyperparameter_tuning = False
 
-        # TODO vielleicht irgendwie nochmal schöner machen
         for hyperparameter in hyperparameter_tuner.HyperparameterTuner.tunable_parameters():
             if hyperparameter in kwargs and\
                     (hyperparameter != "layers_to_unfreeze"

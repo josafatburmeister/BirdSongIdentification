@@ -24,23 +24,22 @@ class DenseNet121TransferLearning(densenet.DenseNet):
         if not layers_to_unfreeze:
             layers_to_unfreeze = ["denseblock3", "transition3", "denseblock4", "norm5", "classifier"]
 
-        # TODO name/child shadowed variable
         # unfreeze the selected layers for fine-tuning
-        for name, child in self.named_children():
-            if name == "features":
-                for name, child in child.named_children():
-                    if layers_to_unfreeze == "all" or name in layers_to_unfreeze:
+        for outer_name, outer_child in self.named_children():
+            if outer_name == "features":
+                for inner_name, inner_child in outer_child.named_children():
+                    if layers_to_unfreeze == "all" or "all" in layers_to_unfreeze or inner_name in layers_to_unfreeze:
                         if logger:
-                            logger.info(f"* {name} has been unfrozen.")
+                            logger.info(f"* {inner_name} has been unfrozen.")
                     else:
-                        for _, params in child.named_parameters():
+                        for _, params in inner_child.named_parameters():
                             # freeze layer
                             params.requires_grad = False
-            elif layers_to_unfreeze == "all" or "all" in layers_to_unfreeze or name in layers_to_unfreeze:
+            elif layers_to_unfreeze == "all" or "all" in layers_to_unfreeze or outer_name in layers_to_unfreeze:
                 if logger:
-                    logger.info(f"* {name} has been unfrozen.")
+                    logger.info(f"* {outer_name} has been unfrozen.")
             else:
-                for _, params in child.named_parameters():
+                for _, params in outer_child.named_parameters():
                     # freeze layer
                     params.requires_grad = False
 
@@ -58,14 +57,3 @@ class DenseNet121TransferLearning(densenet.DenseNet):
         params = super().parameters()
         # only return the parameters that should be re-trained
         return iter([parameter for parameter in params if parameter.requires_grad])
-
-    # TODO unused method
-    @classmethod
-    def load_model(cls, path: str):
-        """
-        stores the model for later retrieval
-        :param path: file from which to store the model
-        """
-        model = cls()
-        model.load_state_dict(load(path)['state_dict'])
-        return model

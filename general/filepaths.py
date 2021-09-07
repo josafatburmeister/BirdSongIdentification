@@ -24,12 +24,6 @@ class PathManager:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-    # TODO methode ist ungenutzt?
-    @staticmethod
-    def ensure_dirs(dir_paths: [str]) -> None:
-        for dir_path in dir_paths:
-            PathManager.ensure_dir(dir_path)
-
     @staticmethod
     def empty_dir(dir_path: str) -> None:
         logger.verbose("empty dir %s", dir_path)
@@ -191,7 +185,6 @@ class PathManager:
     def gcs_model_dir(self) -> str:
         return self.gcs_models_dir
 
-    # TODO unused function
     def copy_cache_to_gcs(self, subdir: str, **kwargs) -> None:
         PathManager.gcs_copy_dir(self.cache(subdir), self.__gcs_cache(subdir, **kwargs))
 

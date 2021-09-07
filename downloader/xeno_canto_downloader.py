@@ -63,7 +63,6 @@ class XenoCantoDownloader(Downloader):
         for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
             progress_bar.update(1)
 
-    # TODO fix annotations
     def __download_species_metadata(self, species_name: str) -> Tuple[JSON, int]:
         metadata_file_path = self.__metadata_cache_path(species_name)
 
