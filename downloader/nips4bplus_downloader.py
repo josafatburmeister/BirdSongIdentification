@@ -139,7 +139,7 @@ class NIPS4BPlusDownloader(Downloader):
                 file_id = file.lstrip("annotation_train").rstrip(".csv")
 
                 labels["id"] = f"nips4b_birds_trainfile{file_id}"
-                labels["file_name"] = f"nips4b_birds_trainfile{file_id}.wav"
+                labels["file_path"] = f"nips4b_birds_trainfile{file_id}.wav"
                 labels["start"] = labels["start"] * 1000
                 labels["end"] = labels["start"] + labels["duration"] * 1000
 
@@ -152,7 +152,7 @@ class NIPS4BPlusDownloader(Downloader):
                 if contains_selected_species:
                     nips4bplus_selected_labels.append(labels)
 
-                labels = labels[["id", "file_name", "start", "end", "label"]]
+                labels = labels[["id", "file_path", "start", "end", "label"]]
 
                 self.append = nips4bplus_labels.append(labels)
 
@@ -161,7 +161,7 @@ class NIPS4BPlusDownloader(Downloader):
         if len(nips4bplus_selected_labels) > 0:
             nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
         else:
-            nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_name", "label", "start", "end"])
+            nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_path", "label", "start", "end"])
 
         self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
 
@@ -172,10 +172,10 @@ class NIPS4BPlusDownloader(Downloader):
 
         # remove audio files without labels
         for file in os.listdir(nips4bplus_audio_folder):
-            if nips4bplus_selected_labels[nips4bplus_selected_labels["file_name"] == file].empty:
+            if nips4bplus_selected_labels[nips4bplus_selected_labels["file_path"] == file].empty:
                 os.remove(os.path.join(nips4bplus_audio_folder, file))
         for file in os.listdir(nips4bplus_all_audio_folder):
-            if nips4bplus_labels[nips4bplus_labels["file_name"] == file].empty:
+            if nips4bplus_labels[nips4bplus_labels["file_path"] == file].empty:
                 os.remove(os.path.join(nips4bplus_all_audio_folder, file))
 
     def download_nips4bplus_dataset(self, species_list: List[str]) -> None:

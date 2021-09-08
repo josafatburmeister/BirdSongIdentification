@@ -35,7 +35,7 @@ class XenoCantoSpectrograms(Dataset):
             raise NameError("Data files missing: ", self.data_dir)
 
         self.labels = pd.read_csv(self.label_file)
-        self.labels = self.labels[self.labels["file_name"].str.endswith(".png")]
+        self.labels = self.labels[self.labels["file_path"].str.endswith(".png")]
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
         self.class_to_idx = {}
@@ -103,7 +103,7 @@ class XenoCantoSpectrograms(Dataset):
             idx = idx.tolist()
 
         img_path = os.path.join(
-            self.data_dir, self.labels["file_name"].iloc[idx])
+            self.data_dir, self.labels["file_path"].iloc[idx])
 
         image = Image.open(img_path).convert('RGB')
 

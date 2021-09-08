@@ -121,11 +121,11 @@ class Downloader:
         """
         Creates label file from pandas dataframe.
 
-        param: labels: dataframe containing the file labels, has to contain the columns "id", "file_name", "label", "start", and "end"
+        param: labels: dataframe containing the file labels, has to contain the columns "id", "file_path", "label", "start", and "end"
         param: split_name: name of the data split (e.g., "train", "val" or "test)
         """
         assert type(labels) == pd.DataFrame
-        for column_name in ["id", "file_name", "label", "start", "end"]:
+        for column_name in ["id", "file_path", "label", "start", "end"]:
             assert column_name in labels.columns
 
         labels.to_csv(self.path.label_file(split_name, "audio"))

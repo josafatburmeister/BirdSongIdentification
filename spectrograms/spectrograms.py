@@ -463,7 +463,7 @@ class SpectrogramCreator:
                             and end <= label["end"]:
                         final_label[label["label"]] = 1
                         final_label["id"] = file_id
-                        final_label["file_name"] = file
+                        final_label["file_path"] = file
                         found_match = True
 
                 if not found_match:
@@ -472,14 +472,14 @@ class SpectrogramCreator:
                     else:
                         final_label["noise"] = 1
                         final_label["id"] = file_id
-                        final_label["file_name"] = file
+                        final_label["file_path"] = file
 
                 spectrogram_labels.append(final_label)
 
         if len(spectrogram_labels) > 0:
             spectrogram_labels = pd.DataFrame(spectrogram_labels).sort_values(
-                by=['file_name']).fillna(0)
-            spectrogram_labels = spectrogram_labels[spectrogram_labels["file_name"] != 0]
+                by=['file_path']).fillna(0)
+            spectrogram_labels = spectrogram_labels[spectrogram_labels["file_path"] != 0]
 
             label_file = self.spectrogram_path.label_file(dataset, "spectrograms")
             spectrogram_labels.to_csv(label_file)

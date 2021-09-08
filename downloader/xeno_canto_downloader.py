@@ -228,7 +228,7 @@ class XenoCantoDownloader(Downloader):
                     "There are no training samples for class {}".format(species_name))
 
             # create class labels
-            labels["file_name"] = labels["id"] + ".mp3"
+            labels["file_path"] = labels["id"] + ".mp3"
 
             labels["sound_type"] = ""
             for idx, row in labels.iterrows():
@@ -253,7 +253,7 @@ class XenoCantoDownloader(Downloader):
                 labels = labels[labels["end"] < maximum_recording_length * 1000]
 
             # select relevant columns
-            labels = labels[["id", "file_name", "start", "end", "label", "sound_type"]]
+            labels = labels[["id", "file_path", "start", "end", "label", "sound_type"]]
             labels = labels[labels["end"] > 0]
 
             for sound_type in selected_sound_types:
