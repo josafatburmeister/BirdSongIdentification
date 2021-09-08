@@ -143,13 +143,18 @@ This label format can be used to support both single-label and multi-label class
 ├── categories.txt
 ├── train
 │   ├── audio
-│   └── train_audio.csv
+│   │   ├── 368261.mp3
+│   │   ├── 619980.mp3
+│   │   └── ...
+│   └── audio.csv
 ├── val
 │   ├── audio
-│   └── val_audio.csv
+│   │   └── ...
+│   └── audio.csv
 └── test
     ├── audio
-    └── test_audio.csv
+    │   └── ...
+    └── audio.csv
 ```
 
 **Listing 1**: Example of the directory structure that is used to pass data between the data download and the spectrogram creation stage.
@@ -161,17 +166,50 @@ Erithacus_rubecula_song
 Erithacus_rubecula_call
 ```
 
-**Listing 2**: Example of a `categories.txt` file that lists the labels that are used in a dataset.
+**Listing 2**: Example of a "categories.txt" file that lists the labels that are used in a dataset.
 
-**Table 2**: Example of a label file in CSV format used by our pipeline.
+**Table 2**: Example of a label file in CSV format used for audio file labeling in our pipeline.
 
-| id     | file_name  | start | end    | label                   |
+| id     | file_path  | start | end    | label                   |
 | ------ | ---------- | ----- | ------ | ----------------------- |
 | 368261 | 368261.mp3 | 0     | 47000  | Turdus_merula_song      |
 | 619980 | 619980.mp3 | 0     | 11000  | Erithacus_rubecula_call |
 | 619980 | 619980.mp3 | 11000 | 174000 | Turdus_merula_call      |
 
+Listing 3 shows an example of the directory structure that is used to pass data between the spectrogram creation and the model training stage. It is very similar to the directory structure that is used as input of the spectrogram creation stage (Listing 1). As shown, the output directory of the spectrogram creation stage also has to contain a "categories.txt" file matches the format shown in Listing 2. In addition, the spectrogram creation stage has to create a subdirectory named "spectrograms" and a label file "spectrograms.csv" for each dataset. The "spectrograms" subdirectory contains the spectrogram images of the respective dataset. The label file "spectrograms.csv" has to contain one label per spectrogram image. As shown in Table 3, it must contain at least the columns "id", "file_path" and one column per label class containing binary presence-absence labels.
+
+```
+├── categories.txt
+├── train
+│   ├── spectrograms
+│   │   ├── 368261-0.png
+│   │   ├── 368261-1_noise.png
+│   │   ├── ...
+│   │   ├── 619980-0.png
+│   │   └── ...
+│   └── spectrograms.csv
+├── val
+│   ├── spectrograms
+│   │   └── ...
+│   └── spectrograms.csv
+└── test
+    ├── spectrograms
+    │   └── ...
+    └── spectrograms.csv
+```
+
+**Listing 3**: Example of the directory structure that is used to pass data between the spectrogram creation and the model training stage.
+
+**Table 3**: Example of a label file in CSV format used for spectrogram labeling in our pipeline.
+
+| id     | file_path    | Turdus_merula_song | Turdus_merula_call | Erithacus_rubecula_song | Erithacus_rubecula_call |
+| ------ | ------------ | ------------------ | ------------------ | ----------------------- | ----------------------- |
+| 368261 | 368261-0.png | 1                  | 0                  | 0                       | 0                       |
+| 368261 | 368261-1.png | 1                  | 0                  | 0                       | 0                       |
+| 619980 | 619980-0.png | 0                  | 0                  | 0                       | 1                       |
+
 </div>
+
 ## Experiments
 
 To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and are not longer than 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
