@@ -267,7 +267,7 @@ class PathManager:
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_model_dir = os.path.join(self.GCS_BUCKET, "models")
 
-    def label_file(self, dataset: str, **kwargs) -> str:
+    def label_file(self, dataset: str, type: str) -> str:
         """
         Computes the absolute path of the label file for the given dataset. Creates all subdirectories of this path that
         do not exist yet.
@@ -280,10 +280,7 @@ class PathManager:
         """
 
         os.makedirs(os.path.join(self.base_dir, dataset), exist_ok=True)
-        keywords = ""
-        for key in kwargs.values():
-            keywords += f"_{key}"
-        return os.path.join(self.base_dir, dataset, f"{dataset}{keywords}.csv")
+        return os.path.join(self.base_dir, dataset, f"{type}.csv")
 
     def categories_file(self) -> str:
         """

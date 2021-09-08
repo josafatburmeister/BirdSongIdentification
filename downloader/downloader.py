@@ -128,4 +128,4 @@ class Downloader:
         for column_name in ["id", "file_name", "label", "start", "end"]:
             assert column_name in labels.columns
 
-        labels.to_csv(self.path.label_file(split_name, type="audio"))
+        labels.to_csv(self.path.label_file(split_name, "audio"))

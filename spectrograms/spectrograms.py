@@ -426,7 +426,7 @@ class SpectrogramCreator:
         Returns:
             None
         """
-        labels = pd.read_csv(self.audio_path.label_file(dataset, type="audio"))
+        labels = pd.read_csv(self.audio_path.label_file(dataset, "audio"))
         spectrogram_dir = self.spectrogram_path.data_folder(dataset, "spectrograms")
 
         spectrogram_labels = []
@@ -481,7 +481,7 @@ class SpectrogramCreator:
                 by=['file_name']).fillna(0)
             spectrogram_labels = spectrogram_labels[spectrogram_labels["file_name"] != 0]
 
-            label_file = self.spectrogram_path.label_file(dataset, type="spectrograms")
+            label_file = self.spectrogram_path.label_file(dataset, "spectrograms")
             spectrogram_labels.to_csv(label_file)
         else:
             raise NameError("No spectrograms found")

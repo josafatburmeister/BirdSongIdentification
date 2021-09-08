@@ -29,7 +29,7 @@ class XenoCantoSpectrograms(Dataset):
         self.path_manager = path_manager
         self.data_dir = self.path_manager.data_folder(
             split, "spectrograms")
-        self.label_file = self.path_manager.label_file(split, type="spectrograms")
+        self.label_file = self.path_manager.label_file(split, "spectrograms")
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
             raise NameError("Data files missing: ", self.data_dir)
