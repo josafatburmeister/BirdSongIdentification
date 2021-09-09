@@ -91,7 +91,7 @@ class NIPS4BPlusDownloader(Downloader):
             Pandas Dataframe that contains the columns "nips4b_class_name", "class name", "Scientific_name", and "sound_type".
         """
 
-        nips4bplus_species_list = os.path.join(self.path.data_folder("nips4bplus", ""), "nips4b_species_list.csv")
+        nips4bplus_species_list = os.path.join(self.path.data_folder("nips4bplus"), "nips4b_species_list.csv")
 
         self.download_file(NIPS4BPlusDownloader.species_list_url, nips4bplus_species_list, cache_subdir="nips4bplus")
 
