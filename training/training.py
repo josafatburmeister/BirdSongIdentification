@@ -159,7 +159,7 @@ class ModelTrainer:
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
 
-    def __setup_dataloaders(self) -> Tuple[Dict[str, ds.XenoCantoSpectrograms], Dict[str, torch.utils.data.DataLoader]]:
+    def __setup_dataloaders(self) -> Tuple[Dict[str, ds.SpectrogramDataset], Dict[str, torch.utils.data.DataLoader]]:
         """
         Creates datasets and dataloaders for model training and validation.
 
@@ -172,7 +172,7 @@ class ModelTrainer:
 
         for dataset in [self.train_dataset, self.val_dataset]:
             dataset_name = "train" if dataset == self.train_dataset else "val"
-            datasets[dataset_name] = ds.XenoCantoSpectrograms(
+            datasets[dataset_name] = ds.SpectrogramDataset(
                 self.spectrogram_path_manager,
                 include_noise_samples=self.include_noise_samples, dataset=dataset,
                 multi_label_classification=self.multi_label_classification,

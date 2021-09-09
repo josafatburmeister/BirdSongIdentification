@@ -15,7 +15,7 @@ from general.logging import logger
 T_co = TypeVar('T_co', covariant=True)
 
 
-class XenoCantoSpectrograms(Dataset):
+class SpectrogramDataset(Dataset):
     """
     Custom PyTorch dataset of spectrogram images.
     """

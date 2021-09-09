@@ -110,7 +110,7 @@ class ModelRunner:
         dataloaders = {}
 
         for dataset_name in dataset_names:
-            datasets[dataset_name] = dataset.XenoCantoSpectrograms(
+            datasets[dataset_name] = dataset.SpectrogramDataset(
                 self.spectrogram_path_manager,
                 include_noise_samples=self.include_noise_samples, dataset=dataset_name,
                 multi_label_classification=self.multi_label_classification,
