@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
 
-from general import logger, PathManager
+from general import logger, FileManager
 
 
 class Downloader:
@@ -76,11 +76,11 @@ class Downloader:
 
         return train_labels, test_labels
 
-    def __init__(self, path_manager: PathManager):
+    def __init__(self, path_manager: FileManager):
         """
 
         Args:
-            path_manager: PathManager object that manages the output directory to be used for storing the
+            path_manager: FileManager object that manages the output directory to be used for storing the
                 downloaded datasets.
         """
 

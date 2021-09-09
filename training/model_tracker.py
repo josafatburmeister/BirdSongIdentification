@@ -5,8 +5,7 @@ from typing import Dict
 
 import torch
 
-from general.filepaths import PathManager
-from general.logging import logger
+from general import logger, FileManager
 from training import metrics
 
 
@@ -15,13 +14,13 @@ class ModelTracker:
     Tracks model performance across training epochs and saves the models with the best performance.
     """
 
-    def __init__(self, pathmanager: PathManager, experiment_name: str, id_to_class_mapping: Dict[str, str],
+    def __init__(self, pathmanager: FileManager, experiment_name: str, id_to_class_mapping: Dict[str, str],
                  is_pipeline_run: bool, model: torch.nn.Module, multi_label_classification: bool = True,
                  device: torch.device = torch.device('cpu')) -> None:
         """
 
         Args:
-            pathmanager: PathManager object that manages the directory containing the spectrograms file and
+            pathmanager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             experiment_name: Descriptive name of the experiment.
             id_to_class_mapping: Dictionary that maps class indices to human-readable class names.

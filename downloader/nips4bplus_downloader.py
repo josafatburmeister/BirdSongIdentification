@@ -6,7 +6,7 @@ from typing import List
 
 import pandas as pd
 
-from general import logger, PathManager
+from general import logger, FileManager
 from .downloader import Downloader
 
 
@@ -25,11 +25,11 @@ class NIPS4BPlusDownloader(Downloader):
     species_list_url = "https://ndownloader.figshare.com/files/13390469"
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
-    def __init__(self, path_manager: PathManager) -> None:
+    def __init__(self, path_manager: FileManager) -> None:
         """
 
         Args:
-            path_manager: PathManager object that manages the output directory to be used for storing the
+            path_manager: FileManager object that manages the output directory to be used for storing the
                 downloaded datasets.
         """
 
@@ -194,8 +194,8 @@ class NIPS4BPlusDownloader(Downloader):
 
         for dataset in ["train", "test"]:
             folder_path = os.path.join(self.extracted_nips_audio_folder, dataset)
-            PathManager.copytree(folder_path, nips4bplus_audio_folder)
-            PathManager.copytree(folder_path, nips4bplus_all_audio_folder)
+            FileManager.copytree(folder_path, nips4bplus_audio_folder)
+            FileManager.copytree(folder_path, nips4bplus_all_audio_folder)
 
         # remove audio files without labels
         for file in os.listdir(nips4bplus_audio_folder):

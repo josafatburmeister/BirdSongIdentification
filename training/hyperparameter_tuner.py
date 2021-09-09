@@ -3,7 +3,7 @@ from typing import List
 
 from tabulate import tabulate
 
-from general import logger, PathManager
+from general import logger, FileManager
 from training.training import ModelTrainer
 
 
@@ -24,13 +24,13 @@ class HyperparameterTuner:
                 "weight_decay"]
 
     def __init__(self,
-                 spectrogram_path_manager: PathManager,
+                 spectrogram_path_manager: FileManager,
                  experiment_name: str,
                  **kwargs) -> None:
         """
 
         Args:
-            spectrogram_path_manager: PathManager object that manages the directory containing the spectrograms file and
+            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             experiment_name: Descriptive name of the training run / experiment.
         """

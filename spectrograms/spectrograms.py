@@ -11,7 +11,7 @@ import pandas as pd
 from scipy import ndimage
 from skimage import io
 
-from general.filepaths import PathManager
+from general.file_manager import FileManager
 from general.logging import logger, ProgressBar
 
 warnings.filterwarnings('ignore')
@@ -61,16 +61,16 @@ class SpectrogramCreator:
 
         return x_scaled
 
-    def __init__(self, chunk_length: int, audio_path_manager: PathManager,
-                 spectrogram_path_manager: Optional[PathManager] = None, include_noise_samples: bool = True) -> None:
+    def __init__(self, chunk_length: int, audio_path_manager: FileManager,
+                 spectrogram_path_manager: Optional[FileManager] = None, include_noise_samples: bool = True) -> None:
         """
 
         Args:
             chunk_length: Length of the chunks into which the audio recordings are to be split (in milliseconds). Per
                 chunk one spectrogram is created.
-            audio_path_manager: PathManager object that manages the input directory containing the audio files from
+            audio_path_manager: FileManager object that manages the input directory containing the audio files from
                 which the spectrograms are to be created.
-            spectrogram_path_manager: PathManager object that manages the output directory to be used for storing the
+            spectrogram_path_manager: FileManager object that manages the output directory to be used for storing the
                 created spectrograms.
             include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
                 included in the spectrogram dataset.
@@ -354,7 +354,7 @@ class SpectrogramCreator:
             None
         """
         # clean up target dir
-        PathManager.empty_dir(target_dir)
+        FileManager.empty_dir(target_dir)
 
         audio_file_names = os.listdir(audio_dir)
 

@@ -2,7 +2,7 @@ from typing import Union
 
 import torch
 
-from general import logger, PathManager
+from general import logger, FileManager
 from training import metrics, metric_logging, model_runner
 
 
@@ -11,11 +11,11 @@ class ModelEvaluator(model_runner.ModelRunner):
     Evaluates a model on a given dataset.
     """
 
-    def __init__(self, spectrogram_path_manager: PathManager, architecture: str, **kwargs) -> None:
+    def __init__(self, spectrogram_path_manager: FileManager, architecture: str, **kwargs) -> None:
         """
 
         Args:
-            spectrogram_path_manager: PathManager object that manages the directory containing the spectrograms file and
+            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
         """

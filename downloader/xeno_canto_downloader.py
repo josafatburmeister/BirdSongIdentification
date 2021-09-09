@@ -9,7 +9,7 @@ import requests
 from sklearn.model_selection import train_test_split
 
 from downloader import Downloader, NIPS4BPlusDownloader
-from general import logger, PathManager, ProgressBar
+from general import logger, FileManager, ProgressBar
 from general.custom_types import JSON
 
 
@@ -56,11 +56,11 @@ class XenoCantoDownloader(Downloader):
 
         return response.json()
 
-    def __init__(self, path_manager: PathManager):
+    def __init__(self, path_manager: FileManager):
         """
 
         Args:
-            path_manager: PathManager object that manages the output directory to be used for storing the downloaded
+            path_manager: FileManager object that manages the output directory to be used for storing the downloaded
                 datasets.
         """
 
@@ -391,7 +391,7 @@ class XenoCantoDownloader(Downloader):
             self.save_label_file(labels, dataset_name)
 
             # clear data folders
-            PathManager.empty_dir(self.path.data_folder(dataset_name, "audio"))
+            FileManager.empty_dir(self.path.data_folder(dataset_name, "audio"))
 
             # download audio files
             self.__download_audio_files_by_id(

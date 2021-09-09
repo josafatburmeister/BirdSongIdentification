@@ -5,7 +5,7 @@ from typing import List
 import zipfile
 
 from downloader import NIPS4BPlusDownloader, XenoCantoDownloader
-from general import logger, PathManager
+from general import logger, FileManager
 from spectrograms import SpectrogramCreator
 from training import model_evaluator, training, hyperparameter_tuner
 
@@ -15,19 +15,19 @@ class PipelineSteps:
                                  verbose_logging: bool, **kwargs) -> None:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
-        path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
+        path_manager = FileManager(output_path, gcs_bucket=gcs_bucket)
         xc_downloader = XenoCantoDownloader(path_manager)
         xc_downloader.create_datasets(species_list=species_list, **kwargs)
 
         nips4bplus_downloader = NIPS4BPlusDownloader(path_manager)
         nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 
-        PathManager.empty_dir(path_manager.cache_dir)
+        FileManager.empty_dir(path_manager.cache_dir)
 
     def download_demo_data(self, gcs_bucket: str, output_path: str, verbose_logging: bool) -> None:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
-        path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
+        path_manager = FileManager(output_path, gcs_bucket=gcs_bucket)
 
         zip_path = os.path.join(output_path, "demo_data.zip")
 
@@ -44,8 +44,8 @@ class PipelineSteps:
                             clear_spectrogram_cache: bool = False, verbose_logging: bool = False, **kwargs) -> None:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
-        audio_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
-        spectrogram_path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
+        audio_path_manager = FileManager(input_path, gcs_bucket=gcs_bucket)
+        spectrogram_path_manager = FileManager(output_path, gcs_bucket=gcs_bucket)
         spectrogram_creator = SpectrogramCreator(chunk_length, audio_path_manager, spectrogram_path_manager, **kwargs)
 
         shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())
@@ -59,8 +59,8 @@ class PipelineSteps:
             clear_spectrogram_cache=clear_spectrogram_cache)
 
         # clean up
-        PathManager.empty_dir(input_path)
-        PathManager.empty_dir(spectrogram_path_manager.cache_dir)
+        FileManager.empty_dir(input_path)
+        FileManager.empty_dir(spectrogram_path_manager.cache_dir)
 
     def train_model(self, input_path: str, gcs_bucket: str, experiment_name: str = "", verbose_logging: bool = False,
                     **kwargs) -> None:
@@ -78,7 +78,7 @@ class PipelineSteps:
                      and type(kwargs[hyperparameter][0]) == list):
                 do_hyperparameter_tuning = True
 
-        spectrogram_path_manager = PathManager(input_path, gcs_bucket=gcs_bucket)
+        spectrogram_path_manager = FileManager(input_path, gcs_bucket=gcs_bucket)
 
         if do_hyperparameter_tuning:
             del kwargs["is_hyperparameter_tuning"]
@@ -106,4 +106,4 @@ class PipelineSteps:
                     )
 
         # clean up
-        PathManager.empty_dir(input_path)
+        FileManager.empty_dir(input_path)

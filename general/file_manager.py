@@ -7,7 +7,7 @@ from general.logging import logger
 from kubeflow import fairing
 
 
-class PathManager:
+class FileManager:
     """
     Manages files within a given directory. As described in the Readme, our pipeline uses specific directory structures
     to transfer data between pipeline stages. This class implements the file operations and file path handling necessary
@@ -140,7 +140,7 @@ class PathManager:
             None
         """
 
-        if PathManager.gcs_file_exists(dir_path):
+        if FileManager.gcs_file_exists(dir_path):
             try:
                 subprocess.run(["gsutil", "-q", "rm", "-r", dir_path], check=True)
                 logger.info(f"Removed {dir_path}.")
@@ -163,7 +163,7 @@ class PathManager:
         Returns:
             None
         """
-        src_path = PathManager.ensure_trailing_slash(src_path)
+        src_path = FileManager.ensure_trailing_slash(src_path)
         try:
             if src_path.startswith("gs://"):
                 subprocess.run(["gsutil", "-m", "rsync", "-r", src_path, dest_path], check=True)
@@ -208,7 +208,7 @@ class PathManager:
             True if the bucket exists, otherwise False.
         """
 
-        bucket_path = PathManager.ensure_trailing_slash(bucket_path)
+        bucket_path = FileManager.ensure_trailing_slash(bucket_path)
         try:
             # if the bucket does not exist, this will throw a BucketNotFoundException
             subprocess.run(
@@ -261,8 +261,8 @@ class PathManager:
             self.GCS_BUCKET_ID = gcs_bucket
             self.GCS_BUCKET = f"gs://{self.GCS_BUCKET_ID}"
 
-            if not PathManager.gcs_bucket_exists(self.GCS_BUCKET):
-                PathManager.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
+            if not FileManager.gcs_bucket_exists(self.GCS_BUCKET):
+                FileManager.gcs_make_bucket(self.GCS_BUCKET, self.GCP_PROJECT)
 
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_model_dir = os.path.join(self.GCS_BUCKET, "models")
@@ -323,7 +323,7 @@ class PathManager:
 
         for key in kwargs.values():
             subdir += f"_{key}"
-        return PathManager.ensure_trailing_slash(os.path.join(self.gcs_cache_dir, subdir))
+        return FileManager.ensure_trailing_slash(os.path.join(self.gcs_cache_dir, subdir))
 
     def cached_file_path(self, subdir: str, file_path: str, **kwargs) -> str:
         """
@@ -389,7 +389,7 @@ class PathManager:
             None
         """
 
-        PathManager.gcs_copy_dir(self.cache(subdir), self.__gcs_cache(subdir, **kwargs))
+        FileManager.gcs_copy_dir(self.cache(subdir), self.__gcs_cache(subdir, **kwargs))
 
     def copy_cache_from_gcs(self, subdir: str, **kwargs) -> None:
         """
@@ -403,7 +403,7 @@ class PathManager:
         """
 
         if self.gcs_file_exists(self.__gcs_cache(subdir, **kwargs)):
-            PathManager.gcs_copy_dir(self.__gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
+            FileManager.gcs_copy_dir(self.__gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
 
     def copy_file_to_gcs_cache(self, file_path: Union[str, List[str]], subdir: str, **kwargs) -> None:
         """
@@ -418,9 +418,9 @@ class PathManager:
         """
 
         if type(file_path) == list:
-            PathManager.gcs_copy_files(file_path, self.__gcs_cache(subdir, **kwargs))
+            FileManager.gcs_copy_files(file_path, self.__gcs_cache(subdir, **kwargs))
         else:
-            PathManager.gcs_copy_file(file_path, self.__gcs_cache(subdir, **kwargs))
+            FileManager.gcs_copy_file(file_path, self.__gcs_cache(subdir, **kwargs))
 
     def clear_cache(self, subdir: str, **kwargs) -> None:
         """
@@ -434,6 +434,6 @@ class PathManager:
             None
         """
 
-        PathManager.empty_dir(self.cache(subdir, **kwargs))
+        FileManager.empty_dir(self.cache(subdir, **kwargs))
         if self.is_pipeline_run:
-            PathManager.gcs_remove_dir(self.__gcs_cache(subdir, **kwargs))
+            FileManager.gcs_remove_dir(self.__gcs_cache(subdir, **kwargs))

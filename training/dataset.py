@@ -9,8 +9,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from general.filepaths import PathManager
-from general.logging import logger
+from general import FileManager, logger
 
 T_co = TypeVar('T_co', covariant=True)
 
@@ -20,13 +19,13 @@ class SpectrogramDataset(Dataset):
     Custom PyTorch dataset of spectrogram images.
     """
 
-    def __init__(self, path_manager: PathManager, include_noise_samples: bool = True,
+    def __init__(self, path_manager: FileManager, include_noise_samples: bool = True,
                  dataset: str = "train", multi_label_classification: bool = False,
                  undersample_noise_samples: bool = True) -> None:
         """
 
         Args:
-            path_manager: PathManager object that manages the directory containing the spectrograms file and their
+            path_manager: FileManager object that manages the directory containing the spectrograms file and their
                 labels.
             include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
                 included in the spectrogram dataset.

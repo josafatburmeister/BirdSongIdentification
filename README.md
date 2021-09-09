@@ -401,12 +401,12 @@ The dependencies can then be installed with the following command:
 python3 -m pip install -r requirements-notebook.txt
 ```
 
-The components of our pipeline do not communicate directly with each other, but pass files through a shared directory. The management of the file paths within the shared directory is implemented in the `PathManager` class. The following code creates an instance of the PathManager class. The path of the directory in which the data of the pipeline is to be stored is passed to the constructor of the PathManager class:
+The components of our pipeline do not communicate directly with each other, but pass files through a shared directory. The management of the file paths within the shared directory is implemented in the `FileManager` class. The following code creates an instance of the FileManager class. The path of the directory in which the data of the pipeline is to be stored is passed to the constructor of the FileManager class:
 
 ```python
-from general import PathManager
+from general import FileManager
 
-path_manager = PathManager("./data")
+path_manager = FileManager("./data")
 ```
 
 All our pipeline components use a shared logger to output status information. For the demo pipeline, we set the logging level to verbose:
@@ -459,12 +459,12 @@ To apply our machine learning pipeline to another dataset than Xeno-Canto or NIP
 
 (3) A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in Table 2.
 
-To facilitate the implementation of custom downloaders, we provide a `Downloader` class in the `downloader` module. This class implements several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a `PathManager` object as an argument. The PathManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the PathManager would be initialized with the `/data` directory.
+To facilitate the implementation of custom downloaders, we provide a `Downloader` class in the `downloader` module. This class implements several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a `FileManager` object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
 
 By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
 
 (1) The Downloader class provides a method `save_categories_file(categories)`. This method takes a list of class names and creates a `categories.txt` file from it.
 
-(2) Within the Downloader class, the PathManager object can be accessed using `self.path`. The PathManager provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
+(2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
 
 (3) The Downloader class implements a method `save_label_file(labels, dataset_name)`. This method takes a Pandas dataframe and creates a label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".

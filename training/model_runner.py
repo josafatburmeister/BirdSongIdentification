@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torchvision import models
 from torch import nn
 
-from general import PathManager
+from general import FileManager
 from training import dataset, metric_logging
 from training.metric_logging import TrainingLogger
 
@@ -27,7 +27,7 @@ class ModelRunner:
         return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def __init__(self,
-                 spectrogram_path_manager: PathManager,
+                 spectrogram_path_manager: FileManager,
                  architecture: str,
                  experiment_name: str,
                  batch_size: int = 100,
@@ -45,7 +45,7 @@ class ModelRunner:
         """
 
         Args:
-            spectrogram_path_manager: PathManager object that manages the directory containing the spectrograms file and
+            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
             experiment_name: Descriptive name of the experiment.
