@@ -2,6 +2,7 @@ import os
 import shutil
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import numpy as np
 import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
@@ -149,3 +150,17 @@ class Downloader:
             assert column_name in labels.columns
 
         labels.to_csv(self.path.label_file(dataset_name, "audio"))
+
+    def save_categories_file(self, categories: List[str]) -> None:
+        """
+        Creates categories.txt file according to the format described in the Readme.
+
+        Args:
+            categories: List of class names that may be used in the datasets.
+
+        Returns:
+            None
+        """
+
+        # noinspection PyTypeChecker
+        np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")

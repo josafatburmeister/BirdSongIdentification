@@ -4,7 +4,6 @@ import os
 from multiprocessing.pool import ThreadPool
 from typing import List, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
@@ -381,8 +380,7 @@ class XenoCantoDownloader(Downloader):
                 else:
                     test_frames.append(test_labels)
 
-        # noinspection PyTypeChecker
-        np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
+        self.save_categories_file(categories)
 
         # save label files
         for dataset_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
