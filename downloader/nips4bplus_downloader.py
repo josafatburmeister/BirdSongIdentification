@@ -14,7 +14,7 @@ class NIPS4BPlusDownloader(Downloader):
     """
     Downloads NIPS4BPlus dataset.
 
-    see Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223
+    See Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223
     (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
     """
 

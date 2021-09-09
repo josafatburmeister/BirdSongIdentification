@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 from multiprocessing.pool import ThreadPool
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -15,6 +15,15 @@ from general.custom_types import JSON
 
 
 class XenoCantoDownloader(Downloader):
+    """
+    Downloads datasets from Xeno-Canto.
+
+    See  Willem-Pier Vellinga and Robert Planque. “The Xeno-canto collection and its relation to sound recognition
+    and classification”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France).
+    Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10.
+    URL: http://ceur-ws.org/Vol-1391/166-CR.pdf.
+    """
+
     xeno_canto_url = "https://www.xeno-canto.org"
     xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
@@ -28,7 +37,20 @@ class XenoCantoDownloader(Downloader):
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     @staticmethod
-    def download_xeno_canto_page(species_name: str, page: int = 1):
+    def download_xeno_canto_page(species_name: str, page: int = 1) -> JSON:
+        """
+        The Xeno-Canto API allows to query audio metadata using a keyword search. The search results are returned
+        paginated. This method searches for a specific bird species and downloads the specified page of resulting
+        metadata.
+
+        Args:
+            species_name: Scientific name of the bird species for which the audio metadata is to be searched.
+            page: Number of the result page to download.
+
+        Returns:
+            Xeno-Canto metadata page in JSON format.
+        """
+
         params = {"query": species_name, "page": page}
 
         response = requests.get(url=XenoCantoDownloader.xeno_api_canto_url, params=params)
@@ -36,14 +58,43 @@ class XenoCantoDownloader(Downloader):
         return response.json()
 
     def __init__(self, path_manager: PathManager):
+        """
+
+        Args:
+            path_manager: PathManager object that manages the output directory to be used for storing the downloaded
+                datasets.
+        """
+
         super().__init__(path_manager)
 
-    def __metadata_cache_path(self, species_name: str):
+    def __metadata_cache_path(self, species_name: str) -> str:
+        """
+        Computes the path where the metadata file for a given bird species should be cached.
+
+        Args:
+            species_name: Scientific name of the bird species.
+
+        Returns:
+            Path of the metadata file in cache.
+        """
+
         file_name = "{}.json".format(species_name.replace(" ", "_"))
         return os.path.join(self.path.cache("labels"), file_name)
 
     def __download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
-                                     download_threads=25):
+                                     download_threads=25) -> None:
+        """
+        Takes a list of Xeno-Canto file IDs and downloads the corresponding files from Xeno-Canto.
+
+        Args:
+            target_dir: Path of the directory where the downloaded files should be stored.
+            file_ids: List of Xeno-Canto file IDs of the files to be downloaded.
+            desc: Description of the download task.
+            download_threads: Number of threads to be used for parallelization of data download.
+
+        Returns:
+            None
+        """
 
         progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0,
                                    is_pipeline_run=self.path.is_pipeline_run)
@@ -64,6 +115,16 @@ class XenoCantoDownloader(Downloader):
             progress_bar.update(1)
 
     def __download_species_metadata(self, species_name: str) -> Tuple[JSON, int]:
+        """
+        Downloads metadata of all audio recordings available for a given bird species in Xeno-Canto.
+
+        Args:
+            species_name: Scientific name of the bird species for which the audio metadata is to be downloaded.
+
+        Returns:
+            Xeno-Canto metadata in JSON format and number of recordings available for the bird species.
+        """
+
         metadata_file_path = self.__metadata_cache_path(species_name)
 
         # check if metadata file is in cache
@@ -118,6 +179,36 @@ class XenoCantoDownloader(Downloader):
                         clear_label_cache: bool = False,
                         random_state: int = 12
                         ) -> None:
+        """
+        Creates training, validation and test sets from Xeno-Canto recordings for a given list of bird species and sound
+        types.
+        The species_list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
+
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+            use_nips4b_species_list: Whether the species list of the NIPS4B dataset should be used (if set to true, the
+                provided species list can be empty)
+            maximum_samples_per_class: Maximum number of recordings per class.
+            test_size: Percentage of recordings that should be used for model testing and validation (validation and
+                test set get one half of the samples each).
+            min_quality: Minimum quality of the audio recordings to be included in the datasets.
+            sound_types: List of sound types to include in the datasets.
+            sexes: List of bird sexes to include in the datasets.
+            life_stages: List of bird life stages to include in the datasets.
+            exclude_special_cases: Whether special cases (e.g. birds imitating other birds) should be excluded from the
+                datasets.
+            maximum_number_of_background_species: Maximum number of background species of the audio recordings to be
+                included in the datasets.
+            maximum_recording_length: Maximum length of the recordings to be included in the datasets.
+            clear_audio_cache: Whether the audio cache should be cleared before downloading the datasets.
+            clear_label_cache: Whether the label cache should be cleared before downloading the datasets.
+            random_state: Random State for random partitioning of the recordings into the training, validation and test
+                sets.
+
+        Returns:
+            None
+        """
+
         if use_nips4b_species_list or not species_list:
             nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
             species_list = nips4bplus_downloader.download_nips4b_species_list()
@@ -294,17 +385,17 @@ class XenoCantoDownloader(Downloader):
         np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
 
         # save label files
-        for split_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
+        for dataset_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
             if len(frames) == 0:
-                raise NameError(f"Empty {split_name} set")
+                raise NameError(f"Empty {dataset_name} set")
             labels = pd.concat(frames)
 
-            self.save_label_file(labels, split_name)
+            self.save_label_file(labels, dataset_name)
 
             # clear data folders
-            PathManager.empty_dir(self.path.data_folder(split_name, "audio"))
+            PathManager.empty_dir(self.path.data_folder(dataset_name, "audio"))
 
             # download audio files
             self.__download_audio_files_by_id(
-                self.path.data_folder(split_name, "audio"), labels["id"], f"Download {split_name} set..."
+                self.path.data_folder(dataset_name, "audio"), labels["id"], f"Download {dataset_name} set..."
             )
