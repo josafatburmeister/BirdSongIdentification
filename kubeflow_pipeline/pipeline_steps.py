@@ -24,7 +24,7 @@ class PipelineSteps:
 
         PathManager.empty_dir(path_manager.cache_dir)
 
-    def download_demo_data(self, gcs_bucket: str, output_path: str, verbose_logging: bool):
+    def download_demo_data(self, gcs_bucket: str, output_path: str, verbose_logging: bool) -> None:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
         path_manager = PathManager(output_path, gcs_bucket=gcs_bucket)
