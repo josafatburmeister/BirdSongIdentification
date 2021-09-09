@@ -19,10 +19,13 @@ class Downloader:
         """
         Parses a list of strings, where each string contains a species name and its sound types.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
-        Returns a dictionary that maps species names to sound types.
 
-        param: species_list: list of species and sound types in the above mentioned  format
-        param: default_sound_types: default sound types that are used when no sound types are provided for a species
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+            default_sound_types: Default sound types that are used when no sound types are provided for a species.
+
+        Returns:
+            A dictionary that maps species names to sound types.
         """
 
         sound_types = set(default_sound_types)
@@ -49,11 +52,15 @@ class Downloader:
         random_state: int = 12
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Splits pandas dataframe into train and test set.
+        Splits Pandas dataframe into train and test set.
 
-        param: labels: Labels to split
-        param: test_size: Fraction of labels that should be used for test set
-        param: random_state: Random state for data splitting
+        Args:
+            labels: Dataframe with labels to split.
+            test_size: Fraction of labels that should be used for test set.
+            random_state: Random State for random splitting of the dataframe.
+
+        Returns:
+            Two Pandas dataframes, the first being the train set and the second being the test set.
         """
 
         train_labels, test_labels = [], []
@@ -70,7 +77,10 @@ class Downloader:
 
     def __init__(self, path_manager: PathManager):
         """
-        param: path_manager: PathManager instance that manages the target folder
+
+        Args:
+            path_manager: PathManager object that manages the output directory to be used for storing the
+                downloaded datasets.
         """
 
         self.path = path_manager
@@ -82,13 +92,17 @@ class Downloader:
 
     def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None) -> None:
         """
-        Downloads file from given URL and saves it in target path. If cache_dir parameter is set the downloaded file is
-        cached to speedup later download request of the same file.
+        Downloads a file from given URL and saves it in target path. If cache_subdir parameter is set, the downloaded
+        file is cached to speedup later download request of the same file.
 
-        param: url: url of file to download
-        param: target_file: path where downloaded file should be stored
-        param: cache_subdir: Name of a subfolder of the cache folder where the downloaded file should be cached. If not
+        Args:
+            url: Url of the file to be downloaded.
+            target_file: Path where downloaded file is to be stored.
+            cache_subdir: Name of a subfolder of the cache folder where the downloaded file should be cached. If not
             existing, the subfolder is created inside the cache folder.
+
+        Returns:
+            None
         """
 
         if cache_subdir:
@@ -117,15 +131,21 @@ class Downloader:
             else:
                 raise NameError("File couldn\'t be retrieved")
 
-    def save_label_file(self, labels: pd.DataFrame, split_name: str) -> None:
+    def save_label_file(self, labels: pd.DataFrame, dataset_name: str) -> None:
         """
-        Creates label file from pandas dataframe.
+        Creates an audio label file for a dataset from a Pandas dataframe according to the format described in the Readme.
 
-        param: labels: dataframe containing the file labels, has to contain the columns "id", "file_path", "label", "start", and "end"
-        param: split_name: name of the data split (e.g., "train", "val" or "test)
+        Args:
+            labels: Pandas dataframe containing the audio file labels, has to contain at least the columns "id",
+                "file_path", "label", "start", and "end" (see Readme).
+            dataset_name: Name of the dataset (e.g., "train", "val" or "test).
+
+        Returns:
+            None
         """
+
         assert type(labels) == pd.DataFrame
         for column_name in ["id", "file_path", "label", "start", "end"]:
             assert column_name in labels.columns
 
-        labels.to_csv(self.path.label_file(split_name, "audio"))
+        labels.to_csv(self.path.label_file(dataset_name, "audio"))
