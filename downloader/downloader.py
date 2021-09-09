@@ -107,8 +107,8 @@ class Downloader:
 
         if cache_subdir:
             cached_file_path = self.path.cached_file_path(cache_subdir, target_file)
+
         # check if file is in cache
-        # FIXME würde die "if"s gerne ander schachteln hier
         if cache_subdir and os.path.exists(cached_file_path):
             logger.verbose("cached %s", url)
             shutil.copy(cached_file_path, target_file)

@@ -23,25 +23,25 @@ inputs:
     name: Maximum Samples Per Class,
     type: Integer,
     default: "100",
-    description: "Maximum number of samples per class",
+    description: "Maximum number of recordings per class",
   }
   - {
     name: Maximum Recording Length,
     type: Integer,
     default: None,
-    description: "Maximum length of audio samples to include in the dataset in seconds",
+    description: "Maximum length of audio recordings to include in the dataset in seconds",
   }
   - {
     name: Test Size,
     type: Float,
     default: "0.4",
-    description: "Percentage of samples that should be used for model testing and validation (validation and test set get one half of the samples each)",
+    description: "Percentage of recordings that should be used for model testing and validation (validation and test set get one half of the samples each)",
   }
   - {
     name: Min Quality,
     type: String,
     default: "E",
-    description: "Minimum quality of the audio samples to be included in the datasets",
+    description: "Minimum quality of the audio recordings to be included in the datasets",
   }
   - {
     name: Sound Types,
@@ -71,7 +71,7 @@ inputs:
     name: Maximum Number Of Background Species,
     type: Integer,
     default: "1",
-    description: "Maximum number of background species of the audio samples to be included in the datasets",
+    description: "Maximum number of background species of the audio recordings to be included in the datasets",
   }
   - {
     name: Clear Audio Cache,
