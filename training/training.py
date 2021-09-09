@@ -79,8 +79,10 @@ class ModelTrainer:
             learning_rate: Learning rate.
             learning_rate_scheduler: Learning rate scheduler, either "cosine" (cosine annealing learning rate scheduler)
                 or "step_lr" (step-wise learning rate decay).
-            learning_rate_scheduler_gamma: Gamma parameter of step-wise learning rate decay; only considered if "learning_rate_scheduler" is set to "step_lr".
-            learning_rate_scheduler_step_size: Step size of step-wise learning rate decay; only considered if "learning_rate_scheduler" is set to "step_lr".
+            learning_rate_scheduler_gamma: Gamma parameter of step-wise learning rate decay; only considered if
+                "learning_rate_scheduler" is set to "step_lr".
+            learning_rate_scheduler_step_size: Step size of step-wise learning rate decay; only considered if
+                "learning_rate_scheduler" is set to "step_lr".
             momentum: Momentum; only considered if "optimizer" is set to "SGD".
             multi_label_classification: Whether the model should be trained as single-label classification model or as
                 multi-label classification model.
@@ -157,7 +159,7 @@ class ModelTrainer:
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
 
-    def __setup_dataloaders(self) -> Tuple[Dict[str, torch.utils.data.Dataset], Dict[str, torch.utils.data.DataLoader]]:
+    def __setup_dataloaders(self) -> Tuple[Dict[str, ds.XenoCantoSpectrograms], Dict[str, torch.utils.data.DataLoader]]:
         """
         Creates datasets and dataloaders for model training and validation.
 
@@ -192,6 +194,7 @@ class ModelTrainer:
         """
 
         logger.info("Setup %s model: ", self.architecture)
+        model = None
         if self.architecture == "resnet18":
             model = resnet.ResnetTransferLearning(architecture="resnet18",
                                                   num_classes=self.num_classes,
@@ -217,10 +220,12 @@ class ModelTrainer:
                 logger=logger, p_dropout=self.p_dropout)
 
         logger.info("\n")
-        model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping()
+        model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping(
+        )
         return model
 
-    def __setup_optimization(self, model: torch.nn.Module) -> Tuple[torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    def __setup_optimization(self, model: torch.nn.Module) -> Tuple[
+        torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """
         Sets up tools for model optimization.
 
@@ -246,7 +251,8 @@ class ModelTrainer:
         else:
             optimizer = None
         if self.learning_rate_scheduler == "cosine":
-            scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.num_epochs, eta_min=0)
+            scheduler = lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=self.num_epochs, eta_min=0)
         elif self.learning_rate_scheduler == "step_lr":
             scheduler = lr_scheduler.StepLR(optimizer, step_size=self.learning_rate_scheduler_step_size,
                                             gamma=self.learning_rate_scheduler_gamma)
@@ -254,7 +260,7 @@ class ModelTrainer:
             scheduler = None
         return loss, optimizer, scheduler
 
-    def train_model(self) -> Union[torch.nn.Module, float]:
+    def train_model(self) -> Union[Tuple[torch.nn.Module, torch.nn.Module, Dict[str, torch.nn.Module]], float]:
         """
         Model training loop.
 
@@ -269,7 +275,8 @@ class ModelTrainer:
 
         model_tracker = tracker.ModelTracker(self.spectrogram_path_manager,
                                              self.experiment_name,
-                                             self.datasets["train"].id_to_class_mapping(),
+                                             self.datasets["train"].id_to_class_mapping(
+                                             ),
                                              self.is_pipeline_run, model,
                                              self.multi_label_classification,
                                              device)
@@ -281,7 +288,8 @@ class ModelTrainer:
         logger.info("Number of species: %i", self.num_classes)
 
         if self.early_stopping:
-            early_stopper = EarlyStopper(monitor=self.monitor, patience=self.patience, min_change=self.min_change)
+            early_stopper = EarlyStopper(
+                monitor=self.monitor, patience=self.patience, min_change=self.min_change)
 
         logger.info("\n")
         for epoch in range(self.num_epochs):
@@ -307,7 +315,8 @@ class ModelTrainer:
                     with torch.set_grad_enabled(phase == "train"):
                         outputs = model(images)
                         if self.multi_label_classification:
-                            predictions = (torch.sigmoid(outputs) > self.multi_label_classification_threshold).int()
+                            predictions = (torch.sigmoid(
+                                outputs) > self.multi_label_classification_threshold).int()
                         else:
                             _, predictions = torch.max(outputs, 1)
                         loss = loss_function(outputs, labels)
@@ -323,10 +332,12 @@ class ModelTrainer:
                 if phase == "val":
                     model_tracker.track_best_model(model, model_metrics, epoch)
 
-                self.logger.log_metrics(model_metrics, phase, epoch, loss if phase == "train" else None)
+                self.logger.log_metrics(
+                    model_metrics, phase, epoch, loss if phase == "train" else None)
 
                 if phase == "val" and self.save_all_models:
-                    model_tracker.save_epoch_model(model, epoch, self.logger.get_run_id())
+                    model_tracker.save_epoch_model(
+                        model, epoch, self.logger.get_run_id())
 
             if self.early_stopping and early_stopper.check_early_stopping(model_metrics):
                 logger.info(f"Training stopped early, because {self.monitor}, did not improve by at least"
@@ -350,10 +361,9 @@ class ModelTrainer:
         )
 
         if self.is_pipeline_run:
-            self.logger.log_metrics_in_kubeflow(
+            metric_logging.TrainingLogger.log_metrics_in_kubeflow(
                 model_tracker.best_average_metrics,
                 model_tracker.best_minimum_metrics,
-                model_tracker.best_metrics_per_class if self.multi_label_classification else None
             )
 
         self.logger.finish()

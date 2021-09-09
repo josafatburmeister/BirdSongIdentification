@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess
-from typing import List
+from typing import List, Union
 
 from general.logging import logger
 from kubeflow import fairing
@@ -15,7 +15,7 @@ class PathManager:
     """
 
     @staticmethod
-    def copytree(src: str, dest: str, symlinks: bool = False, ignore =None) -> None:
+    def copytree(src: str, dest: str, symlinks: bool = False, ignore: bool = None) -> None:
         """
         Recursively copies a directory and its subdirectories.
     
@@ -267,20 +267,21 @@ class PathManager:
             self.gcs_cache_dir = os.path.join(self.GCS_BUCKET, "cache")
             self.gcs_model_dir = os.path.join(self.GCS_BUCKET, "models")
 
-    def label_file(self, dataset: str, type: str) -> str:
+    def label_file(self, dataset: str, label_type: str) -> str:
         """
         Computes the absolute path of the label file for the given dataset. Creates all subdirectories of this path that
         do not exist yet.
 
         Args:
             dataset: Name of a dataset (e.g. "train", "val", "test").
+            label_type: Type of label file (e.g. "audio", "spectrograms").
 
         Returns:
             Absolute path of the label file for the given dataset.
         """
 
         os.makedirs(os.path.join(self.base_dir, dataset), exist_ok=True)
-        return os.path.join(self.base_dir, dataset, f"{type}.csv")
+        return os.path.join(self.base_dir, dataset, f"{label_type}.csv")
 
     def categories_file(self) -> str:
         """
@@ -404,7 +405,7 @@ class PathManager:
         if self.gcs_file_exists(self.__gcs_cache(subdir, **kwargs)):
             PathManager.gcs_copy_dir(self.__gcs_cache(subdir, **kwargs), self.cache(subdir, **kwargs))
 
-    def copy_file_to_gcs_cache(self, file_path: str, subdir: str, **kwargs) -> None:
+    def copy_file_to_gcs_cache(self, file_path: Union[str, List[str]], subdir: str, **kwargs) -> None:
         """
         Uploads the specified file to a cache subdirectory in the GCS bucket used to persist the cache.
 

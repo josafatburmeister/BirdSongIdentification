@@ -3,7 +3,7 @@ from typing import Union
 import torch
 
 from general import logger, PathManager
-from training import metrics, model_runner
+from training import metrics, metric_logging, model_runner
 
 
 class ModelEvaluator(model_runner.ModelRunner):
@@ -19,11 +19,13 @@ class ModelEvaluator(model_runner.ModelRunner):
                 their labels.
             architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
         """
-        super().__init__(spectrogram_path_manager, architecture, experiment_name="", **kwargs)
+        super().__init__(spectrogram_path_manager,
+                         architecture, experiment_name="", **kwargs)
         self.datasets = None
         self.dataloaders = None
 
-    def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device, num_classes: int) -> torch.nn.Module:
+    def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device,
+                    num_classes: int) -> torch.nn.Module:
         """
         Creates model with the required number of classes and the required architecture.
 
@@ -70,7 +72,8 @@ class ModelEvaluator(model_runner.ModelRunner):
         model.to(device)
         model.eval()
 
-        metric_logger = super().setup_metric_logger({"experiment_name": model_name, "split": dataset})
+        metric_logger = super().setup_metric_logger(
+            {"experiment_name": model_name, "split": dataset})
 
         model_metrics = metrics.Metrics(num_classes=num_classes,
                                         multi_label=self.multi_label_classification)
@@ -82,7 +85,8 @@ class ModelEvaluator(model_runner.ModelRunner):
             with torch.no_grad():
                 outputs = model(images)
                 if self.multi_label_classification:
-                    predictions = (torch.sigmoid(outputs) > self.multi_label_classification_threshold).int()
+                    predictions = (torch.sigmoid(
+                        outputs) > self.multi_label_classification_threshold).int()
                 else:
                     _, predictions = torch.max(outputs, 1)
 
@@ -90,6 +94,6 @@ class ModelEvaluator(model_runner.ModelRunner):
         logger.info("Model performance of %s on %s set:", model_name, dataset)
         metric_logger.log_metrics(model_metrics, "test", 0)
         if self.track_metrics:
-            metric_logger.store_summary_metrics(model_metrics)
+            metric_logging.TrainingLogger.store_summary_metrics(model_metrics)
 
         metric_logger.finish()

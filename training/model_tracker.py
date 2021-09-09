@@ -106,7 +106,7 @@ class ModelTracker:
         Returns:
             None
         """
-        self.path.ensure_dir(os.path.split(model_path)[0])
+        os.makedirs(os.path.split(model_path)[0], exist_ok=True)
         torch.save({
             'state_dict': model,
             'id_to_class_mapping': self.id_to_class_mapping

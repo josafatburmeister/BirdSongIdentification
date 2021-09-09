@@ -26,7 +26,8 @@ class XenoCantoSpectrograms(Dataset):
         """
 
         Args:
-            path_manager: PathManager object that manages the directory containing the spectrograms file and their labels.
+            path_manager: PathManager object that manages the directory containing the spectrograms file and their
+                labels.
             include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
                 included in the spectrogram dataset.
             dataset: Name of a dataset (e.g. train, val, or test).

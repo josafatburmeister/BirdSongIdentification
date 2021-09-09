@@ -60,10 +60,10 @@ class HyperparameterTuner:
         for hyperparameter in HyperparameterTuner.tunable_parameters():
             if hyperparameter in parameters and \
                     (hyperparameter != "layers_to_unfreeze"
-                    and type(parameters[hyperparameter]) == list
-                    or hyperparameter == "layers_to_unfreeze"
-                    and type(parameters[hyperparameter]) == list
-                    and type(parameters[hyperparameter][0]) == list):
+                     and type(parameters[hyperparameter]) == list
+                     or hyperparameter == "layers_to_unfreeze"
+                     and type(parameters[hyperparameter]) == list
+                     and type(parameters[hyperparameter][0]) == list):
                 if hyperparameter not in self.tuned_parameters:
                     self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True

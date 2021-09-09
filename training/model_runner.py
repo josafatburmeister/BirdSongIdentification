@@ -94,7 +94,8 @@ class ModelRunner:
 
         return logger
 
-    def setup_dataloaders(self, dataset_names: list) -> Tuple[Dict[str, torch.utils.data.Dataset], Dict[str, torch.utils.data.DataLoader]]:
+    def setup_dataloaders(self, dataset_names: list) -> Tuple[
+        Dict[str, torch.utils.data.Dataset], Dict[str, torch.utils.data.DataLoader]]:
         """
         Creates datasets and dataloaders for the given dataset names.
 
