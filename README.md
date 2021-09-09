@@ -445,6 +445,26 @@ xc_downloader.create_datasets(
     )
 ```
 
-## Running the pipeline in Kubeflow
+## Running the Pipeline in Kubeflow
 
-## Implementing custom pipeline components
+## Implementing Custom Pipeline Components
+
+### Implementing Custom Data Downloaders
+
+To apply our machine learning pipeline to another dataset than Xeno-Canto or NIPS4BPlus, it is necessary to implement a custom downloader for that dataset. This downloader must place the data in a directory structure as described in the section "Data Exchange Between Pipeline Components" (Listing 1). Let's suppose we want to implement a downloader for a dataset named "test" that will be stored under the path `/data`. To do this, we need to implement the following things:
+
+(1) In the `/data` directory, the `categories.txt` file needs to be created. This file must list the class names of the data set in the format shown in Listing 2.
+
+(2) The audio files of the dataset must be placed in the `/data/test/audio` directory.
+
+(3) A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in Table 2.
+
+To facilitate the implementation of custom downloaders, we provide a `Downloader` class in the `downloader` module. This class implements several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a `PathManager` object as an argument. The PathManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the PathManager would be initialized with the `/data` directory.
+
+By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
+
+(1) The Downloader class provides a method `save_categories_file(categories)`. This method takes a list of class names and creates a `categories.txt` file from it.
+
+(2) Within the Downloader class, the PathManager object can be accessed using `self.path`. The PathManager provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
+
+(3) The Downloader class implements a method `save_label_file(labels, dataset_name)`. This method takes a Pandas dataframe and creates a label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
