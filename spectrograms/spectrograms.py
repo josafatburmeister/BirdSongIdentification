@@ -386,7 +386,7 @@ class SpectrogramCreator:
 
                 progress_bar.update(len(audio_file_names))
 
-    def create_spectrograms_for_splits(self, datasets: Optional[List[str]] = None, signal_threshold: int = 3,
+    def create_spectrograms_for_datasets(self, datasets: Optional[List[str]] = None, signal_threshold: int = 3,
                                        noise_threshold: int = 1, clear_spectrogram_cache: bool = False) -> None:
         """
         Creates spectrograms for all audio files of a dataset.

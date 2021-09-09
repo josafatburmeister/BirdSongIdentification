@@ -50,12 +50,12 @@ class PipelineSteps:
 
         shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())
 
-        spectrogram_creator.create_spectrograms_for_splits(
-            splits=["train", "val", "test"], signal_threshold=signal_threshold, noise_threshold=noise_threshold,
+        spectrogram_creator.create_spectrograms_for_datasets(
+            datasets=["train", "val", "test"], signal_threshold=signal_threshold, noise_threshold=noise_threshold,
             clear_spectrogram_cache=clear_spectrogram_cache)
 
-        spectrogram_creator.create_spectrograms_for_splits(
-            splits=["nips4bplus", "nips4bplus_all"], signal_threshold=0, noise_threshold=0,
+        spectrogram_creator.create_spectrograms_for_datasets(
+            datasets=["nips4bplus", "nips4bplus_all"], signal_threshold=0, noise_threshold=0,
             clear_spectrogram_cache=clear_spectrogram_cache)
 
         # clean up
@@ -92,17 +92,17 @@ class PipelineSteps:
 
             evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
 
-            for split in ["test", "nips4bplus", "nips4bplus_all"]:
+            for dataset in ["test", "nips4bplus", "nips4bplus_all"]:
                 evaluator.evaluate_model(
-                    model=best_average_model, model_name=f"{experiment_name}_best_average_model", split=split
+                    model=best_average_model, model_name=f"{experiment_name}_best_average_model", dataset=dataset
                 )
                 evaluator.evaluate_model(
-                    model=best_minimum_model, model_name=f"{experiment_name}_best_minimum_model", split=split
+                    model=best_minimum_model, model_name=f"{experiment_name}_best_minimum_model", dataset=dataset
                 )
 
                 for class_name, model in best_models_per_class.items():
                     evaluator.evaluate_model(
-                        model=model, model_name=f"{experiment_name}_best_model_{class_name}", split=split
+                        model=model, model_name=f"{experiment_name}_best_model_{class_name}", dataset=dataset
                     )
 
         # clean up
