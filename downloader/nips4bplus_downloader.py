@@ -11,6 +11,13 @@ from .downloader import Downloader
 
 
 class NIPS4BPlusDownloader(Downloader):
+    """
+    Downloads NIPS4BPlus dataset.
+
+    see Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223
+    (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
+    """
+
     nips4bplus_annotations_url = "https://ndownloader.figshare.com/files/16334603"
     nips4bplus_annotations_folder_name = "temporal_annotations_nips4b"
     nips4b_audio_files_url = "http://sabiod.univ-tln.fr/nips4b/media/birds/NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV.tar.gz"
@@ -19,6 +26,13 @@ class NIPS4BPlusDownloader(Downloader):
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     def __init__(self, path_manager: PathManager) -> None:
+        """
+
+        Args:
+            path_manager: PathManager object that manages the output directory to be used for storing the
+                downloaded datasets.
+        """
+
         super().__init__(path_manager)
 
         self.nips4bplus_folder = self.path.data_folder("nips4bplus")
@@ -30,7 +44,10 @@ class NIPS4BPlusDownloader(Downloader):
 
     def __download_nips4b_audio_files(self) -> None:
         """
-        Downloads audio files of NIPS4B dataset
+        Downloads audio files of NIPS4B dataset.
+
+        Returns:
+            None
         """
 
         nips4bplus_audio_path = os.path.join(self.nips4bplus_folder, "nips4bplus_audio.tar.gz")
@@ -48,7 +65,10 @@ class NIPS4BPlusDownloader(Downloader):
 
     def __download_nips4b_plus_annotations(self) -> None:
         """
-        Downloads temporal annotations for NIPS4B audio files from NIPS4BPlus dataset
+        Downloads temporal annotations for NIPS4B audio files from NIPS4BPlus dataset.
+
+        Returns:
+            None
         """
 
         nips4bplus_annotations_path = os.path.join(self.nips4bplus_folder, "nips4bplus_annotations.zip")
@@ -66,6 +86,9 @@ class NIPS4BPlusDownloader(Downloader):
     def download_nips4b_species_list(self) -> pd.DataFrame:
         """
         Downloads list of categories / species of the NIPS4B dataset.
+
+        Returns:
+            Pandas Dataframe that contains the columns "nips4b_class_name", "class name", "Scientific_name", and "sound_type".
         """
 
         nips4bplus_species_list = os.path.join(self.path.data_folder("nips4bplus", ""), "nips4b_species_list.csv")
@@ -97,7 +120,11 @@ class NIPS4BPlusDownloader(Downloader):
         Creates label file for the NIPS4BPlus dataset using the categories from the provided species list.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
 
-        param: species_list: list of species and sound types in the above mentioned  format
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+
+        Returns:
+            None
         """
 
         nips4bplus_audio_folder = self.path.data_folder("nips4bplus", "audio")
@@ -165,8 +192,8 @@ class NIPS4BPlusDownloader(Downloader):
 
         self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
 
-        for split in ["train", "test"]:
-            folder_path = os.path.join(self.extracted_nips_audio_folder, split)
+        for dataset in ["train", "test"]:
+            folder_path = os.path.join(self.extracted_nips_audio_folder, dataset)
             PathManager.copytree(folder_path, nips4bplus_audio_folder)
             PathManager.copytree(folder_path, nips4bplus_all_audio_folder)
 
@@ -180,10 +207,14 @@ class NIPS4BPlusDownloader(Downloader):
 
     def download_nips4bplus_dataset(self, species_list: List[str]) -> None:
         """
-        Downloads whole NIPS4BPlus dataset and creates labels using the categories from the provided species list.
+        Downloads the whole NIPS4BPlus dataset and creates labels using the categories from the provided species list.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
 
-        param: species_list: list of species and sound types in the above mentioned  format
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+
+        Returns:
+            None
         """
 
         self.path.empty_dir(self.nips4bplus_folder)
