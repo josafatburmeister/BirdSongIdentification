@@ -2,17 +2,40 @@ from typing import Union
 
 import torch
 
-from general.logging import logger
+from general import logger, PathManager
 from training import metrics, model_runner
 
 
 class ModelEvaluator(model_runner.ModelRunner):
-    def __init__(self, spectrogram_path_manager, architecture: str, **kwargs) -> None:
+    """
+    Evaluates a model on a given dataset.
+    """
+
+    def __init__(self, spectrogram_path_manager: PathManager, architecture: str, **kwargs) -> None:
+        """
+
+        Args:
+            spectrogram_path_manager: PathManager object that manages the directory containing the spectrograms file and
+                their labels.
+            architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
+        """
         super().__init__(spectrogram_path_manager, architecture, experiment_name="", **kwargs)
         self.datasets = None
         self.dataloaders = None
 
-    def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device, num_classes: int):
+    def setup_model(self, model: Union[str, torch.nn.Module], device: torch.device, num_classes: int) -> torch.nn.Module:
+        """
+        Creates model with the required number of classes and the required architecture.
+
+        Args:
+            model: Pytorch model to be evaluated.
+            device: Pytorch device on which the model evaluation is to be run.
+            num_classes: Number of classes in the dataset used to train the model.
+
+        Returns:
+            Pytorch model.
+        """
+
         if type(model) == str:
             model_path = model
             pretrained_model = torch.load(model_path, map_location=device)
@@ -23,25 +46,36 @@ class ModelEvaluator(model_runner.ModelRunner):
 
         return model
 
-    def evaluate_model(self, model: Union[str, torch.nn.Module], model_name: str, split: str) -> None:
+    def evaluate_model(self, model: Union[str, torch.nn.Module], model_name: str, dataset: str) -> None:
+        """
+        Runs model evaluation.
+
+        Args:
+            model: Pytorch model or path to a Pytorch model file.
+            model_name: Descriptive name of the model.
+            dataset: Name of the dataset to be used for model evaluation.
+
+        Returns:
+            None
+        """
 
         # setup datasets
-        datasets, dataloaders = self.setup_dataloaders([split])
+        datasets, dataloaders = self.setup_dataloaders([dataset])
         self.datasets = datasets
         self.dataloaders = dataloaders
-        num_classes = self.datasets[split].num_classes()
+        num_classes = self.datasets[dataset].num_classes()
 
         device = model_runner.ModelRunner.setup_device()
         model = self.setup_model(model, device, num_classes)
         model.to(device)
         model.eval()
 
-        metric_logger = super().setup_metric_logger({"experiment_name": model_name, "split": split})
+        metric_logger = super().setup_metric_logger({"experiment_name": model_name, "split": dataset})
 
         model_metrics = metrics.Metrics(num_classes=num_classes,
                                         multi_label=self.multi_label_classification)
 
-        for images, labels in self.dataloaders[split]:
+        for images, labels in self.dataloaders[dataset]:
             images = images.to(device)
             labels = labels.to(device)
 
@@ -53,7 +87,7 @@ class ModelEvaluator(model_runner.ModelRunner):
                     _, predictions = torch.max(outputs, 1)
 
                 model_metrics.update(predictions, labels)
-        logger.info("Model performance of %s on %s set:", model_name, split)
+        logger.info("Model performance of %s on %s set:", model_name, dataset)
         metric_logger.log_metrics(model_metrics, "test", 0)
         if self.track_metrics:
             metric_logger.store_summary_metrics(model_metrics)

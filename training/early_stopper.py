@@ -2,11 +2,23 @@ from training.metrics import Metrics
 
 
 class EarlyStopper:
-    def __init__(self, monitor, patience, min_change) -> None:
-        if monitor in {'f1_score', 'accuracy', 'average_loss'}:
+    """
+    Monitors model training and stops it when model performance no longer improves.
+    """
+
+    def __init__(self, monitor: str, patience: int, min_change: float) -> None:
+        """
+
+        Args:
+            monitor: Performance metric that should be monitored. Either "f1-score", "accuracy" or "average_loss".
+            patience: Number of epochs without performance increase that waited before stopping the model training.
+            min_change: Minimum performance increase per epoch that justifies continuing model training.
+        """
+
+        if monitor in {'f1-score', 'accuracy', 'average_loss'}:
             self.monitor = monitor
         else:
-            raise ValueError('Monitor has to be in {\'f1_score\', \'accuracy\', \'average_loss\'}. Monitor given was: ',
+            raise ValueError('Monitor has to be in {\'f1-score\', \'accuracy\', \'average_loss\'}. Monitor given was: ',
                              monitor)
         self.patience = patience
         self.min_change = min_change
@@ -14,9 +26,19 @@ class EarlyStopper:
         self.best_value = -1e15
 
     def check_early_stopping(self, model_metrics: Metrics) -> bool:
+        """
+        Checks if the model training should be stopped after the current epoch.
+
+        Args:
+            model_metrics: Metrics object representing the model performance in the current epoch.
+
+        Returns:
+            Whether model training should be stopped or not.
+        """
+
         if not self.monitor:
             raise Exception('Early Stopping has not been setup.')
-        if self.monitor == 'f1_score':
+        if self.monitor == 'f1-score':
             current_value = model_metrics.f1_score().mean().item()
         elif self.monitor == 'accuracy':
             current_value = model_metrics.accuracy()

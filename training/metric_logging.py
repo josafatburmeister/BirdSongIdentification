@@ -1,8 +1,8 @@
 import json
+from typing import Any, Dict
 
 import torch
 import wandb
-from sklearn.metrics import f1_score
 from tabulate import tabulate
 
 from general.logging import logger
@@ -10,6 +10,10 @@ from training.metrics import Metrics
 
 
 class TrainingLogger:
+    """
+    Logs model performance metrics.
+    """
+
     metrics = {
         'f1-score': lambda x: x.f1_score(),
         'precision': lambda x: x.precision(),
@@ -26,8 +30,26 @@ class TrainingLogger:
         'mean': lambda x: torch.mean(x, dim=2)[0]
     }
 
-    def __init__(self, model_trainer, config=None, is_pipeline_run: bool = False, track_metrics=False,
-                 wandb_entity_name="", wandb_project_name="", wandb_key="") -> None:
+    def __init__(self, model_trainer, config: Dict[str, Any] = None, is_pipeline_run: bool = False,
+                 track_metrics: bool = False, wandb_entity_name: str = "", wandb_key: str = "",
+                 wandb_project_name: str = "") -> None:
+        """
+
+        Args:
+            model_trainer: ModelTrainer object used for model training.
+            config: Model training configuration to be logged in Weights and Biases; only
+                considered if "track_metrics" is set to True.
+            is_pipeline_run: Whether the model training is run in a non-notebook execution environment.
+            track_metrics: Whether the model metrics should be logged in Weights and Biases (https://wandb.ai/);
+                requires "wandb_entity_name", "wandb_key", and "wandb_project_name" to be set.
+            wandb_entity_name: Name of the Weights and Biases account to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+            wandb_key: API key for the Weights and Biases account to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+            wandb_project_name: Name of the Weights and Biases project to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+        """
+
         if not config:
             config = {}
         self.trainer = model_trainer
@@ -44,12 +66,28 @@ class TrainingLogger:
             wandb.run.name = config["experiment_name"]
 
     def get_run_id(self) -> str:
+        """
+
+        Returns:
+            Weights and Biases run ID.
+        """
+
         if self.track_metrics:
             return wandb.run.id
         else:
             return ""
 
     def __print_metrics(self, metrics_object: Metrics) -> None:
+        """
+        Prints metrics object.
+
+        Args:
+            metrics_object: A Metrics object.
+
+        Returns:
+            None
+        """
+
         logger.info("")
 
         table_headers = ["metric"]
@@ -71,7 +109,20 @@ class TrainingLogger:
         logger.info(tabulate(metric_rows, headers=table_headers, tablefmt='github', floatfmt=".4f", numalign="center"))
         logger.info("")
 
-    def log_metrics(self, model_metrics: Metrics, phase: str, epoch: int, loss=None) -> None:
+    def log_metrics(self, model_metrics: Metrics, phase: str, epoch: int, loss: float = None) -> None:
+        """
+        Prints metrics object and additionally logs metrics in Weights and Biases if "track_metrics" is True.
+
+        Args:
+            model_metrics: A Metrics object.
+            phase: Current training phase (e.g. "training" or "validation").
+            epoch: Current training epoch.
+            loss: Loss of current epoch.
+
+        Returns:
+            None
+        """
+
         self.__print_metrics(model_metrics)
 
         if self.track_metrics:
@@ -89,8 +140,19 @@ class TrainingLogger:
                         tolog[metric_name] = metric[class_id]
             wandb.log(tolog, step=epoch)
 
-    def log_metrics_in_kubeflow(self, best_average_metrics: {f1_score}, best_minimum_metrics: {f1_score},
-                                best_metrics_per_class=None) -> None:
+    def log_metrics_in_kubeflow(self, best_average_metrics: Metrics, best_minimum_metrics: Metrics) -> None:
+        """
+        Logs metrics
+
+        Args:
+            best_average_metrics: Metrics object representing the performance metrics of the model with the highest
+                macro-average F1-score.
+            best_minimum_metrics: Metrics object representing the performance metrics of the model with the highest
+                minimum class-wise F1-score.
+
+        Returns:
+            None
+        """
         metrics = {
             'metrics': [
                 {
@@ -128,13 +190,44 @@ class TrainingLogger:
         with open("/MLPipeline_Metrics.json", mode="w") as json_file:
             json.dump(metrics, json_file)
 
-    def store_summary_metrics(self, metrics: {f1_score}) -> None:
+    def store_summary_metrics(self, metrics: Metrics) -> None:
+        """
+        Uploads summary metrics to Weights and Biases.
+
+        Args:
+            metrics: A Metrics object.
+
+        Returns:
+            None
+        """
+
         wandb.run.summary[f"mean_f1_score_avg_model"] = torch.mean(metrics.f1_score())
         wandb.run.summary[f"min_f1_score_avg_model"] = torch.min(metrics.f1_score())
         wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(metrics.f1_score())
 
-    def print_model_summary(self, best_average_epoch, best_average_metrics, best_minimum_epoch, best_minimum_metrics,
-                            best_epochs_per_class=None, best_metrics_per_class=None) -> None:
+    def print_model_summary(self, best_average_epoch: int, best_average_metrics: Metrics, best_minimum_epoch: int,
+                            best_minimum_metrics: Metrics,
+                            best_epochs_per_class: Dict[str, int] = None,
+                            best_metrics_per_class: Dict[str, Metrics] = None) -> None:
+        """
+        Prints summary metrics and additionally logs them in Weights and Biases if "track_metrics" is True.
+
+        Args:
+            best_average_epoch: Training epoch in which the highest macro-averaged F1-score was achieved.
+            best_average_metrics: Metrics object representing the performance metrics of the model with the highest
+                macro-average F1-score.
+            best_minimum_epoch: Training epoch in which the highest minimum class-wise F1-score was achieved.
+            best_minimum_metrics: Metrics object representing the performance metrics of the model with the highest
+                minimum class-wise F1-score.
+            best_epochs_per_class: Dictionary that maps class names to the epoch in which the highest F1-score for that
+                class was achieved.
+            best_metrics_per_class: Dictionary that maps class names to the Metrics object of the epoch in which the
+                highest F1-score for that class was achieved.
+
+        Returns:
+            None
+        """
+
         logger.info("Summary")
         logger.info('-' * 10)
         logger.info("Validation metrics of model with best average F1-Scores (epoch %s):", best_average_epoch)
@@ -169,5 +262,11 @@ class TrainingLogger:
                     wandb.run.summary[f"{class_name}_best_epoch_min_model"] = best_minimum_epoch
 
     def finish(self) -> None:
+        """
+        Finishes Weights and Biases run.
+
+        Returns:
+            None
+        """
         if self.track_metrics:
             wandb.run.finish()

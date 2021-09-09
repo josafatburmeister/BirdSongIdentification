@@ -1,4 +1,5 @@
 import time
+from typing import Dict, Tuple, Union
 
 import torch
 from torch.optim import lr_scheduler
@@ -6,13 +7,25 @@ from torch.utils.data import DataLoader
 
 from general.logging import logger
 from models import densenet, resnet
-from training import dataset, metrics, metric_logging, model_tracker as tracker
+from training import dataset as ds, metrics, metric_logging, model_tracker as tracker
 from training.early_stopper import EarlyStopper
 
 
 class ModelTrainer:
+    """
+    Runs model training with fixed hyperparameter values.
+    """
+
     @staticmethod
     def __setup_device() -> torch.device:
+        """
+        Creates the Pytorch device on which the model training is to be run; if a GPU with CUDA support is available,
+        it is preferred over the CPU.
+
+        Returns:
+            Pytorch device.
+        """
+
         device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
         logger.info('Device set to: %s', device)
         return torch.device(device)
@@ -39,14 +52,65 @@ class ModelTrainer:
                  p_dropout=0,
                  save_all_models=False,
                  track_metrics=True,
+                 train_dataset="train",
                  monitor="f1_score",
                  patience=0,
                  min_change=0.0,
                  undersample_noise_samples=True,
+                 val_dataset="val",
                  wandb_entity_name="",
                  wandb_key="",
                  wandb_project_name="",
                  weight_decay=0) -> None:
+        """
+
+        Args:
+            spectrogram_path_manager: PathManager object that manages the directory containing the spectrograms file and
+                their labels.
+            architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
+            experiment_name: Descriptive name of the training run / experiment.
+            batch_size: Batch size.
+            early_stopping: Whether early stopping should be used for model training.
+            include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
+                included in the spectrogram dataset.
+            is_hyperparameter_tuning: Whether the training run is part of a hyperparameter tuning.
+            layers_to_unfreeze: List of model layer names to be unfrozen for fine-tuning; if set to "all", all model
+                layers will be fine-tuned.
+            learning_rate: Learning rate.
+            learning_rate_scheduler: Learning rate scheduler, either "cosine" (cosine annealing learning rate scheduler)
+                or "step_lr" (step-wise learning rate decay).
+            learning_rate_scheduler_gamma: Gamma parameter of step-wise learning rate decay; only considered if "learning_rate_scheduler" is set to "step_lr".
+            learning_rate_scheduler_step_size: Step size of step-wise learning rate decay; only considered if "learning_rate_scheduler" is set to "step_lr".
+            momentum: Momentum; only considered if "optimizer" is set to "SGD".
+            multi_label_classification: Whether the model should be trained as single-label classification model or as
+                multi-label classification model.
+            multi_label_classification_threshold: Threshold for assigning samples to positive class in multi-label
+                classification, only considered if "multi_label_classification" is set to True.
+            number_epochs: Number of training epochs.
+            number_workers: Number of dataloading workers.
+            optimizer: Optimizer, either "Adam" or "SGD".
+            p_dropout: Probability of dropout before the fully-connected layer.
+            save_all_models: Whether the models from all training epochs should be saved or only the models with the
+                best performance.
+            track_metrics: Whether the model metrics should be logged in Weights and Biases (https://wandb.ai/);
+                requires "wandb_entity_name", "wandb_key", and "wandb_project_name" to be set.
+            train_dataset: Name of the dataset to be used for model training.
+            monitor: Name of the metric that should be used for early stopping; only considered if "early_stopping" is
+                set to True.
+            patience: Patience parameter for early stopping, only considered if "early_stopping" is True.
+            min_change: Minimum change parameter for early stopping, only considered if "early_stopping" is True.
+            undersample_noise_samples: Whether the number of "noise" spectrograms should be limited to the maximum
+                number of spectrograms of a sound class.
+            val_dataset: Name of the dataset to be used for model validation.
+            wandb_entity_name: Name of the Weights and Biases account to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+            wandb_key: API key for the Weights and Biases account to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+            wandb_project_name: Name of the Weights and Biases project to which the model metrics should be logged; only
+                considered if "track_metrics" is set to True.
+            weight_decay: Weight decay.
+        """
+
         self.spectrogram_path_manager = spectrogram_path_manager
         self.architecture = architecture
         self.batch_size = batch_size
@@ -67,8 +131,10 @@ class ModelTrainer:
         self.optimizer = optimizer
         self.p_dropout = p_dropout
         self.save_all_models = save_all_models
+        self.train_dataset = train_dataset
         self.track_metrics = track_metrics
         self.undersample_noise_samples = undersample_noise_samples
+        self.val_dataset = val_dataset
         self.weight_decay = weight_decay
 
         # early stopping parameters
@@ -91,25 +157,40 @@ class ModelTrainer:
                                                     wandb_entity_name=wandb_entity_name,
                                                     wandb_project_name=wandb_project_name, wandb_key=wandb_key)
 
-    def __setup_dataloaders(self):
+    def __setup_dataloaders(self) -> Tuple[Dict[str, torch.utils.data.Dataset], Dict[str, torch.utils.data.DataLoader]]:
+        """
+        Creates datasets and dataloaders for model training and validation.
+
+        Returns:
+            Training and validation dataset and training and validation dataloader.
+        """
+
         datasets = {}
         dataloaders = {}
 
-        for split in ["train", "val"]:
-            datasets[split] = dataset.XenoCantoSpectrograms(
+        for dataset in [self.train_dataset, self.val_dataset]:
+            dataset_name = "train" if dataset == self.train_dataset else "val"
+            datasets[dataset_name] = ds.XenoCantoSpectrograms(
                 self.spectrogram_path_manager,
-                include_noise_samples=self.include_noise_samples, split=split,
+                include_noise_samples=self.include_noise_samples, dataset=dataset,
                 multi_label_classification=self.multi_label_classification,
                 undersample_noise_samples=self.undersample_noise_samples)
 
-            shuffle = (split == "train")
-            dataloaders[split] = DataLoader(
-                datasets[split], batch_size=self.batch_size, sampler=None,
+            shuffle = (dataset == self.train_dataset)
+            dataloaders[dataset_name] = DataLoader(
+                datasets[dataset_name], batch_size=self.batch_size, sampler=None,
                 shuffle=shuffle, num_workers=self.num_workers)
 
         return datasets, dataloaders
 
-    def __setup_model(self):
+    def __setup_model(self) -> torch.nn.Module:
+        """
+        Creates model with the required number of classes and the required architecture.
+
+        Returns:
+            Pytorch model.
+        """
+
         logger.info("Setup %s model: ", self.architecture)
         if self.architecture == "resnet18":
             model = resnet.ResnetTransferLearning(architecture="resnet18",
@@ -139,7 +220,17 @@ class ModelTrainer:
         model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping()
         return model
 
-    def __setup_optimization(self, model):
+    def __setup_optimization(self, model: torch.nn.Module) -> Tuple[torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+        """
+        Sets up tools for model optimization.
+
+        Args:
+            model: Pytorch model.
+
+        Returns:
+            Pytorch loss, optimizer and learning rate scheduler.
+        """
+
         if self.multi_label_classification:
             loss = torch.nn.BCEWithLogitsLoss()
         else:
@@ -163,7 +254,15 @@ class ModelTrainer:
             scheduler = None
         return loss, optimizer, scheduler
 
-    def train_model(self):
+    def train_model(self) -> Union[torch.nn.Module, float]:
+        """
+        Model training loop.
+
+        Returns:
+            Models with the best performance (if is_hyperparameter_tuning is False) or macro-averaged F1-score of the
+            best model.
+        """
+
         model = self.__setup_model()
         device = ModelTrainer.__setup_device()
         loss_function, optimizer, scheduler = self.__setup_optimization(model)
