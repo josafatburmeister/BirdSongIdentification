@@ -7,7 +7,18 @@ import sys
 from google.colab import drive
 
 
-def setup_colab_environment(data_path: str, branch: str = "main"):
+def setup_colab_environment(data_path: str, branch: str = "main") -> None:
+    """
+    Prepares Google Colab environment for running the pipeline.
+
+    Args:
+        data_path: Path of zipped datasets in Google drive.
+        branch: Git branch to be checked out.
+
+    Returns:
+        None
+    """
+
     git_repo_dir = "/content/BirdSongIdentification"
 
     try:
