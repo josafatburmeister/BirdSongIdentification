@@ -106,6 +106,10 @@ class XenoCantoSpectrograms(Dataset):
             self.data_dir, self.labels["file_name"].iloc[idx])
 
         image = Image.open(img_path).convert('RGB')
+
+        if self.transform:
+            image = self.transform(image)
+
         label = self.labels.iloc[idx]
 
         if self.multi_label_classification:
@@ -114,18 +118,15 @@ class XenoCantoSpectrograms(Dataset):
             for class_name, class_id in self.class_to_idx.items():
                 if label[class_name] == 1:
                     label_tensor[class_id] = 1
+            return image, label_tensor
         else:
+            if self.include_noise_samples:
+                class_label = self.class_name_to_id("noise")
             for class_name, class_id in self.class_to_idx.items():
                 if label[class_name] == 1:
-                    label_tensor = class_id
+                    class_label = class_id
                     # in the single label case there should be only one positive class per spectrogram,
                     # so we can stop here
                     break
-            # TODO ist label_tensor hier gesetzt?
-            if torch.sum(label_tensor) == 0 and self.include_noise_samples:
-                label_tensor[self.class_name_to_id("noise")] = 1
 
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label_tensor
+            return image, class_label
