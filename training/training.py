@@ -299,7 +299,7 @@ class ModelTrainer(model_runner.ModelRunner):
         )
 
         if self.is_pipeline_run:
-            metric_logging.TrainingLogger.log_metrics_in_kubeflow(
+            metric_logging.MetricLogger.log_metrics_in_kubeflow(
                 model_tracker.best_average_metrics,
                 model_tracker.best_minimum_metrics,
             )

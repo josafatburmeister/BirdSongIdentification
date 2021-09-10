@@ -9,7 +9,7 @@ from general.logging import logger
 from training.metrics import Metrics
 
 
-class TrainingLogger:
+class MetricLogger:
     """
     Logs model performance metrics.
     """
@@ -248,7 +248,7 @@ class TrainingLogger:
         self.__print_metrics(best_minimum_metrics)
 
         if self.track_metrics:
-            TrainingLogger.store_summary_metrics(best_average_metrics)
+            MetricLogger.store_summary_metrics(best_average_metrics)
         if best_metrics_per_class:
             for class_name, best_class_metrics in best_metrics_per_class.items():
                 logger.info("Validation metrics of best model for class %s (epoch %s):", class_name,

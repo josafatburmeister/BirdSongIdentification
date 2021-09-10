@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from general import logger, FileManager
 from models import model_architectures
 from training import dataset, metric_logging
-from training.metric_logging import TrainingLogger
+from training.metric_logging import MetricLogger
 
 
 class ModelRunner:
@@ -84,14 +84,14 @@ class ModelRunner:
         logger.info('Device set to: %s', device)
         return torch.device(device)
 
-    def _setup_metric_logger(self, config=None) -> TrainingLogger:
+    def _setup_metric_logger(self, config=None) -> MetricLogger:
         if config is None:
             config = {}
-        metric_logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run,
-                                                      track_metrics=self.track_metrics,
-                                                      wandb_entity_name=self.wandb_entity_name,
-                                                      wandb_project_name=self.wandb_project_name,
-                                                      wandb_key=self.wandb_key)
+        metric_logger = metric_logging.MetricLogger(self, config, self.is_pipeline_run,
+                                                    track_metrics=self.track_metrics,
+                                                    wandb_entity_name=self.wandb_entity_name,
+                                                    wandb_project_name=self.wandb_project_name,
+                                                    wandb_key=self.wandb_key)
 
         return metric_logger
 

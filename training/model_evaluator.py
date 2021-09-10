@@ -129,6 +129,6 @@ class ModelEvaluator(model_runner.ModelRunner):
         logger.info("Model performance of %s on %s set:", model_name, dataset)
         metric_logger.log_metrics(model_metrics, "test", 0)
         if self.track_metrics:
-            metric_logging.TrainingLogger.store_summary_metrics(model_metrics)
+            metric_logging.MetricLogger.store_summary_metrics(model_metrics)
 
         metric_logger.finish()
