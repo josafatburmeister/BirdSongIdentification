@@ -20,7 +20,8 @@ class PipelineSteps:
         xc_downloader.create_datasets(species_list=species_list, **kwargs)
 
         nips4bplus_downloader = NIPS4BPlusDownloader(path_manager)
-        nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
+        nips4bplus_downloader.download_nips4bplus_dataset(
+            species_list=species_list)
 
         FileManager.empty_dir(path_manager.cache_dir)
 
@@ -32,7 +33,8 @@ class PipelineSteps:
         zip_path = os.path.join(output_path, "demo_data.zip")
 
         logger.info("Download dataset...")
-        path_manager.gcs_copy_file(f"gs://{gcs_bucket}/demo_data.zip", zip_path)
+        path_manager.gcs_copy_file(
+            f"gs://{gcs_bucket}/demo_data.zip", zip_path)
 
         with zipfile.ZipFile(zip_path, 'r') as zip_file:
             logger.info("Unzip dataset to %s...", output_path)
@@ -45,17 +47,20 @@ class PipelineSteps:
         if verbose_logging:
             logger.setLevel(logging.VERBOSE)
         audio_path_manager = FileManager(input_path, gcs_bucket=gcs_bucket)
-        spectrogram_path_manager = FileManager(output_path, gcs_bucket=gcs_bucket)
-        spectrogram_creator = SpectrogramCreator(chunk_length, audio_path_manager, spectrogram_path_manager, **kwargs)
+        spectrogram_path_manager = FileManager(
+            output_path, gcs_bucket=gcs_bucket)
+        spectrogram_creator = SpectrogramCreator(
+            chunk_length, audio_path_manager, spectrogram_path_manager, **kwargs)
 
-        shutil.copy(audio_path_manager.categories_file(), spectrogram_path_manager.categories_file())
+        shutil.copy(audio_path_manager.categories_file(),
+                    spectrogram_path_manager.categories_file())
 
         spectrogram_creator.create_spectrograms_for_datasets(
             datasets=["train", "val", "test"], signal_threshold=signal_threshold, noise_threshold=noise_threshold,
             clear_spectrogram_cache=clear_spectrogram_cache)
 
         spectrogram_creator.create_spectrograms_for_datasets(
-            datasets=["nips4bplus", "nips4bplus_all"], signal_threshold=0, noise_threshold=0,
+            datasets=["nips4bplus", "nips4bplus_filtered"], signal_threshold=0, noise_threshold=0,
             clear_spectrogram_cache=clear_spectrogram_cache)
 
         # clean up
@@ -78,7 +83,8 @@ class PipelineSteps:
                      and type(kwargs[hyperparameter][0]) == list):
                 do_hyperparameter_tuning = True
 
-        spectrogram_path_manager = FileManager(input_path, gcs_bucket=gcs_bucket)
+        spectrogram_path_manager = FileManager(
+            input_path, gcs_bucket=gcs_bucket)
 
         if do_hyperparameter_tuning:
             del kwargs["is_hyperparameter_tuning"]
@@ -87,12 +93,14 @@ class PipelineSteps:
             )
             model_tuner.tune_model()
         else:
-            trainer = training.ModelTrainer(spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
+            trainer = training.ModelTrainer(
+                spectrogram_path_manager, experiment_name=experiment_name, **kwargs)
             best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 
-            evaluator = model_evaluator.ModelEvaluator(spectrogram_path_manager, **kwargs)
+            evaluator = model_evaluator.ModelEvaluator(
+                spectrogram_path_manager, **kwargs)
 
-            for dataset in ["test", "nips4bplus", "nips4bplus_all"]:
+            for dataset in ["test", "nips4bplus", "nips4bplus_filtered"]:
                 evaluator.evaluate_model(
                     model=best_average_model, model_name=f"{experiment_name}_best_average_model", dataset=dataset
                 )

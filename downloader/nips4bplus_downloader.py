@@ -35,8 +35,8 @@ class NIPS4BPlusDownloader(Downloader):
 
         super().__init__(file_manager)
 
+        self.nips4bplus_filtered_folder = self.file_manager.data_folder("nips4bplus_filtered")
         self.nips4bplus_folder = self.file_manager.data_folder("nips4bplus")
-        self.nips4bplus_folder_all = self.file_manager.data_folder("nips4bplus_all")
         self.extracted_nips_annotations_folder = os.path.join(self.nips4bplus_folder,
                                                               NIPS4BPlusDownloader.nips4bplus_annotations_folder_name)
         self.extracted_nips_audio_folder = os.path.join(
@@ -127,8 +127,8 @@ class NIPS4BPlusDownloader(Downloader):
             None
         """
 
+        nips4bplus_filtered_audio_folder = self.file_manager.data_folder("nips4bplus_filtered", "audio")
         nips4bplus_audio_folder = self.file_manager.data_folder("nips4bplus", "audio")
-        nips4bplus_all_audio_folder = self.file_manager.data_folder("nips4bplus_all", "audio")
 
         nips4b_species_list = self.download_nips4b_species_list()
 
@@ -184,26 +184,26 @@ class NIPS4BPlusDownloader(Downloader):
                 self.append = nips4bplus_labels.append(labels)
 
         nips4bplus_labels = pd.concat(nips4bplus_labels)
-        self.save_label_file(nips4bplus_labels, "nips4bplus_all")
+        self.save_label_file(nips4bplus_labels, "nips4bplus")
         if len(nips4bplus_selected_labels) > 0:
             nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
         else:
             nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_path", "label", "start", "end"])
 
-        self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
+        self.save_label_file(nips4bplus_selected_labels, "nips4bplus_filtered")
 
         for dataset in ["train", "test"]:
             folder_path = os.path.join(self.extracted_nips_audio_folder, dataset)
+            FileManager.copytree(folder_path, nips4bplus_filtered_audio_folder)
             FileManager.copytree(folder_path, nips4bplus_audio_folder)
-            FileManager.copytree(folder_path, nips4bplus_all_audio_folder)
 
         # remove audio files without labels
-        for file in os.listdir(nips4bplus_audio_folder):
+        for file in os.listdir(nips4bplus_filtered_audio_folder):
             if nips4bplus_selected_labels[nips4bplus_selected_labels["file_path"] == file].empty:
-                os.remove(os.path.join(nips4bplus_audio_folder, file))
-        for file in os.listdir(nips4bplus_all_audio_folder):
+                os.remove(os.path.join(nips4bplus_filtered_audio_folder, file))
+        for file in os.listdir(nips4bplus_audio_folder):
             if nips4bplus_labels[nips4bplus_labels["file_path"] == file].empty:
-                os.remove(os.path.join(nips4bplus_all_audio_folder, file))
+                os.remove(os.path.join(nips4bplus_audio_folder, file))
 
     def download_nips4bplus_dataset(self, species_list: List[str]) -> None:
         """
