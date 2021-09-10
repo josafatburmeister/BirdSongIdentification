@@ -637,11 +637,11 @@ python3 kubeflow_pipeline/compile_pipeline.py build_docker_image
 
 Now, open the Kubeflow UI of your cluster, go to the "Pipelines" section and click "Upload Pipeline". Upload the `birdsong_pipeline.yaml` file that you compiled before:
 
-![Kubeflow-1](https://drive.google.com/file/d/1DSyp6En5aM5sLzxmGkG2NtiwsszHU94w/view)
+![Kubeflow-1](https://lh6.googleusercontent.com/uyVJARH9d8HByY_g0LSA-BhSVB7KVE-mFo28nQOua6b1ZfnfBiFgrtTPrX-kgFs1scES3JQn7GaYMg=w2880-h766)
 
 After creating the pipeline, click the "Create run" button, to start a pipeline run:
 
-![Kubeflow-2](https://drive.google.com/file/d/1NXqVRQgVpMI7tNCf-7xkDvv1WrstIhFl/view)
+![Kubeflow-2](https://lh5.googleusercontent.com/iuUn-Pk9TtN6Af64cBNBMiseAgOz27XNGPsRqSVGOaqydNyYSaFY_z5W1vb9UPZWO_ZUcvGWEFvjl7IQjnLt=w2210-h1478-rw)
 
 ## Implementing Custom Pipeline Components
 
