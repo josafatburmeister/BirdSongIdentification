@@ -430,6 +430,14 @@ To install the dependencies, run:
 
 Afterwards, restart the Google Colab runtime so that the installed dependencies are loaded. To do this, go to the "Runtime" menu item and select "Restart runtime".
 
+To be able to import the modules from the repository, run:
+
+```python
+import sys
+
+sys.path.append('/content/BirdSongIdentification')
+```
+
 ### Setting Up the File Manager
 
 As described in the section "Data Exchange Between Pipeline Components", our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directory structures is implemented by the _FileManager_ class. The following code snippet creates an instance of this class:
