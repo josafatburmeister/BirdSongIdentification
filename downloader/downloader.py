@@ -107,14 +107,16 @@ class Downloader:
         """
 
         # check if file is in cache
+        file_is_cached = False
         if cache_subdir:
             cached_file_path = self.file_manager.cached_file_path(cache_subdir, target_file)
             if os.path.exists(cached_file_path):
                 logger.verbose("cached %s", url)
                 shutil.copy(cached_file_path, target_file)
+                file_is_cached = True
 
         # file is not in cache and needs to be downloaded
-        else:
+        if not file_is_cached:
             logger.verbose("download %s", url)
             response = requests.get(url, stream=True)
 
