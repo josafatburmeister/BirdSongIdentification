@@ -470,7 +470,9 @@ logger.setLevel(logging.VERBOSE)
 
 ### Pipeline Stage 1: Data Download
 
-With this, we are ready to run the first pipeline stage that downloads the datasets. For this, we have to create instances of the respective downloader classes. In our example, we download audio data from Xeno-Canto and compile train, validation and test sets from it. To do this, we create an instance of the `XenoCantoDownloader` class and then call the `create_datasets` method on it. The `create_datasets` has a number of parameters that can be used to specify which data should be downloaded from Xeno-Canto. Among them is the `species_list` parameter, which specifies which bird species and sound categories should be included in the datasets, and the `maximum_samples_per_class` parameter, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+With this, we are ready to run the first pipeline stage that downloads the datasets. For this, we have to create instances of the respective downloader classes. In our example, we download audio data from Xeno-Canto and compile train, validation and test sets from it. To do this, we create an instance of the _XenoCantoDownloader_ class and then call the "create\*datasets" method on it. The "create_datasets" method has several parameters that specify what data should be downloaded from Xeno-Canto. Among them is the "species_list" parameter, which specifies which bird species and sound categories should be included in the datasets, and the "maximum_samples_per_class" parameter, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+
+Note that the FileManager object we created earlier is passed to the XenoCantoDownloader constructor. This way we ensure that the downloaded data is placed in the `./data` directory.
 
 ```python
 from downloader import XenoCantoDownloader
@@ -492,13 +494,10 @@ xc_downloader.create_datasets(
     exclude_special_cases=True,
     maximum_number_of_background_species=0,
     clear_audio_cache=False,
-    clear_label_cache=False,
-    )
+    clear_label_cache=False)
 ```
 
-Note that the FileManager object we created earlier is passed to the XenoCantoDownloader constructor. This way we make sure that the downloaded data will be placed in the `./data` directory.
-
-In addition to the data from Xeno-Canto, we would like to use the NIPS4BPlus dataset for model evaluation in our example. To download this dataset, we create an instance of the `NIPS4BPlusDownloader` class and call the `download_nips4bplus_dataset` method on it:
+In addition to the data from Xeno-Canto, we use the NIPS4BPlus dataset for model evaluation in our example. To download this dataset, we create an instance of the _NIPS4BPlusDownloader_ class and call the "download_nips4bplus_dataset" method on it. Since the NIPS4BPlus dataset includes less metadata than the Xeno-Canto database, the "download_nips4bplus_dataset" method provides fewer parameters for selecting which data to download. The method compiles two variants of the dataset, named "nips4bplus" and "nips4blpus_filtered". While the first variant contains all recordings of the NIPS4BPlus dataset, the second variant includes only recordings that contain at least one of the species listed in the parameter "species_list".
 
 ```python
 from downloader import NIPS4BPlusDownloader
