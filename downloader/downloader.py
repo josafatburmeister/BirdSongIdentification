@@ -2,11 +2,12 @@ import os
 import shutil
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import numpy as np
 import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
 
-from general import logger, PathManager
+from general import logger, FileManager
 
 
 class Downloader:
@@ -19,10 +20,13 @@ class Downloader:
         """
         Parses a list of strings, where each string contains a species name and its sound types.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
-        Returns a dictionary that maps species names to sound types.
 
-        param: species_list: list of species and sound types in the above mentioned  format
-        param: default_sound_types: default sound types that are used when no sound types are provided for a species
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+            default_sound_types: Default sound types that are used when no sound types are provided for a species.
+
+        Returns:
+            A dictionary that maps species names to sound types.
         """
 
         sound_types = set(default_sound_types)
@@ -44,16 +48,20 @@ class Downloader:
 
     @staticmethod
     def train_test_split(
-        labels: pd.DataFrame,
-        test_size: float = 0.4,
-        random_state: int = 12
+            labels: pd.DataFrame,
+            test_size: float = 0.4,
+            random_state: int = 12
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Splits pandas dataframe into train and test set.
+        Randomly splits Pandas dataframe into train and test set.
 
-        param: labels: Labels to split
-        param: test_size: Fraction of labels that should be used for test set
-        param: random_state: Random state for data splitting
+        Args:
+            labels: Dataframe to be split.
+            test_size: Fraction of rows that should be used for test set.
+            random_state: Random state for random splitting of the dataframe.
+
+        Returns:
+            Two Pandas dataframes, the first being the train set and the second being the test set.
         """
 
         train_labels, test_labels = [], []
@@ -68,37 +76,44 @@ class Downloader:
 
         return train_labels, test_labels
 
-    def __init__(self, path_manager: PathManager):
-        """
-        param: path_manager: PathManager instance that manages the target folder
+    def __init__(self, file_manager: FileManager):
         """
 
-        self.path = path_manager
+        Args:
+            file_manager: FileManager object that manages the output directory to be used for storing the
+                downloaded datasets.
+        """
+
+        self.file_manager = file_manager
 
         # retrieve cached files from google cloud storage
-        if self.path.is_pipeline_run:
-            self.path.copy_cache_from_gcs("audio")
-            self.path.copy_cache_from_gcs("labels")
+        if self.file_manager.is_pipeline_run:
+            self.file_manager.copy_cache_from_gcs("audio")
+            self.file_manager.copy_cache_from_gcs("labels")
 
     def download_file(self, url: str, target_file: str, cache_subdir: Optional[str] = None) -> None:
         """
-        Downloads file from given URL and saves it in target path. If cache_dir parameter is set the downloaded file is
-        cached to speedup later download request of the same file.
+        Downloads file from a URL and saves it to the specified path. If the cache_subdir parameter is set, the file is
+        additionally copied to a cache directory. Files that are already in the cache are not downloaded again.
 
-        param: url: url of file to download
-        param: target_file: path where downloaded file should be stored
-        param: cache_subdir: Name of a subfolder of the cache folder where the downloaded file should be cached. If not
-            existing, the subfolder is created inside the cache folder.
+        Args:
+            url: URL of the file to be downloaded.
+            target_file: Path where downloaded file is to be stored.
+            cache_subdir: Name of a subdirectory of the cache directory where the downloaded file should be cached. If
+                not existing, the subdirectory is created inside the cache directory.
+
+        Returns:
+            None
         """
 
-        if cache_subdir:
-            cached_file_path = self.path.cached_file_path(cache_subdir, target_file)
         # check if file is in cache
-        # FIXME würde die "if"s gerne ander schachteln hier
-        if cache_subdir and os.path.exists(cached_file_path):
-            logger.verbose("cached %s", url)
-            shutil.copy(cached_file_path, target_file)
-        # download file
+        if cache_subdir:
+            cached_file_path = self.file_manager.cached_file_path(cache_subdir, target_file)
+            if os.path.exists(cached_file_path):
+                logger.verbose("cached %s", url)
+                shutil.copy(cached_file_path, target_file)
+
+        # file is not in cache and needs to be downloaded
         else:
             logger.verbose("download %s", url)
             response = requests.get(url, stream=True)
@@ -111,21 +126,43 @@ class Downloader:
 
                 # put file copy into cache
                 if cache_subdir:
+                    cached_file_path = self.file_manager.cached_file_path(cache_subdir, target_file)
                     shutil.copy(target_file, cached_file_path)
-                    if self.path.is_pipeline_run:
-                        self.path.copy_file_to_gcs_cache(cached_file_path, cache_subdir)
+                    if self.file_manager.is_pipeline_run:
+                        self.file_manager.copy_file_to_gcs_cache(cached_file_path, cache_subdir)
             else:
-                raise NameError("File couldn\'t be retrieved")
+                raise NameError("File could not be retrieved")
 
-    def save_label_file(self, labels: pd.DataFrame, split_name: str) -> None:
+    def save_label_file(self, labels: pd.DataFrame, dataset_name: str) -> None:
         """
-        Creates label file from pandas dataframe.
+        Creates an audio label file for a dataset from a Pandas dataframe according to the format described in the
+        Readme.
 
-        param: labels: dataframe containing the file labels, has to contain the columns "id", "file_name", "label", "start", and "end"
-        param: split_name: name of the data split (e.g., "train", "val" or "test)
+        Args:
+            labels: Pandas dataframe containing the audio file labels, has to contain at least the columns "id",
+                "file_path", "label", "start", and "end" (see Readme for further explanations).
+            dataset_name: Name of the dataset (e.g., "train", "val" or "test).
+
+        Returns:
+            None
         """
+
         assert type(labels) == pd.DataFrame
-        for column_name in ["id", "file_name", "label", "start", "end"]:
+        for column_name in ["id", "file_path", "label", "start", "end"]:
             assert column_name in labels.columns
 
-        labels.to_csv(self.path.label_file(split_name, type="audio"))
+        labels.to_csv(self.file_manager.label_file(dataset_name, "audio"))
+
+    def save_categories_file(self, categories: List[str]) -> None:
+        """
+        Creates categories.txt file according to the format described in the Readme.
+
+        Args:
+            categories: List of class names that may be used in the datasets (see Readme for further explanations).
+
+        Returns:
+            None
+        """
+
+        # noinspection PyTypeChecker
+        np.savetxt(self.file_manager.categories_file(), np.array(categories), delimiter=",", fmt="%s")

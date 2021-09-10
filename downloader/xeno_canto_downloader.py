@@ -2,19 +2,27 @@ import datetime
 import json
 import os
 from multiprocessing.pool import ThreadPool
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 import requests
 from sklearn.model_selection import train_test_split
 
 from downloader import Downloader, NIPS4BPlusDownloader
-from general import logger, PathManager, ProgressBar
+from general import logger, FileManager, ProgressBar
 from general.custom_types import JSON
 
 
 class XenoCantoDownloader(Downloader):
+    """
+    Downloads datasets from Xeno-Canto.
+
+    See  Willem-Pier Vellinga and Robert Planque. “The Xeno-canto collection and its relation to sound recognition
+    and classification”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse,
+    France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10. URL:
+    http://ceur-ws.org/Vol-1391/166-CR.pdf.
+    """
+
     xeno_canto_url = "https://www.xeno-canto.org"
     xeno_api_canto_url = "https://www.xeno-canto.org/api/2/recordings"
 
@@ -28,25 +36,67 @@ class XenoCantoDownloader(Downloader):
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     @staticmethod
-    def download_xeno_canto_page(species_name: str, page: int = 1):
+    def download_xeno_canto_page(species_name: str, page: int = 1) -> JSON:
+        """
+        The Xeno-Canto API allows to query audio metadata using a keyword search. The search results are returned
+        paginated. This method searches for a specific bird species and downloads the specified page of resulting
+        metadata.
+
+        Args:
+            species_name: Scientific name of the bird species for which the audio metadata is to be searched.
+            page: Number of the result page to download.
+
+        Returns:
+            Xeno-Canto metadata page in JSON format.
+        """
+
         params = {"query": species_name, "page": page}
 
         response = requests.get(url=XenoCantoDownloader.xeno_api_canto_url, params=params)
 
         return response.json()
 
-    def __init__(self, path_manager: PathManager):
-        super().__init__(path_manager)
+    def __init__(self, file_manager: FileManager):
+        """
 
-    def __metadata_cache_path(self, species_name: str):
+        Args:
+            file_manager: FileManager object that manages the output directory to be used for storing the downloaded
+                datasets.
+        """
+
+        super().__init__(file_manager)
+
+    def __metadata_cache_path(self, species_name: str) -> str:
+        """
+        Computes the path where the metadata file for a given bird species should be cached.
+
+        Args:
+            species_name: Scientific name of the bird species.
+
+        Returns:
+            Path of the metadata file in cache.
+        """
+
         file_name = "{}.json".format(species_name.replace(" ", "_"))
-        return os.path.join(self.path.cache("labels"), file_name)
+        return os.path.join(self.file_manager.cache("labels"), file_name)
 
     def __download_audio_files_by_id(self, target_dir: str, file_ids: List[str], desc: str = "Download audio files...",
-                                     download_threads=25):
+                                     download_threads=25) -> None:
+        """
+        Takes a list of Xeno-Canto file IDs and downloads the corresponding files from Xeno-Canto.
+
+        Args:
+            target_dir: Path of the directory where the downloaded files should be stored.
+            file_ids: List of Xeno-Canto file IDs of the files to be downloaded.
+            desc: Description of the download task.
+            download_threads: Number of threads to be used for parallelization of data download.
+
+        Returns:
+            None
+        """
 
         progress_bar = ProgressBar(total=len(file_ids), desc=desc, position=0,
-                                   is_pipeline_run=self.path.is_pipeline_run)
+                                   is_pipeline_run=self.file_manager.is_pipeline_run)
 
         url_and_filepaths = [(XenoCantoDownloader.xeno_canto_url + "/" + file_id + "/" + "download",
                               os.path.join(target_dir, file_id + ".mp3"), file_id) for file_id in file_ids]
@@ -57,14 +107,22 @@ class XenoCantoDownloader(Downloader):
             try:
                 self.download_file(url, file_path, "audio")
             except Exception as e:
-                progress_bar.write(
-                    "Could not download file with id {}. Reason: {}".format(file_id, e))
+                progress_bar.write(f"Could not download file with id {file_id}. Reason: {e}.")
 
         for _ in pool.imap_unordered(lambda x: download_task(*x), url_and_filepaths):
             progress_bar.update(1)
 
-    # TODO fix annotations
     def __download_species_metadata(self, species_name: str) -> Tuple[JSON, int]:
+        """
+        Downloads metadata of all audio recordings available for a given bird species in Xeno-Canto.
+
+        Args:
+            species_name: Scientific name of the bird species for which the audio metadata is to be downloaded.
+
+        Returns:
+            Xeno-Canto metadata in JSON format and number of recordings available for the bird species.
+        """
+
         metadata_file_path = self.__metadata_cache_path(species_name)
 
         # check if metadata file is in cache
@@ -86,7 +144,7 @@ class XenoCantoDownloader(Downloader):
             # download remaining pages
             progress_bar = ProgressBar(sequence=range(2, number_of_pages + 1),
                                        desc="Download label file for {}...".format(species_name), position=0,
-                                       is_pipeline_run=self.path.is_pipeline_run)
+                                       is_pipeline_run=self.file_manager.is_pipeline_run)
 
             for page in progress_bar.iterable():
                 current_page = XenoCantoDownloader.download_xeno_canto_page(
@@ -98,8 +156,8 @@ class XenoCantoDownloader(Downloader):
             with open(metadata_file_path, "w") as metadata_file:
                 json.dump(metadata, metadata_file, indent=2,
                           separators=(',', ':'))
-            if self.path.is_pipeline_run:
-                self.path.copy_file_to_gcs_cache(metadata_file_path, "labels")
+            if self.file_manager.is_pipeline_run:
+                self.file_manager.copy_file_to_gcs_cache(metadata_file_path, "labels")
 
             return metadata, first_page["numRecordings"]
 
@@ -119,8 +177,38 @@ class XenoCantoDownloader(Downloader):
                         clear_label_cache: bool = False,
                         random_state: int = 12
                         ) -> None:
+        """
+        Creates training, validation and test sets from Xeno-Canto recordings for a given list of bird species and sound
+        types.
+        The species_list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
+
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+            use_nips4b_species_list: Whether the species list of the NIPS4B dataset should be used (if set to true, the
+                provided species list can be empty)
+            maximum_samples_per_class: Maximum number of recordings per class.
+            test_size: Percentage of recordings that should be used for model testing and validation (validation and
+                test set get one half of the samples each).
+            min_quality: Minimum quality of the audio recordings to be included in the datasets.
+            sound_types: List of sound types to include in the datasets.
+            sexes: List of bird sexes to include in the datasets.
+            life_stages: List of bird life stages to include in the datasets.
+            exclude_special_cases: Whether special cases (e.g. birds imitating other birds) should be excluded from the
+                datasets.
+            maximum_number_of_background_species: Maximum number of background species of the audio recordings to be
+                included in the datasets.
+            maximum_recording_length: Maximum length of the recordings to be included in the datasets.
+            clear_audio_cache: Whether the audio cache should be cleared before downloading the datasets.
+            clear_label_cache: Whether the label cache should be cleared before downloading the datasets.
+            random_state: Random State for random partitioning of the recordings into the training, validation and test
+                sets.
+
+        Returns:
+            None
+        """
+
         if use_nips4b_species_list or not species_list:
-            nips4bplus_downloader = NIPS4BPlusDownloader(self.path)
+            nips4bplus_downloader = NIPS4BPlusDownloader(self.file_manager)
             species_list = nips4bplus_downloader.download_nips4b_species_list()
 
             def get_species_sound_type(row):
@@ -155,9 +243,9 @@ class XenoCantoDownloader(Downloader):
             raise ValueError("Invalid life stage for Xeno-Canto database")
 
         if clear_audio_cache:
-            self.path.clear_cache("audio")
+            self.file_manager.clear_cache("audio")
         if clear_label_cache:
-            self.path.clear_cache("labels")
+            self.file_manager.clear_cache("labels")
 
         train_frames = []
         test_frames = []
@@ -229,7 +317,7 @@ class XenoCantoDownloader(Downloader):
                     "There are no training samples for class {}".format(species_name))
 
             # create class labels
-            labels["file_name"] = labels["id"] + ".mp3"
+            labels["file_path"] = labels["id"] + ".mp3"
 
             labels["sound_type"] = ""
             for idx, row in labels.iterrows():
@@ -254,7 +342,7 @@ class XenoCantoDownloader(Downloader):
                 labels = labels[labels["end"] < maximum_recording_length * 1000]
 
             # select relevant columns
-            labels = labels[["id", "file_name", "start", "end", "label", "sound_type"]]
+            labels = labels[["id", "file_path", "start", "end", "label", "sound_type"]]
             labels = labels[labels["end"] > 0]
 
             for sound_type in selected_sound_types:
@@ -266,7 +354,7 @@ class XenoCantoDownloader(Downloader):
                 else:
                     label_subset = labels[labels["sound_type"] == sound_type]
 
-                # create train, test and val splits
+                # create train, test and val sets
                 train_labels, test_labels = self.train_test_split(
                     label_subset, test_size=test_size, random_state=random_state)
 
@@ -291,21 +379,20 @@ class XenoCantoDownloader(Downloader):
                 else:
                     test_frames.append(test_labels)
 
-        # noinspection PyTypeChecker
-        np.savetxt(self.path.categories_file(), np.array(categories), delimiter=",", fmt="%s")
+        self.save_categories_file(categories)
 
         # save label files
-        for split_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
+        for dataset_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
             if len(frames) == 0:
-                raise NameError(f"Empty {split_name} set")
+                raise NameError(f"Empty {dataset_name} set")
             labels = pd.concat(frames)
 
-            self.save_label_file(labels, split_name)
+            self.save_label_file(labels, dataset_name)
 
             # clear data folders
-            PathManager.empty_dir(self.path.data_folder(split_name, "audio"))
+            FileManager.empty_dir(self.file_manager.data_folder(dataset_name, "audio"))
 
             # download audio files
             self.__download_audio_files_by_id(
-                self.path.data_folder(split_name, "audio"), labels["id"], f"Download {split_name} set..."
+                self.file_manager.data_folder(dataset_name, "audio"), labels["id"], f"Download {dataset_name} set..."
             )

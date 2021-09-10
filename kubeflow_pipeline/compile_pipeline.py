@@ -8,6 +8,16 @@ from kfp.compiler import compiler
 from kubernetes.client import V1Toleration
 
 def __set_gpu_resources(yaml_file_path: str) -> None:
+    """
+    Adds GPU resource specifications to a Kubeflow pipeline definition file.
+
+    Args:
+        yaml_file_path: Path of a YAML file containing a Kubeflow pipeline definition.
+
+    Returns:
+        None
+    """
+
     with open(yaml_file_path, 'r') as stream:
         try:
             pipeline_yaml = yaml.safe_load(stream)
@@ -27,6 +37,16 @@ def __set_gpu_resources(yaml_file_path: str) -> None:
             raise NameError(f"Could not write pipeline YAML file")
 
 def compile_pipeline(use_gpu: bool = True) -> None:
+    """
+    Compiles full Kubeflow pipeline to a Kubeflow pipeline definition file.
+
+    Args:
+        use_gpu: Whether the pipeline is intended to run on GPU.
+
+    Returns:
+        None
+    """
+
     download_data_container_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component.yaml'))
 
@@ -150,6 +170,16 @@ def compile_pipeline(use_gpu: bool = True) -> None:
         __set_gpu_resources(pipeline_filename)
 
 def compile_demo_pipeline(use_gpu: bool = True) -> None:
+    """
+    Compiles a demo Kubeflow pipeline (without data download and spectrogram creation stages) to a Kubeflow pipeline
+    definition file.
+
+    Args:
+        use_gpu: Whether the pipeline is intended to run on GPU.
+
+    Returns:
+        None
+    """
     data_loader_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/demo_data_component.yaml'))
 
@@ -222,7 +252,18 @@ def compile_demo_pipeline(use_gpu: bool = True) -> None:
     if use_gpu:
         __set_gpu_resources(pipeline_filename)
 
-def build_docker_image(cwd: str = ".", rebuild_prebuild_image: bool = True):
+def build_docker_image(cwd: str = ".", rebuild_prebuild_image: bool = True) -> None:
+    """
+    Builds and pushes the Dockerimage used by the Kubeflow pipeline.
+
+    Args:
+        cwd: Path of the directory where the Dockerfiles are located.
+        rebuild_prebuild_image: Whether the base image (defined by "PrebuildDockerfile") should be rebuild.
+
+    Returns:
+        None
+    """
+
     if not os.path.exists(os.path.join(cwd, "Dockerfile")):
         raise NameError(f"Could not find Dockerfile.")
     if not os.path.exists(os.path.join(cwd, "PrebuildDockerfile")):

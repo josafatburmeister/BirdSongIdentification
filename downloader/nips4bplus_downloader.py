@@ -6,11 +6,18 @@ from typing import List
 
 import pandas as pd
 
-from general import logger, PathManager
+from general import logger, FileManager
 from .downloader import Downloader
 
 
 class NIPS4BPlusDownloader(Downloader):
+    """
+    Downloads NIPS4BPlus dataset.
+
+    See Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223
+    (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
+    """
+
     nips4bplus_annotations_url = "https://ndownloader.figshare.com/files/16334603"
     nips4bplus_annotations_folder_name = "temporal_annotations_nips4b"
     nips4b_audio_files_url = "http://sabiod.univ-tln.fr/nips4b/media/birds/NIPS4B_BIRD_CHALLENGE_TRAIN_TEST_WAV.tar.gz"
@@ -18,11 +25,18 @@ class NIPS4BPlusDownloader(Downloader):
     species_list_url = "https://ndownloader.figshare.com/files/13390469"
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
-    def __init__(self, path_manager: PathManager) -> None:
-        super().__init__(path_manager)
+    def __init__(self, file_manager: FileManager) -> None:
+        """
 
-        self.nips4bplus_folder = self.path.data_folder("nips4bplus")
-        self.nips4bplus_folder_all = self.path.data_folder("nips4bplus_all")
+        Args:
+            file_manager: FileManager object that manages the output directory to be used for storing the
+                downloaded datasets.
+        """
+
+        super().__init__(file_manager)
+
+        self.nips4bplus_folder = self.file_manager.data_folder("nips4bplus")
+        self.nips4bplus_folder_all = self.file_manager.data_folder("nips4bplus_all")
         self.extracted_nips_annotations_folder = os.path.join(self.nips4bplus_folder,
                                                               NIPS4BPlusDownloader.nips4bplus_annotations_folder_name)
         self.extracted_nips_audio_folder = os.path.join(
@@ -30,7 +44,10 @@ class NIPS4BPlusDownloader(Downloader):
 
     def __download_nips4b_audio_files(self) -> None:
         """
-        Downloads audio files of NIPS4B dataset
+        Downloads audio files of NIPS4B dataset.
+
+        Returns:
+            None
         """
 
         nips4bplus_audio_path = os.path.join(self.nips4bplus_folder, "nips4bplus_audio.tar.gz")
@@ -48,7 +65,10 @@ class NIPS4BPlusDownloader(Downloader):
 
     def __download_nips4b_plus_annotations(self) -> None:
         """
-        Downloads temporal annotations for NIPS4B audio files from NIPS4BPlus dataset
+        Downloads temporal annotations for NIPS4B audio files from NIPS4BPlus dataset.
+
+        Returns:
+            None
         """
 
         nips4bplus_annotations_path = os.path.join(self.nips4bplus_folder, "nips4bplus_annotations.zip")
@@ -66,9 +86,12 @@ class NIPS4BPlusDownloader(Downloader):
     def download_nips4b_species_list(self) -> pd.DataFrame:
         """
         Downloads list of categories / species of the NIPS4B dataset.
+
+        Returns:
+            Pandas Dataframe that contains the columns "nips4b_class_name", "class name", "Scientific_name", and "sound_type".
         """
 
-        nips4bplus_species_list = os.path.join(self.path.data_folder("nips4bplus", ""), "nips4b_species_list.csv")
+        nips4bplus_species_list = os.path.join(self.file_manager.data_folder("nips4bplus"), "nips4b_species_list.csv")
 
         self.download_file(NIPS4BPlusDownloader.species_list_url, nips4bplus_species_list, cache_subdir="nips4bplus")
 
@@ -97,11 +120,15 @@ class NIPS4BPlusDownloader(Downloader):
         Creates label file for the NIPS4BPlus dataset using the categories from the provided species list.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
 
-        param: species_list: list of species and sound types in the above mentioned  format
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+
+        Returns:
+            None
         """
 
-        nips4bplus_audio_folder = self.path.data_folder("nips4bplus", "audio")
-        nips4bplus_all_audio_folder = self.path.data_folder("nips4bplus_all", "audio")
+        nips4bplus_audio_folder = self.file_manager.data_folder("nips4bplus", "audio")
+        nips4bplus_all_audio_folder = self.file_manager.data_folder("nips4bplus_all", "audio")
 
         nips4b_species_list = self.download_nips4b_species_list()
 
@@ -139,7 +166,7 @@ class NIPS4BPlusDownloader(Downloader):
                 file_id = file.lstrip("annotation_train").rstrip(".csv")
 
                 labels["id"] = f"nips4b_birds_trainfile{file_id}"
-                labels["file_name"] = f"nips4b_birds_trainfile{file_id}.wav"
+                labels["file_path"] = f"nips4b_birds_trainfile{file_id}.wav"
                 labels["start"] = labels["start"] * 1000
                 labels["end"] = labels["start"] + labels["duration"] * 1000
 
@@ -152,7 +179,7 @@ class NIPS4BPlusDownloader(Downloader):
                 if contains_selected_species:
                     nips4bplus_selected_labels.append(labels)
 
-                labels = labels[["id", "file_name", "start", "end", "label"]]
+                labels = labels[["id", "file_path", "start", "end", "label"]]
 
                 self.append = nips4bplus_labels.append(labels)
 
@@ -161,32 +188,36 @@ class NIPS4BPlusDownloader(Downloader):
         if len(nips4bplus_selected_labels) > 0:
             nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
         else:
-            nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_name", "label", "start", "end"])
+            nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_path", "label", "start", "end"])
 
         self.save_label_file(nips4bplus_selected_labels, "nips4bplus")
 
-        for split in ["train", "test"]:
-            folder_path = os.path.join(self.extracted_nips_audio_folder, split)
-            PathManager.copytree(folder_path, nips4bplus_audio_folder)
-            PathManager.copytree(folder_path, nips4bplus_all_audio_folder)
+        for dataset in ["train", "test"]:
+            folder_path = os.path.join(self.extracted_nips_audio_folder, dataset)
+            FileManager.copytree(folder_path, nips4bplus_audio_folder)
+            FileManager.copytree(folder_path, nips4bplus_all_audio_folder)
 
         # remove audio files without labels
         for file in os.listdir(nips4bplus_audio_folder):
-            if nips4bplus_selected_labels[nips4bplus_selected_labels["file_name"] == file].empty:
+            if nips4bplus_selected_labels[nips4bplus_selected_labels["file_path"] == file].empty:
                 os.remove(os.path.join(nips4bplus_audio_folder, file))
         for file in os.listdir(nips4bplus_all_audio_folder):
-            if nips4bplus_labels[nips4bplus_labels["file_name"] == file].empty:
+            if nips4bplus_labels[nips4bplus_labels["file_path"] == file].empty:
                 os.remove(os.path.join(nips4bplus_all_audio_folder, file))
 
     def download_nips4bplus_dataset(self, species_list: List[str]) -> None:
         """
-        Downloads whole NIPS4BPlus dataset and creates labels using the categories from the provided species list.
+        Downloads the whole NIPS4BPlus dataset and creates labels using the categories from the provided species list.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
 
-        param: species_list: list of species and sound types in the above mentioned  format
+        Args:
+            species_list: List of species and sound types in the above mentioned  format.
+
+        Returns:
+            None
         """
 
-        self.path.empty_dir(self.nips4bplus_folder)
+        self.file_manager.empty_dir(self.nips4bplus_folder)
 
         self.__download_nips4b_audio_files()
         self.__download_nips4b_plus_annotations()

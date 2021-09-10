@@ -7,7 +7,18 @@ import sys
 from google.colab import drive
 
 
-def setup_colab_environment(data_path: str, branch: str = "main"):
+def setup_colab_environment(data_path: str, branch: str = "main") -> None:
+    """
+    Prepares Google Colab environment for running the pipeline.
+
+    Args:
+        data_path: Path of zipped datasets in Google drive.
+        branch: Git branch to be checked out.
+
+    Returns:
+        None
+    """
+
     git_repo_dir = "/content/BirdSongIdentification"
 
     try:
@@ -28,17 +39,17 @@ def setup_colab_environment(data_path: str, branch: str = "main"):
 
     drive.mount('/content/drive', force_remount=True)
     colab_data_dir = "/content/data"
-    for split in ["train", "test", "val"]:
-        if not os.path.exists(os.path.join(colab_data_dir, f"{split}.zip")):
+    for dataset in ["train", "test", "val"]:
+        if not os.path.exists(os.path.join(colab_data_dir, f"{dataset}.zip")):
             os.makedirs(colab_data_dir, exist_ok=True)
-            shutil.copy(os.path.join(data_path, f"{split}.zip"), colab_data_dir)
+            shutil.copy(os.path.join(data_path, f"{dataset}.zip"), colab_data_dir)
 
-        if not os.path.exists(os.path.join(colab_data_dir, split)):
+        if not os.path.exists(os.path.join(colab_data_dir, dataset)):
             try:
-                subprocess.run(["unzip", "-q", os.path.join(colab_data_dir, f"{split}.zip")],
+                subprocess.run(["unzip", "-q", os.path.join(colab_data_dir, f"{dataset}.zip")],
                                cwd=colab_data_dir, check=True)
             except subprocess.CalledProcessError:
-                raise NameError(f"Could unzip {split} data set")
+                raise NameError(f"Could unzip {dataset} data set")
 
     # force restart of runtime
     os.kill(os.getpid(), 9)

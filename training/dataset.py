@@ -1,5 +1,5 @@
 import os
-from typing import KeysView, T_co
+from typing import KeysView, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -9,14 +9,31 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from general.filepaths import PathManager
-from general.logging import logger
+from general import FileManager, logger
+
+T_co = TypeVar('T_co', covariant=True)
 
 
-class XenoCantoSpectrograms(Dataset):
-    def __init__(self, path_manager: PathManager, include_noise_samples: bool = True,
-                 split: str = "train", multi_label_classification: bool = False,
+class SpectrogramDataset(Dataset):
+    """
+    Custom PyTorch dataset of spectrogram images.
+    """
+
+    def __init__(self, path_manager: FileManager, include_noise_samples: bool = True,
+                 dataset: str = "train", multi_label_classification: bool = False,
                  undersample_noise_samples: bool = True) -> None:
+        """
+
+        Args:
+            path_manager: FileManager object that manages the directory containing the spectrograms file and their
+                labels.
+            include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
+                included in the spectrogram dataset.
+            dataset: Name of a dataset (e.g. train, val, or test).
+            multi_label_classification: Whether a label format suitable for training multi-label models should be used.
+            undersample_noise_samples: Whether the number of "noise" spectrograms should be limited to the maximum
+                number of spectrograms of a sound class.
+        """
 
         normalize = transforms.Normalize(
             (0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
@@ -28,14 +45,14 @@ class XenoCantoSpectrograms(Dataset):
 
         self.path_manager = path_manager
         self.data_dir = self.path_manager.data_folder(
-            split, "spectrograms")
-        self.label_file = self.path_manager.label_file(split, type="spectrograms")
+            dataset, "spectrograms")
+        self.label_file = self.path_manager.label_file(dataset, "spectrograms")
 
         if not os.path.exists(self.data_dir) or not os.path.exists(self.label_file):
             raise NameError("Data files missing: ", self.data_dir)
 
         self.labels = pd.read_csv(self.label_file)
-        self.labels = self.labels[self.labels["file_name"].str.endswith(".png")]
+        self.labels = self.labels[self.labels["file_path"].str.endswith(".png")]
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
         self.class_to_idx = {}
@@ -48,7 +65,7 @@ class XenoCantoSpectrograms(Dataset):
         max_samples_per_class = 0
         if logger:
             logger.info("\n")
-            logger.info("Label distribution of %s set", split)
+            logger.info("Label distribution of %s set", dataset)
             for class_name in self.class_names():
                 class_samples = self.labels[class_name].sum()
                 max_samples_per_class = max(max_samples_per_class, class_samples)
@@ -67,6 +84,13 @@ class XenoCantoSpectrograms(Dataset):
             logger.info("\n")
 
     def create_class_indices(self) -> None:
+        """
+        Creates an internal mapping of human-readable class names to class indices.
+
+        Returns:
+            None
+        """
+
         categories = list(np.loadtxt(self.path_manager.categories_file(), delimiter=",", dtype=str))
 
         if self.include_noise_samples and not self.multi_label_classification:
@@ -78,32 +102,91 @@ class XenoCantoSpectrograms(Dataset):
             self.class_to_idx[class_name] = idx
 
     def class_to_id_mapping(self) -> dict:
+        """
+
+        Returns:
+            A dictionary that maps human-readable class names to class indices.
+        """
+
         return self.class_to_idx
 
     def id_to_class_mapping(self) -> dict:
+        """
+
+        Returns:
+            A dictionary that maps class indices to human-readable class names.
+        """
+
         return {value: key for key, value in self.class_to_idx.items()}
 
     def id_to_class_name(self, identifier: int):
+        """
+        Maps class indices to human-readable class names.
+
+        Args:
+            identifier: Index of a respective class.
+
+        Returns:
+            Name of the respective class.
+        """
+
         return self.id_to_class_mapping()[identifier]
 
     def class_name_to_id(self, class_name: str):
+        """
+        Maps human-readable class names to class indices.
+
+        Args:
+            class_name: A class name.
+
+        Returns:
+            Index of the respective class.
+        """
+
         return self.class_to_idx[str(class_name)]
 
     def class_names(self) -> KeysView:
+        """
+
+        Returns:
+            Class names of the dataset.
+        """
+
         return self.class_to_idx.keys()
 
     def num_classes(self) -> int:
+        """
+
+        Returns:
+            Number of classes of the dataset.
+        """
+
         return len(self.class_to_idx)
 
     def __len__(self) -> int:
+        """
+
+        Returns:
+            Length of the dataset.
+        """
+
         return len(self.labels)
 
     def __getitem__(self, idx: [int] or Tensor) -> T_co:
+        """
+
+        Args:
+            idx: Index of the spectrogram to be retrieved.
+
+        Returns:
+            Spectrogram image and its class index (if "multi_label_classification" is False) or a multi-hot encoded
+                label tensor (if "multi_label_classification" is True)
+        """
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
         img_path = os.path.join(
-            self.data_dir, self.labels["file_name"].iloc[idx])
+            self.data_dir, self.labels["file_path"].iloc[idx])
 
         image = Image.open(img_path).convert('RGB')
 

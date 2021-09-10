@@ -83,7 +83,7 @@ inputs:
       name: Multi Label Classification,
       type: Bool,
       default: False,
-      description: "Whether a multi-label classification model should be use",
+      description: "Whether the model should be trained as single-label classification model or as multi-label classification model.",
     }
   - {
       name: Multi Label Classification Threshold,

@@ -3,20 +3,38 @@ from typing import List
 
 from tabulate import tabulate
 
-from general.logging import logger
+from general import logger, FileManager
 from training.training import ModelTrainer
 
 
 class HyperparameterTuner:
+    """
+    Runs hyperparameter tuning.
+    """
+
     @staticmethod
     def tunable_parameters() -> List[str]:
+        """
+
+        Returns:
+            List of tunable hyperparameters.
+        """
+
         return ["batch_size", "include_noise_samples", "layers_to_unfreeze", "learning_rate", "momentum", "p_dropout",
                 "weight_decay"]
 
     def __init__(self,
-                 spectrogram_path_manager,
+                 spectrogram_path_manager: FileManager,
                  experiment_name: str,
                  **kwargs) -> None:
+        """
+
+        Args:
+            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
+                their labels.
+            experiment_name: Descriptive name of the training run / experiment.
+        """
+
         self.experiment_name = experiment_name
         self.spectrogram_path_manager = spectrogram_path_manager
         self.kwargs = kwargs
@@ -27,14 +45,25 @@ class HyperparameterTuner:
         self.best_parameters = None
 
     def __tune(self, parameters: dict, experiment_name: str) -> None:
+        """
+        Recursively combines the values of all hyperparameters to be tuned and starts corresponding training runs.
+
+        Args:
+            parameters: Model training parameters.
+            experiment_name: Descriptive name of the training run / experiment.
+
+        Returns:
+            None
+        """
+
         unresolved_parameters = False
         for hyperparameter in HyperparameterTuner.tunable_parameters():
             if hyperparameter in parameters and \
                     (hyperparameter != "layers_to_unfreeze"
-                    and type(parameters[hyperparameter]) == list
-                    or hyperparameter == "layers_to_unfreeze"
-                    and type(parameters[hyperparameter]) == list
-                    and type(parameters[hyperparameter][0]) == list):
+                     and type(parameters[hyperparameter]) == list
+                     or hyperparameter == "layers_to_unfreeze"
+                     and type(parameters[hyperparameter]) == list
+                     and type(parameters[hyperparameter][0]) == list):
                 if hyperparameter not in self.tuned_parameters:
                     self.tuned_parameters.append(hyperparameter)
                 unresolved_parameters = True
@@ -63,6 +92,13 @@ class HyperparameterTuner:
                 self.best_parameters = parameters.copy()
 
     def __log_summary(self) -> None:
+        """
+        Logs results of hyperparameter tuning.
+
+        Returns:
+            None
+        """
+
         logger.info("\n")
         logger.info("Best hyperparamater combination:")
         for hyperparameter in self.tuned_parameters:
@@ -87,6 +123,13 @@ class HyperparameterTuner:
                     tabulate(metrics, headers=table_headers, tablefmt='github', floatfmt=".4f", numalign="center"))
 
     def tune_model(self) -> None:
+        """
+        Runs hyperparameter tuning.
+
+        Returns:
+            None
+        """
+
         logger.info("Hyperparameter Tuning \n")
         self.__tune(self.kwargs.copy(), self.experiment_name)
         self.__log_summary()
