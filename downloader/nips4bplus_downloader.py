@@ -25,18 +25,18 @@ class NIPS4BPlusDownloader(Downloader):
     species_list_url = "https://ndownloader.figshare.com/files/13390469"
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
-    def __init__(self, path_manager: FileManager) -> None:
+    def __init__(self, file_manager: FileManager) -> None:
         """
 
         Args:
-            path_manager: FileManager object that manages the output directory to be used for storing the
+            file_manager: FileManager object that manages the output directory to be used for storing the
                 downloaded datasets.
         """
 
-        super().__init__(path_manager)
+        super().__init__(file_manager)
 
-        self.nips4bplus_folder = self.path.data_folder("nips4bplus")
-        self.nips4bplus_folder_all = self.path.data_folder("nips4bplus_all")
+        self.nips4bplus_folder = self.file_manager.data_folder("nips4bplus")
+        self.nips4bplus_folder_all = self.file_manager.data_folder("nips4bplus_all")
         self.extracted_nips_annotations_folder = os.path.join(self.nips4bplus_folder,
                                                               NIPS4BPlusDownloader.nips4bplus_annotations_folder_name)
         self.extracted_nips_audio_folder = os.path.join(
@@ -91,7 +91,7 @@ class NIPS4BPlusDownloader(Downloader):
             Pandas Dataframe that contains the columns "nips4b_class_name", "class name", "Scientific_name", and "sound_type".
         """
 
-        nips4bplus_species_list = os.path.join(self.path.data_folder("nips4bplus"), "nips4b_species_list.csv")
+        nips4bplus_species_list = os.path.join(self.file_manager.data_folder("nips4bplus"), "nips4b_species_list.csv")
 
         self.download_file(NIPS4BPlusDownloader.species_list_url, nips4bplus_species_list, cache_subdir="nips4bplus")
 
@@ -127,8 +127,8 @@ class NIPS4BPlusDownloader(Downloader):
             None
         """
 
-        nips4bplus_audio_folder = self.path.data_folder("nips4bplus", "audio")
-        nips4bplus_all_audio_folder = self.path.data_folder("nips4bplus_all", "audio")
+        nips4bplus_audio_folder = self.file_manager.data_folder("nips4bplus", "audio")
+        nips4bplus_all_audio_folder = self.file_manager.data_folder("nips4bplus_all", "audio")
 
         nips4b_species_list = self.download_nips4b_species_list()
 
@@ -217,7 +217,7 @@ class NIPS4BPlusDownloader(Downloader):
             None
         """
 
-        self.path.empty_dir(self.nips4bplus_folder)
+        self.file_manager.empty_dir(self.nips4bplus_folder)
 
         self.__download_nips4b_audio_files()
         self.__download_nips4b_plus_annotations()
