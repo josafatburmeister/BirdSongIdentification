@@ -61,16 +61,16 @@ class SpectrogramCreator:
 
         return x_scaled
 
-    def __init__(self, chunk_length: int, audio_path_manager: FileManager,
-                 spectrogram_path_manager: Optional[FileManager] = None, include_noise_samples: bool = True) -> None:
+    def __init__(self, chunk_length: int, audio_file_manager: FileManager,
+                 spectrogram_file_manager: Optional[FileManager] = None, include_noise_samples: bool = True) -> None:
         """
 
         Args:
             chunk_length: Length of the chunks into which the audio recordings are to be split (in milliseconds). Per
                 chunk one spectrogram is created.
-            audio_path_manager: FileManager object that manages the input directory containing the audio files from
+            audio_file_manager: FileManager object that manages the input directory containing the audio files from
                 which the spectrograms are to be created.
-            spectrogram_path_manager: FileManager object that manages the output directory to be used for storing the
+            spectrogram_file_manager: FileManager object that manages the output directory to be used for storing the
                 created spectrograms.
             include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
                 included in the spectrogram dataset.
@@ -90,13 +90,13 @@ class SpectrogramCreator:
 
         self.include_noise_samples = include_noise_samples
 
-        if not spectrogram_path_manager:
-            spectrogram_path_manager = audio_path_manager
-        self.audio_path = audio_path_manager
-        self.spectrogram_path = spectrogram_path_manager
+        if not spectrogram_file_manager:
+            spectrogram_file_manager = audio_file_manager
+        self.audio_file_manager = audio_file_manager
+        self.spectrogram_file_manager = spectrogram_file_manager
 
-        if self.spectrogram_path.is_pipeline_run:
-            self.spectrogram_path.copy_cache_from_gcs("spectrograms", chunk_length=self.chunk_length)
+        if self.spectrogram_file_manager.is_pipeline_run:
+            self.spectrogram_file_manager.copy_cache_from_gcs("spectrograms", chunk_length=self.chunk_length)
 
         self.__index_cached_spectrograms()
 
@@ -167,7 +167,7 @@ class SpectrogramCreator:
                 signal pixels is equal or above this threshold, the spectrogram is classified as containing substantial
                 signal parts.
             noise_threshold: Threshold used to identify "noise" spectrograms. If the number of image rows containing
-                signal pixels is equal or below this threshold, the spectrogram is classified as containing only noise.
+                signal pixels is below this threshold, the spectrogram is classified as containing only noise.
 
         Returns:
             Tuple of two Booleans. The first value is True, if the spectrogram image is classified as "signal"
@@ -197,7 +197,7 @@ class SpectrogramCreator:
         Saves spectrogram to an image file.
 
         Args:
-            target_file: Absolute path of the image file.
+            target_file: Absolute file_manager of the image file.
             spectrogram: Numpy ndarray containing the pixel values of the spectrogram.
 
         Returns:
@@ -214,7 +214,7 @@ class SpectrogramCreator:
         io.imsave(target_file, img)
 
         # copy spectrogram to cache
-        cached_file_path = self.spectrogram_path.cached_file_path(
+        cached_file_path = self.spectrogram_file_manager.cached_file_path(
             "spectrograms", target_file, chunk_length=self.chunk_length)
         shutil.copy(target_file, cached_file_path)
 
@@ -226,7 +226,7 @@ class SpectrogramCreator:
             None
         """
 
-        cache_path = self.spectrogram_path.cache("spectrograms", chunk_length=self.chunk_length)
+        cache_path = self.spectrogram_file_manager.cache("spectrograms", chunk_length=self.chunk_length)
 
         self.cached_spectrograms = {
             "with noise": {},
@@ -266,6 +266,19 @@ class SpectrogramCreator:
             return self.cached_spectrograms["without noise"][audio_file_id]
 
         return []
+
+    def __create_spectrogram(self, chunk: numpy.ndarray):
+        # apply short time fourier transformation to extract frequency information from amplitude data
+        mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate,
+                                                         hop_length=self.hop_length, n_fft=self.n_fft,
+                                                         win_length=self.window_length, n_mels=112,
+                                                         fmin=self.fmin, fmax=self.fmax)
+
+        # convert power spectrogram to dB-scaled spectrogram
+        mel_spectrogram_db = librosa.power_to_db(
+            mel_spectrogram, ref=numpy.max)
+
+        return mel_spectrogram_db
 
     def __create_spectrograms_from_file(self, audio_file: str, target_dir: str, signal_threshold: int,
                                         noise_threshold: int) -> List[str]:
@@ -307,15 +320,7 @@ class SpectrogramCreator:
                     # get samples of current chunk
                     chunk = amplitudes[i * self.samples_per_chunk:(i + 1) * self.samples_per_chunk]
 
-                    # apply short time fourier transformation to extract frequency information from amplitude data
-                    mel_spectrogram = librosa.feature.melspectrogram(chunk, sr=self.sampling_rate,
-                                                                     hop_length=self.hop_length, n_fft=self.n_fft,
-                                                                     win_length=self.window_length, n_mels=112,
-                                                                     fmin=self.fmin, fmax=self.fmax)
-
-                    # convert power spectrogram to dB-scaled spectrogram
-                    mel_spectrogram_db = librosa.power_to_db(
-                        mel_spectrogram, ref=numpy.max)
+                    mel_spectrogram_db = self.__create_spectrogram(chunk)
 
                     file_name = os.path.splitext(os.path.basename(audio_file))[0]
                     target_file = os.path.join(target_dir, "{}-{}.png".format(file_name, i))
@@ -360,7 +365,7 @@ class SpectrogramCreator:
 
         progress_bar = ProgressBar(
             total=len(audio_file_names), desc="Create spectrograms for {}".format(desc), position=0,
-            is_pipeline_run=self.spectrogram_path.is_pipeline_run)
+            is_pipeline_run=self.spectrogram_file_manager.is_pipeline_run)
 
         def spectrogram_task(file_name: str) -> List[str]:
             if file_name.endswith(".mp3") or file_name.endswith(".wav"):
@@ -373,7 +378,7 @@ class SpectrogramCreator:
                 spectrogram_task(file_name)
                 progress_bar.update(1)
         else:
-            batch_size = 50 if self.spectrogram_path.is_pipeline_run else 20
+            batch_size = 50 if self.spectrogram_file_manager.is_pipeline_run else 20
             audio_file_names_batches = [audio_file_names[x:x + batch_size] for x in
                                         range(0, len(audio_file_names), batch_size)]
             for audio_file_names in audio_file_names_batches:
@@ -381,9 +386,9 @@ class SpectrogramCreator:
                 spectrogram_paths = joblib.Parallel(n_jobs=spectrogram_creation_threads)(jobs)
                 spectrogram_paths = [spectrogram_path for sublist in spectrogram_paths for spectrogram_path in sublist]
 
-                if self.spectrogram_path.is_pipeline_run:
-                    self.spectrogram_path.copy_file_to_gcs_cache(spectrogram_paths, "spectrograms",
-                                                                 chunk_length=self.chunk_length)
+                if self.spectrogram_file_manager.is_pipeline_run:
+                    self.spectrogram_file_manager.copy_file_to_gcs_cache(spectrogram_paths, "spectrograms",
+                                                                         chunk_length=self.chunk_length)
 
                 progress_bar.update(len(audio_file_names))
 
@@ -406,12 +411,12 @@ class SpectrogramCreator:
             datasets = ["train", "val", "test", "nips4bplus", "nips4bplus_all"]
 
         if clear_spectrogram_cache:
-            self.spectrogram_path.clear_cache("spectrograms", chunk_length=self.chunk_length)
+            self.spectrogram_file_manager.clear_cache("spectrograms", chunk_length=self.chunk_length)
             self.__index_cached_spectrograms()
 
         for dataset in datasets:
-            spectrogram_dir = self.spectrogram_path.data_folder(dataset, "spectrograms")
-            audio_dir = self.audio_path.data_folder(dataset, "audio")
+            spectrogram_dir = self.spectrogram_file_manager.data_folder(dataset, "spectrograms")
+            audio_dir = self.audio_file_manager.data_folder(dataset, "audio")
             os.makedirs(spectrogram_dir, exist_ok=True)
             self.__create_spectrograms_from_dir(
                 audio_dir, spectrogram_dir, signal_threshold, noise_threshold, f"{dataset} set")
@@ -427,8 +432,8 @@ class SpectrogramCreator:
         Returns:
             None
         """
-        labels = pd.read_csv(self.audio_path.label_file(dataset, "audio"))
-        spectrogram_dir = self.spectrogram_path.data_folder(dataset, "spectrograms")
+        labels = pd.read_csv(self.audio_file_manager.label_file(dataset, "audio"))
+        spectrogram_dir = self.spectrogram_file_manager.data_folder(dataset, "spectrograms")
 
         spectrogram_labels = []
 
@@ -482,7 +487,7 @@ class SpectrogramCreator:
                 by=['file_path']).fillna(0)
             spectrogram_labels = spectrogram_labels[spectrogram_labels["file_path"] != 0]
 
-            label_file = self.spectrogram_path.label_file(dataset, "spectrograms")
+            label_file = self.spectrogram_file_manager.label_file(dataset, "spectrograms")
             spectrogram_labels.to_csv(label_file)
         else:
             raise NameError("No spectrograms found")
