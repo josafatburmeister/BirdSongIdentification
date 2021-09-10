@@ -24,19 +24,19 @@ class HyperparameterTuner:
                 "weight_decay"]
 
     def __init__(self,
-                 spectrogram_path_manager: FileManager,
+                 spectrogram_file_manager: FileManager,
                  experiment_name: str,
                  **kwargs) -> None:
         """
 
         Args:
-            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
+            spectrogram_file_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             experiment_name: Descriptive name of the training run / experiment.
         """
 
         self.experiment_name = experiment_name
-        self.spectrogram_path_manager = spectrogram_path_manager
+        self.spectrogram_file_manager = spectrogram_file_manager
         self.kwargs = kwargs
         self.tuned_parameters = []
 
@@ -79,7 +79,7 @@ class HyperparameterTuner:
             for hyperparameter in self.tuned_parameters:
                 logger.info(f"{hyperparameter} = {parameters[hyperparameter]}")
             logger.info("\n")
-            model_trainer = ModelTrainer(self.spectrogram_path_manager, experiment_name=experiment_name,
+            model_trainer = ModelTrainer(self.spectrogram_file_manager, experiment_name=experiment_name,
                                          is_hyperparameter_tuning=True, **parameters)
             best_average_f1_score = model_trainer.train_model()
             if len(self.tuned_parameters) <= 2:

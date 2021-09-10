@@ -3,35 +3,19 @@ from typing import Dict, Tuple, Union
 
 import torch
 from torch.optim import lr_scheduler
-from torch.utils.data import DataLoader
 
 from general.logging import logger
-from models import densenet, resnet
-from training import dataset as ds, metrics, metric_logging, model_tracker as tracker
+from training import metrics, metric_logging, model_runner, model_tracker as tracker
 from training.early_stopper import EarlyStopper
 
 
-class ModelTrainer:
+class ModelTrainer(model_runner.ModelRunner):
     """
     Runs model training with fixed hyperparameter values.
     """
 
-    @staticmethod
-    def __setup_device() -> torch.device:
-        """
-        Creates the Pytorch device on which the model training is to be run; if a GPU with CUDA support is available,
-        it is preferred over the CPU.
-
-        Returns:
-            Pytorch device.
-        """
-
-        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
-        logger.info('Device set to: %s', device)
-        return torch.device(device)
-
     def __init__(self,
-                 spectrogram_path_manager,
+                 spectrogram_file_manager,
                  architecture: str,
                  experiment_name: str,
                  batch_size: int = 100,
@@ -58,14 +42,14 @@ class ModelTrainer:
                  min_change=0.0,
                  undersample_noise_samples=True,
                  val_dataset="val",
-                 wandb_entity_name="",
-                 wandb_key="",
-                 wandb_project_name="",
+                 wandb_entity_name: str = "",
+                 wandb_key: str = "",
+                 wandb_project_name: str = "",
                  weight_decay=0) -> None:
         """
 
         Args:
-            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
+            spectrogram_file_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
             experiment_name: Descriptive name of the training run / experiment.
@@ -113,12 +97,21 @@ class ModelTrainer:
             weight_decay: Weight decay.
         """
 
-        self.spectrogram_path_manager = spectrogram_path_manager
-        self.architecture = architecture
-        self.batch_size = batch_size
+        super().__init__(spectrogram_file_manager,
+                         architecture,
+                         batch_size=batch_size,
+                         include_noise_samples=include_noise_samples,
+                         multi_label_classification=multi_label_classification,
+                         multi_label_classification_threshold=multi_label_classification_threshold,
+                         number_workers=number_workers,
+                         track_metrics=track_metrics,
+                         undersample_noise_samples=undersample_noise_samples,
+                         wandb_entity_name=wandb_entity_name,
+                         wandb_key=wandb_key,
+                         wandb_project_name=wandb_project_name)
+
         self.early_stopping = early_stopping
         self.experiment_name = experiment_name
-        self.include_noise_samples = include_noise_samples
         self.is_hyperparameter_tuning = is_hyperparameter_tuning
         self.layers_to_unfreeze = layers_to_unfreeze
         self.learning_rate = learning_rate
@@ -126,16 +119,11 @@ class ModelTrainer:
         self.learning_rate_scheduler_gamma = learning_rate_scheduler_gamma
         self.learning_rate_scheduler_step_size = learning_rate_scheduler_step_size
         self.momentum = momentum
-        self.multi_label_classification = multi_label_classification
-        self.multi_label_classification_threshold = multi_label_classification_threshold
         self.num_epochs = number_epochs
-        self.num_workers = number_workers
         self.optimizer = optimizer
         self.p_dropout = p_dropout
         self.save_all_models = save_all_models
         self.train_dataset = train_dataset
-        self.track_metrics = track_metrics
-        self.undersample_noise_samples = undersample_noise_samples
         self.val_dataset = val_dataset
         self.weight_decay = weight_decay
 
@@ -145,47 +133,20 @@ class ModelTrainer:
         self.min_change = min_change
 
         # setup datasets
-        datasets, dataloaders = self.__setup_dataloaders()
+        datasets, dataloaders = self._setup_dataloaders(
+            [self.train_dataset], [self.val_dataset])
         self.datasets = datasets
         self.dataloaders = dataloaders
-        self.num_classes = self.datasets["train"].num_classes()
+        self.num_classes = self.datasets[self.train_dataset].num_classes()
 
-        self.is_pipeline_run = self.spectrogram_path_manager.is_pipeline_run
+        self.is_pipeline_run = self.spectrogram_file_manager.is_pipeline_run
 
         config = locals().copy()
-        del config['spectrogram_path_manager']
-        device = self.__setup_device()
-        self.logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=track_metrics,
-                                                    wandb_entity_name=wandb_entity_name,
-                                                    wandb_project_name=wandb_project_name, wandb_key=wandb_key)
+        del config['spectrogram_file_manager']
+        self.device = self._setup_device()
+        self.logger = self._setup_metric_logger(config)
 
-    def __setup_dataloaders(self) -> Tuple[Dict[str, ds.SpectrogramDataset], Dict[str, torch.utils.data.DataLoader]]:
-        """
-        Creates datasets and dataloaders for model training and validation.
-
-        Returns:
-            Training and validation dataset and training and validation dataloader.
-        """
-
-        datasets = {}
-        dataloaders = {}
-
-        for dataset in [self.train_dataset, self.val_dataset]:
-            dataset_name = "train" if dataset == self.train_dataset else "val"
-            datasets[dataset_name] = ds.SpectrogramDataset(
-                self.spectrogram_path_manager,
-                include_noise_samples=self.include_noise_samples, dataset=dataset,
-                multi_label_classification=self.multi_label_classification,
-                undersample_noise_samples=self.undersample_noise_samples)
-
-            shuffle = (dataset == self.train_dataset)
-            dataloaders[dataset_name] = DataLoader(
-                datasets[dataset_name], batch_size=self.batch_size, sampler=None,
-                shuffle=shuffle, num_workers=self.num_workers)
-
-        return datasets, dataloaders
-
-    def __setup_model(self) -> torch.nn.Module:
+    def _setup_model(self) -> torch.nn.Module:
         """
         Creates model with the required number of classes and the required architecture.
 
@@ -193,39 +154,15 @@ class ModelTrainer:
             Pytorch model.
         """
 
-        logger.info("Setup %s model: ", self.architecture)
-        model = None
-        if self.architecture == "resnet18":
-            model = resnet.ResnetTransferLearning(architecture="resnet18",
-                                                  num_classes=self.num_classes,
-                                                  layers_to_unfreeze=self.layers_to_unfreeze,
-                                                  logger=logger,
-                                                  p_dropout=self.p_dropout)
-        if self.architecture == "resnet34":
-            model = resnet.ResnetTransferLearning(architecture="resnet34",
-                                                  num_classes=self.num_classes,
-                                                  layers_to_unfreeze=self.layers_to_unfreeze,
-                                                  logger=logger,
-                                                  p_dropout=self.p_dropout)
-        elif self.architecture == "resnet50":
-            model = resnet.ResnetTransferLearning(architecture="resnet50",
-                                                  num_classes=self.num_classes,
-                                                  layers_to_unfreeze=self.layers_to_unfreeze,
-                                                  logger=logger,
-                                                  p_dropout=self.p_dropout)
+        model = super()._setup_model(self.num_classes,
+                                     self.layers_to_unfreeze, self.p_dropout)
 
-        elif self.architecture == "densenet121":
-            model = densenet.DenseNet121TransferLearning(
-                num_classes=self.num_classes, layers_to_unfreeze=self.layers_to_unfreeze,
-                logger=logger, p_dropout=self.p_dropout)
-
-        logger.info("\n")
-        model.id_to_class_mapping = self.datasets["train"].id_to_class_mapping(
+        model.id_to_class_mapping = self.datasets[self.train_dataset].id_to_class_mapping(
         )
         return model
 
-    def __setup_optimization(self, model: torch.nn.Module) -> Tuple[
-        torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    def _setup_optimization(self, model: torch.nn.Module):  # -> #Tuple[
+        # torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """
         Sets up tools for model optimization.
 
@@ -269,19 +206,18 @@ class ModelTrainer:
             best model.
         """
 
-        model = self.__setup_model()
-        device = ModelTrainer.__setup_device()
-        loss_function, optimizer, scheduler = self.__setup_optimization(model)
+        model = self._setup_model()
+        loss_function, optimizer, scheduler = self._setup_optimization(model)
 
-        model_tracker = tracker.ModelTracker(self.spectrogram_path_manager,
+        model_tracker = tracker.ModelTracker(self.spectrogram_file_manager,
                                              self.experiment_name,
-                                             self.datasets["train"].id_to_class_mapping(
+                                             self.datasets[self.train_dataset].id_to_class_mapping(
                                              ),
                                              self.is_pipeline_run, model,
                                              self.multi_label_classification,
-                                             device)
+                                             self.device)
 
-        model.to(device)
+        model.to(self.device)
 
         since = time.time()
 
@@ -299,16 +235,18 @@ class ModelTrainer:
             for phase in ["train", "val"]:
                 if phase == "train":
                     model.train()
+                    dataset_name = self.train_dataset
                 else:
                     model.eval()
+                    dataset_name = self.val_dataset
 
                 model_metrics = metrics.Metrics(num_classes=self.num_classes,
                                                 multi_label=self.multi_label_classification,
-                                                device=device)
+                                                device=self.device)
 
-                for images, labels in self.dataloaders[phase]:
-                    images = images.to(device)
-                    labels = labels.to(device)
+                for images, labels in self.dataloaders[dataset_name]:
+                    images = images.to(self.device)
+                    labels = labels.to(self.device)
 
                     optimizer.zero_grad()
 

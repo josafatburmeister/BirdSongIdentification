@@ -1,11 +1,10 @@
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Tuple, Union
 
 import torch
 from torch.utils.data import DataLoader
-from torchvision import models
-from torch import nn
 
-from general import FileManager
+from general import logger, FileManager
+from models import model_architectures
 from training import dataset, metric_logging
 from training.metric_logging import TrainingLogger
 
@@ -15,22 +14,10 @@ class ModelRunner:
     Base class for implementing model training and model evaluation loops.
     """
 
-    @staticmethod
-    def setup_device():
-        """
-        Creates the Pytorch device on which the model training / evaluation is to be run; if a GPU with CUDA support is
-        available, it is preferred over the CPU.
-
-        Returns:
-            Pytorch device.
-        """
-        return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     def __init__(self,
-                 spectrogram_path_manager: FileManager,
+                 spectrogram_file_manager: FileManager,
                  architecture: str,
-                 experiment_name: str,
-                 batch_size: int = 100,
+                 batch_size: int = 128,
                  include_noise_samples: bool = True,
                  multi_label_classification: bool = True,
                  multi_label_classification_threshold: float = 0.5,
@@ -45,10 +32,9 @@ class ModelRunner:
         """
 
         Args:
-            spectrogram_path_manager: FileManager object that manages the directory containing the spectrograms file and
+            spectrogram_file_manager: FileManager object that manages the directory containing the spectrograms file and
                 their labels.
             architecture: Model architecture, either "resnet18", "resnet34", "resnet50", or "densenet121".
-            experiment_name: Descriptive name of the experiment.
             batch_size: Batch size.
             include_noise_samples: Whether spectrograms that are classified as "noise" during noise filtering should be
                 included in the spectrogram dataset.
@@ -68,11 +54,10 @@ class ModelRunner:
             wandb_project_name: Name of the Weights and Biases project to which the model metrics should be logged; only
                 considered if "track_metrics" is set to True.
         """
-        self.spectrogram_path_manager = spectrogram_path_manager
+        self.spectrogram_file_manager = spectrogram_file_manager
 
         self.architecture = architecture
         self.batch_size = batch_size
-        self.experiment_name = experiment_name
         self.include_noise_samples = include_noise_samples
         self.multi_label_classification = multi_label_classification
         self.multi_label_classification_threshold = multi_label_classification_threshold
@@ -83,24 +68,41 @@ class ModelRunner:
         self.wandb_key = wandb_key
         self.wandb_project_name = wandb_project_name
 
-        self.is_pipeline_run = self.spectrogram_path_manager.is_pipeline_run
+        self.is_pipeline_run = self.spectrogram_file_manager.is_pipeline_run
+        self.device = self._setup_device()
 
-    def setup_metric_logger(self, config=None) -> TrainingLogger:
+    def _setup_device(self) -> torch.device:
+        """
+        Creates the Pytorch device on which the model training is to be run; if a GPU with CUDA support is available,
+        it is preferred over the CPU.
+
+        Returns:
+            Pytorch device.
+        """
+
+        device: str = "cuda:0" if torch.cuda.is_available() else "cpu"
+        logger.info('Device set to: %s', device)
+        return torch.device(device)
+
+    def _setup_metric_logger(self, config=None) -> TrainingLogger:
         if config is None:
             config = {}
-        logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run, track_metrics=self.track_metrics,
-                                               wandb_entity_name=self.wandb_entity_name,
-                                               wandb_project_name=self.wandb_project_name, wandb_key=self.wandb_key)
+        metric_logger = metric_logging.TrainingLogger(self, config, self.is_pipeline_run,
+                                                      track_metrics=self.track_metrics,
+                                                      wandb_entity_name=self.wandb_entity_name,
+                                                      wandb_project_name=self.wandb_project_name,
+                                                      wandb_key=self.wandb_key)
 
-        return logger
+        return metric_logger
 
-    def setup_dataloaders(self, dataset_names: list) -> Tuple[
-        Dict[str, torch.utils.data.Dataset], Dict[str, torch.utils.data.DataLoader]]:
+    def _setup_dataloaders(self, dataset_names_shuffle: List[str], dataset_names_no_shuffle: List[str]) -> Tuple[
+        Dict[str, dataset.SpectrogramDataset], Dict[str, torch.utils.data.DataLoader]]:
         """
         Creates datasets and dataloaders for the given dataset names.
 
         Args:
-            dataset_names: List of dataset names (e.g. train, val, or test).
+            dataset_names_shuffle: List of dataset names that should be shuffled (e.g. "train").
+            dataset_names_no_shuffle: List of dataset names that should not be shuffled (e.g. "val", or "test").
 
         Returns:
             Datasets and dataloaders for the given datasets names.
@@ -109,36 +111,45 @@ class ModelRunner:
         datasets = {}
         dataloaders = {}
 
-        for dataset_name in dataset_names:
+        for dataset_name in dataset_names_no_shuffle + dataset_names_shuffle:
             datasets[dataset_name] = dataset.SpectrogramDataset(
-                self.spectrogram_path_manager,
+                self.spectrogram_file_manager,
                 include_noise_samples=self.include_noise_samples, dataset=dataset_name,
                 multi_label_classification=self.multi_label_classification,
                 undersample_noise_samples=self.undersample_noise_samples)
 
-            shuffle = (dataset_name == "train")
+            shuffle = (dataset_name in dataset_names_shuffle)
             dataloaders[dataset_name] = DataLoader(
                 datasets[dataset_name], batch_size=self.batch_size, sampler=None,
                 shuffle=shuffle, num_workers=self.number_workers)
 
         return datasets, dataloaders
 
-    def setup_model(self, num_classes: int) -> Optional[torch.nn.Module]:
+    def _setup_model(self, num_classes: int, layers_to_unfreeze: Union[List[str], str],
+                     p_dropout: float = 0) -> torch.nn.Module:
         """
         Creates model with the required number of classes and the required architecture.
-        
+
         Args:
             num_classes: Number of classes in the dataset used to train the model.
+            layers_to_unfreeze: List of model layer names to be unfrozen for fine-tuning; if set to "all", all model
+                layers will be fine-tuned.
+            p_dropout: Probability of dropout before the fully-connected layer.
 
         Returns:
             Pytorch model.
         """
 
-        if self.architecture == "resnet18":
-            model = models.resnet18(pretrained=True, progress=(not self.is_pipeline_run))
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, num_classes)
-        else:
-            model = None
+        logger.info("Setup %s model: ", self.architecture)
+        model = None
 
+        if self.architecture in model_architectures:
+            model_architecture = model_architectures[self.architecture]
+            model = model_architecture(architecture=self.architecture,
+                                       num_classes=num_classes,
+                                       layers_to_unfreeze=layers_to_unfreeze,
+                                       logger=logger,
+                                       p_dropout=p_dropout)
+
+        logger.info("\n")
         return model
