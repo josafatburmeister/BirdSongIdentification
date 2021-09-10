@@ -381,13 +381,13 @@ Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ n
 
 # Technical Documentation
 
-## Running the pipeline in a Jupyter notebook
+## Running the Pipeline in a Jupyter Notebook
 
-The individual steps of our pipeline are implemented by Python classes. To run the pipeline in a Jupyter notebook, instances of the corresponding classes must be created and certain methods must be called on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as an Jupyter notebook named `demo.ipynb`.
+The individual steps of our pipeline are implemented by Python classes. To run the pipeline in a Jupyter notebook, instances of the corresponding classes must be created and certain methods must be called on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as a Jupyter notebook named `demo.ipynb`.
 
-### Installing the dependencies locally
+### Local Installation of Dependencies
 
-Our pipeline requires Python 3.7 or higher and Jupyter, please make sure that both are installed. We recommend installing the dependencies of our pipeline in a virtual environment. To create a virtual environment, run the venv module inside the directory where you want to create the virtual environment::
+Our pipeline requires Python 3.7 or higher and Jupyter, please make sure that both are installed. We recommend installing the dependencies of our pipeline in a virtual environment. To create a virtual environment, run the `venv` module inside the directory where you want to create the virtual environment:
 
 ```bash
 python3 -m venv env
@@ -411,11 +411,11 @@ To install the dependencies, run:
 python3 -m pip install -r requirements-notebook.txt
 ```
 
-Next, make sure that your Jupyter uses the Python installation of the virtual environment as kernel. If this is the case, you can start setting up the pipeline.
+When running the pipeline, make sure that your Jupyter kernel uses the Python installation of the virtual environment.
 
-### Installing the dependencies in Google Colab
+### Installation of Dependencies in Google Colab
 
-Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To setup the pipeline in Google Colab, create an empty notebook in Google Colab and clone the repository:
+Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To setup the pipeline in Google Colab, create an empty Colab notebook and clone the repository:
 
 ```bash
 !git clone github.com/josafatburmeister/BirdSongIdentification
@@ -430,9 +430,9 @@ To install the dependencies, run:
 
 Afterwards, restart the Google Colab runtime so that the installed dependencies are loaded. To do this, go to the "Runtime" menu item and select "Restart runtime".
 
-### Setting up the File Manager
+### Setting Up the File Manager
 
-As described in the section "Data Exchange Between Pipeline Components" our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directories is implemented by the `FileManager` class. The following code snippet creates an instance of this class:
+As described in the section "Data Exchange Between Pipeline Components", our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directory structures is implemented by the _FileManager_ class. The following code snippet creates an instance of this class:
 
 ```python
 from general import FileManager
@@ -440,7 +440,7 @@ from general import FileManager
 file_manager = FileManager("./data")
 ```
 
-As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure is to be created. In this example we use the directory `./data` to store the pipeline's data. As shown in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stage have a very similar structure. As you may have noticed, the directory and file names are chosen so that both stages can write their output to the same directory without naming conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
+As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure will be created. In this example we use the directory `./data` to store the pipeline's data.As can be seen in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stages have a very similar structure. The directory and file names chosen so that both stages can write their output to the same directory without name conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
 
 ### Setting up the Logger
 
