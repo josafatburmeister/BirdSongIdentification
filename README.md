@@ -411,6 +411,12 @@ To install the dependencies, run:
 python3 -m pip install -r requirements-notebook.txt
 ```
 
+To be able to import the modules from the repository, run:
+
+```bash
+python3 -m pip install -e .
+```
+
 When running the pipeline, make sure that your Jupyter kernel uses the Python installation of the virtual environment.
 
 ### Installation of Dependencies in Google Colab
