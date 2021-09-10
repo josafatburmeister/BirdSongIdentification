@@ -456,9 +456,9 @@ file_manager = FileManager("./data")
 
 As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure will be created. In this example we use the directory `./data` to store the pipeline's data.As can be seen in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stages have a very similar structure. The directory and file names chosen so that both stages can write their output to the same directory without name conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
 
-### Setting up the Logger
+### Setting Up the Logger
 
-All our pipeline components use a shared logger to output status information. Per default, the logging level is set to `INFO`. For our example, we set the logging level to verbose:
+All pipeline components use a shared logger to output status information. Per default, the logging level is set to "INFO". For our example, we set the logging level to "VERBOSE":
 
 ```python
 import logging
