@@ -135,7 +135,7 @@ class NIPS4BPlusDownloader(Downloader):
         nips4bplus_selected_labels = []
         nips4bplus_labels = []
 
-        species_to_sound_types = self.parse_species_list(species_list, {"song", "call"})
+        species_to_sound_types = self._parse_species_list(species_list, {"song", "call"})
 
         for file in os.listdir(self.extracted_nips_annotations_folder):
             label_file_path = os.path.join(self.extracted_nips_annotations_folder, file)
@@ -184,13 +184,13 @@ class NIPS4BPlusDownloader(Downloader):
                 self.append = nips4bplus_labels.append(labels)
 
         nips4bplus_labels = pd.concat(nips4bplus_labels)
-        self.save_label_file(nips4bplus_labels, "nips4bplus")
+        self._save_label_file(nips4bplus_labels, "nips4bplus")
         if len(nips4bplus_selected_labels) > 0:
             nips4bplus_selected_labels = pd.concat(nips4bplus_selected_labels)
         else:
             nips4bplus_selected_labels = pd.DataFrame(columns=["id", "file_path", "label", "start", "end"])
 
-        self.save_label_file(nips4bplus_selected_labels, "nips4bplus_filtered")
+        self._save_label_file(nips4bplus_selected_labels, "nips4bplus_filtered")
 
         for dataset in ["train", "test"]:
             folder_path = os.path.join(self.extracted_nips_audio_folder, dataset)

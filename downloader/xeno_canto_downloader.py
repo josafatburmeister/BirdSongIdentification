@@ -36,7 +36,7 @@ class XenoCantoDownloader(Downloader):
     nips4bplus_sound_types_to_xc_sound_types = {"call": "call", "drum": "drumming", "song": "song"}
 
     @staticmethod
-    def download_xeno_canto_page(species_name: str, page: int = 1) -> JSON:
+    def __download_xeno_canto_page(species_name: str, page: int = 1) -> JSON:
         """
         The Xeno-Canto API allows to query audio metadata using a keyword search. The search results are returned
         paginated. This method searches for a specific bird species and downloads the specified page of resulting
@@ -133,7 +133,7 @@ class XenoCantoDownloader(Downloader):
                 return metadata, len(metadata)
         else:
             # download first page to get total number of pages and number of recordings
-            first_page = XenoCantoDownloader.download_xeno_canto_page(species_name)
+            first_page = XenoCantoDownloader.__download_xeno_canto_page(species_name)
 
             if int(first_page["numSpecies"]) != 1:
                 raise NameError("Multiple species found for {}".format(species_name))
@@ -147,8 +147,7 @@ class XenoCantoDownloader(Downloader):
                                        is_pipeline_run=self.file_manager.is_pipeline_run)
 
             for page in progress_bar.iterable():
-                current_page = XenoCantoDownloader.download_xeno_canto_page(
-                    species_name, page)
+                current_page = XenoCantoDownloader.__download_xeno_canto_page(species_name, page)
 
                 metadata.extend(current_page["recordings"])
 
@@ -252,7 +251,7 @@ class XenoCantoDownloader(Downloader):
         val_frames = []
         categories = []
 
-        species_sounds_dict = XenoCantoDownloader.parse_species_list(species_list, XenoCantoDownloader.xc_sound_types)
+        species_sounds_dict = XenoCantoDownloader._parse_species_list(species_list, XenoCantoDownloader.xc_sound_types)
         for species_name, species_sound_types in species_sounds_dict.items():
             try:
                 labels, _ = self.__download_species_metadata(species_name)
@@ -379,7 +378,7 @@ class XenoCantoDownloader(Downloader):
                 else:
                     test_frames.append(test_labels)
 
-        self.save_categories_file(categories)
+        self._save_categories_file(categories)
 
         # save label files
         for dataset_name, frames in [("train", train_frames), ("val", val_frames), ("test", test_frames)]:
@@ -387,7 +386,7 @@ class XenoCantoDownloader(Downloader):
                 raise NameError(f"Empty {dataset_name} set")
             labels = pd.concat(frames)
 
-            self.save_label_file(labels, dataset_name)
+            self._save_label_file(labels, dataset_name)
 
             # clear data folders
             FileManager.empty_dir(self.file_manager.data_folder(dataset_name, "audio"))

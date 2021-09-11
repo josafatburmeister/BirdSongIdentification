@@ -11,8 +11,8 @@ maximilian.goetz@student.hpi.de
 ## Abstract
 
 <div style="text-align: justify">
-Audio recorders that capture bird vocalizations are increasingly used in conservation biology to monitor bird
-populations. However, labeling the collected audio data requires trained ornithologists and is a very time-consuming task. To facilitate training of deep learning models that automate the labeling process, this work implements an end-to-end machine learning pipeline for the automatic recognition of bird vocalizations in audio files. The presented pipeline can be run both as a notebook and as a Kubeflow pipeline. The pipeline includes steps for collecting and downloading suitable training data, preprocessing and filtering the training data, and training, tuning, and evaluating deep learning models.
+Audio recorders that capture bird vocalizations are used increasingly in conservation biology to monitor bird
+populations. However, labeling the collected audio data requires trained ornithologists and is a very time-consuming task. To facilitate training of deep learning models, that automate the labeling process, this work implements an end-to-end machine learning pipeline for the automated recognition of bird vocalizations in audio files. The presented pipeline can be run both as a notebook and as a Kubeflow pipeline. The pipeline includes steps for collecting and downloading suitable training data, preprocessing and filtering the training data, and training, tuning, and evaluating deep learning models.
 The pipeline is evaluated using an example sample dataset with ten different bird vocalization classes from the Xeno-Canto database. On this dataset an average F<sub>1</sub>-score of ... is achieved.
 </div>
 
@@ -20,9 +20,9 @@ The pipeline is evaluated using an example sample dataset with ten different bir
 
 <div style="text-align: justify">
 
-Estimates of bird populations are an essential element in conservation biology for determining the conservation status of bird species and for planning conservation measures [\cite{monitorung-overview}, \cite{audio-monitorung}]. Therefore, monitoring programs exist for many bird species in which the abundance of the target species‚ is regularly surveyed in selected study areas. Conventionally, monitoring is conducted by trained ornithologists who survey the observed species using standardized methods [\cite{monitorung-overview}]. In recent years, monitoring by human observers has been increasingly complemented by passive acoustic monitoring with audio recorders. The use of audio recorders reduces bias caused by human disturbances and allows for data collection on a larger spatial and temporal scale [\cite{audio-monitorung}]. However, labeling and interpreting the collected audio files requires trained ornithologists and is a very time-consuming task. Using machine learning, significant progress has been made in recent years to automate the labeling process. In particular, deep convolutional neural networks that treat audio classification as an image classification problem have emerged as a promising approach [\cite{sprengel-2016}, \cite{sevilla-2017}, \cite{koh-2018}]. As the classification of bird vocalizations is associated with various challenges, the problem is not yet completely solved. One challenge is that audio recordings often contain background noise and overlapping vocalizations of multiple bird species. In addition, the songs of some bird species differ between individuals and regions. Moreover, most publicly available training data are only weakly labeled at the file level, but do not include temporal annotations [\cite{nips4bplus}].
+Estimates of bird populations are an essential element in conservation biology for determining the conservation status of bird species and for planning conservation measures [\cite{monitoring-overview}, \cite{audio-monitoring}]. Therefore, monitoring programs exist for many bird species in which the abundance of the target species‚ is regularly surveyed in selected study areas. Conventionally, monitoring is conducted by trained ornithologists who survey the observed species using standardized methods [\cite{monitoring-overview}]. In recent years, monitoring by human observers has been increasingly complemented by passive acoustic monitoring with audio recorders. The use of audio recorders reduces bias caused by human disturbances and allows for data collection on a larger spatial and temporal scale [\cite{audio-monitoring}]. However, labeling and interpreting the collected audio files requires trained ornithologists and is a very time-consuming task. Using machine learning, significant progress has been made in recent years to automate the labeling process. In particular, deep convolutional neural networks that treat audio classification as an image classification problem have emerged as a promising approach [\cite{sprengel-2016}, \cite{sevilla-2017}, \cite{koh-2018}]. As the classification of bird vocalizations is associated with various challenges, the problem is not yet completely solved. One challenge is that audio recordings often contain background noise and overlapping vocalizations of multiple bird species. In addition, the songs of some bird species differ between individuals and regions. Moreover, most publicly available training data is only weakly labeled at file level and do not include temporal annotations [\cite{nips4bplus}].
 
-Since different monitoring projects focus on different bird species and research questions, individual models are usually required for each monitoring project. To reduce the effort of training and fine-tuning custom models, this work aims to implement a flexible machine-learning pipeline for recognition of bird vocalizations in audio files. In previous work, convolutional neural networks trained on spectrogram images have yielded promising results. Therefore, we adopt this approach and focus our pipeline design on training such models. To support a wide range of applications, we aim for a flexible design in terms of the training dataset and model architecture used. To optimize models for custom datasets, our pipeline should also support the tuning of model hyperparameters.
+Since different monitoring projects focus on different bird species and research questions, individual models are usually required for each monitoring project. To reduce the effort of training and fine-tuning custom models, this work aims to implement a flexible machine-learning pipeline for recognition of bird vocalizations in audio files. In previous works, convolutional neural networks trained on spectrogram images have yielded promising results. Therefore, we adopt this approach and focus our pipeline design on training such models. To support a wide range of applications, we aim for a flexible design in terms of the training dataset and model architecture used. To optimize models for custom datasets, our pipeline should also support the tuning of model hyperparameters.
 
 </div>
 
@@ -30,18 +30,17 @@ Since different monitoring projects focus on different bird species and research
 
 <div style="text-align: justify">
 
-A major driver of research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [\cite{bird-clef-2014}, \cite{bird-clef-2015}, \cite{bird-clef-2016}, \cite{bird-clef-2017}, \cite{bird-clef-2018}, \cite{bird-clef-2019}, \cite{bird-clef-2020}]. The objective of this challenge is to recognize bird vocalizations in so-called soundscape files, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [\cite{bird-clef-2026}]. The provided training data in the BirdCLEF challenge consists mainly of so-called focal recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species [\cite{bird-clef-2026}]. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. The recordings included in the Xeno-Canto collection are usually a few minutes long and typically contain only one focal species. The Xeno-Canto database also provides various metadata, such as the recording location, recording quality, and the age and sex of the recorded bird [\cite{xeno-canto}].
+A major driver of research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [\cite{bird-clef-2014}, \cite{bird-clef-2015}, \cite{bird-clef-2016}, \cite{bird-clef-2017}, \cite{bird-clef-2018}, \cite{bird-clef-2019}, \cite{bird-clef-2020}]. The objective of this challenge is to recognize bird vocalizations in so-called soundscape files, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [\cite{bird-clef-2026}]. The provided training data in the BirdCLEF challenge consists mainly of so-called focal recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species [\cite{bird-clef-2026}] at a time. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. These recordings are usually a few minutes long and typically contain only one focal species. The Xeno-Canto database also provides various metadata, such as the recording location, recording quality, and the age and sex of the recorded bird [\cite{xeno-canto}].
 
 Besides the Xeno-Canto database, several other datasets that include recordings of bird vocalizations are publicly available. These include the Chernobyl dataset, the Warblr dataset, the freefield1010 dataset, the PolandNFC dataset, the Birdvox-Full-Night dataset, and the NIPS4B dataset [\cite{warblr}, \cite{birdvox}, \cite{nips4bplus}]. While the other datasets only include presence-absence tags for bird vocalizations, the NIPS4B dataset also provides species tags [\cite{nips4bplus}]. The NIPS4BPlus dataset provides time-accurate annotations of bird vocalizations for a subset of the recordings in the NIPS4B dataset [\cite{nips4bplus}].
 
-Over the last years, various approaches to automatic bird sound recognition have been investigated. Lassek approached the problem with random forests trained on low-level features of audio files and statistical features of spectrograms [\cite{lasseck2013}, \cite{lasseck2014}, \cite{lasseck2015}]. Müller and Marti employed recurrent neural networks (RNN) for bird sound recognition, namely an LSTM architecture [\cite{muller2018}]. However, deep convoplutional neural networks have emerged as the most promising approach. In order to use convolutional neural networks (CNN) for audio classification, spectrogram images are generated from the audio data, turning the audio classification task into an image classification task. In recent years, this approach has produced very good results in the BirdCLEF challenge.
+Over the last years, various approaches to automated bird sound recognition have been investigated. Lassek approached the problem with random forests trained on low-level features of audio files and statistical features of spectrograms [\cite{lasseck2013}, \cite{lasseck2014}, \cite{lasseck2015}]. Müller and Marti employed recurrent neural networks (RNNs) for bird sound recognition, namely an LSTM architecture [\cite{muller2018}]. However, deep convolutional neural networks have emerged as the most promising approach. In order to use convolutional neural networks (CNNs) for audio classification, spectrogram images are generated from the audio data, turning the audio classification task into an image classification task. In recent years, this approach has produced very good results in the BirdCLEF challenge.
 
-For example, Sprengel et al. won the BirdCLEF challenge in 2016 by training a CNN with five convolutional layers on fixed-size spectrograms. In order to identify relevant sections of the audio files when generating the spectrograms, Sprengel et al. implemented noise filtering. Using a sequence of image filters such as median threshholding, erosion filtering and dilation filtering, noise pixels are separated from signal pixels. To enlarge the training set, data augmentation techniques such as time shifts, pitch shifts, and background
-noise were applied [\cite{sprengel-2016}].
+For example, Sprengel et al. won the BirdCLEF challenge in 2016 by training a CNN with five convolutional layers on fixed-size spectrograms. In order to identify relevant sections of the audio files when generating the spectrograms, Sprengel et al. implemented noise filtering. Using a sequence of image filters such as median thresholding, erosion filtering and dilation filtering, noise pixels are separated from signal pixels. To enlarge the training set, data augmentation techniques such as time shifts, pitch shifts, and background noise were applied [\cite{sprengel-2016}].
 
 In their winning submission to the 2017 BirdCLEF challenge, Sevilla employed an Inception-v4 model for classification of bird vocalizations. The model was trained using transfer learning and standard augmentation techniques, such as random hue, contrast, brightness, and saturation modifications. To guide the model's focus to relevant spectrogram regions, attention layers were added to Inception-v4 architecture [\cite{sevilla-2017}].
 
-Following a similar approach, Koh et al. achieved second place in the BirdCLEF challenge in 2019. They trained Resnet18 and Inception models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address data imbalanced, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [\cite{koh2019}].
+Following a similar approach, Koh et al. achieved second place in the BirdCLEF challenge in 2019. They trained Resnet18 and Inception models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address data imbalance, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [\cite{koh2019}].
 
 </div>
 
@@ -51,9 +50,9 @@ Following a similar approach, Koh et al. achieved second place in the BirdCLEF c
 
 <div style="text-align: justify">
 
-Our work aims to implement an end-to-end machine learning pipeline that automates the training bird sound recognition models. Based on promising results of previous work, we focus on training deep convolutional neural networks (DCNN) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [\cite{koh-2018}]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
+Our work aims to implement an end-to-end machine learning pipeline that automates the training of bird sound recognition models. Based on promising results of previous works, we focus on training deep convolutional neural networks (DCNNs) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [\cite{koh-2018}]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
 
-To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database, which is the largest publicly available collection of bird sound recordings. To train DCNN models, we convert the audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto are usually dominated by the vocalizations of one focus species, but may include other bird vocalizations in the background. Since Xeno-Canto only includes file-level annotations, but no time-accurate annotations, we use only the focal species for spectrogram labeling and ignore the background species. In contrast to recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations. To generalize our models to such use cases, we train multi-label classification models, even though our training data is single-label data. To evaluate the performance of our models in such a scenario, we use the NIPS4BPlus dataset as an additional test dataset [\cite{nips4bplus}]. In order to obtain time-accurate predictions, we split the audio files into fixed-length chunks (1 second) and create separate spectrograms and thus separate predictions for each chunk.
+To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database, which is the largest publicly available collection of bird sound recordings. To train DCNN models, we convert audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto are usually dominated by the vocalizations of one specific species, but may include other bird vocalizations in the background. Since Xeno-Canto only includes file-level annotations, but no time-accurate annotations, we only use the focal species for spectrogram labeling and ignore the background species. In contrast to recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations and other different background noises. To generalize our models to such use cases, we train multi-label classification models, even though our training data is single-label data. To evaluate the performance of our models in such a scenario, we use the NIPS4BPlus dataset as an additional test dataset [\cite{nips4bplus}]. In order to obtain time-accurate predictions, we split the audio files into fixed-length chunks (1 second) and create separate spectrograms and thus separate predictions for each chunk.
 
 </div>
 
@@ -79,11 +78,11 @@ All pipeline steps are implemented by Python classes, which are described in mor
 
 <div style="text-align: justify">
 
-The downloader stage is responsible for downloading the audio files and labels needed for model training and evalution, and converting them into a consistent format.
+The downloader stage is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format.
 
-To demonstrate the capability of our pipeline, we use both audio data from the Xeno-Canto database (for model training, validation and testing) and the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from a common base class. For downloading audio files from Xeno-Canto, we use the public Xeno-Canto API. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files. Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API. Based on the criteria defined by the pipeline user, the downloader compiles training, validation and test sets. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from a common base class. For downloading audio files from Xeno-Canto, we use the public Xeno-Canto API. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files. Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API. Based on the criteria defined by the pipeline user, the downloader compiles training, validation and test sets. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
 
-To speed up the download phase, our downloader classes use multithreading where possible. In addition, we implement local caching of files such that subsequent pipeline runs do not need to download them again. When the pipeline is run as a Jupyter notebook, an ordinary directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage bucket is used for file caching.
+To speed up the download phase, our downloader classes use multithreading where possible. In addition, we implemented local caching of files such that subsequent pipeline runs do not need to download the same files more than once. When the pipeline is run as a Jupyter notebook, an ordinary directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage bucket is used for file caching.
 
 ### Stage 2: Spectrogram Creation
 
@@ -99,17 +98,62 @@ For spectrogram creation, we largely follow the approach described by Kot et al.
 
 Table 1: Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
-Since the audio files from Xeno-Canto are only labeled at the file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value. First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshhold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows to include noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only labeled at file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value (Figure 1). First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows including noise spectrograms for training as a separate class.
+
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1wD_RyvBCkvVM9y8sKFEz3-HS4IVZ1gvv" width="150" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1jK6ccjBxzIlIBxUJbbjRXU8kAnZv2o2z" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1qz1Pi_8xF7db6J8zwCDxh9ZP6yE_Gq-0" width="150" style="border: 1px solid black;"/>
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) Original spectrograms.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1I2yeGT_EaSoPrl4YJ35RroxMPIykzeh5" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1n2sks2tmGlEGf1Otwq7ljlKlZFaGwofL" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=15_oIqICXk0e0dQqNEQV0kQkz3k70rAXT" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(b) Spectrograms after median blurring.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1VgE8r4UMHB2zECLYk_mXfqki7qZgOKrc" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1ooS0Re-MQo3oPkGa8ije4pwnJaPdZuX9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1H3307qKdmWgSaDpfs8qMhAgxmfLkYbmx" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(c) Spectrograms after median filtering.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=14fgZc7GkJmAE6ikHNg6bI2ceHWrI9MEl" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1QOICjC7DMsoYZwORyMUYYLlHGY2l_ux9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=19OCBhuoAHL5fnJhyIlGL1xguDAeZqhV6" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(d) Spectrograms after spot removal.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=15eVBJ_02WjxShwo_N2RPPpnw_E45Xg2_" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1kz41gi2szgQJycvVg5Dse3svAa3t4FzO" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1IeZZrl_kCJ9okjuze2CVuuiXVwcopq-Y" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(e) Spectrograms after morphological closing.</p>
+    </div>
+</div>
+
+**Figure 1**: Steps of the noise filtering algorithm shown by three example spectrograms.
 
 <sup>1</sup> https://librosa.org
 
 ### Stage 3: Model Training
 
-The model training stage of our pipeline can be used either to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It was implemented using the Pytorch framework<sup>2</sup> and the Torchvision library<sup>3</sup>. Building on the convetions of the Torchvision library, the training component is designed in such a way that the model architecture used can be easily exchanged. For our use case, we mainly use the ResNet18 architecture, as it has been successfully applied to bird sound classification in previous work [\cite{koh-2017}]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird calls may occur simultaneously in some recordings.
+The model training stage of our pipeline can be either used to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It was implemented using the Pytorch framework<sup>2</sup> and the Torchvision library<sup>3</sup>. Building on Torchvision conventions, the training component is designed in such a way that the model architecture used can be exchanged easily. For our use case, we mainly use the ResNet18 architecture, as it has been successfully applied to bird sound classification in previous work [\cite{koh-2017}]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird calls may occur simultaneously in some recordings.
 
-We train the models using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [\cite{image-net}]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
+We train the models using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [\cite{image-net}]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
 
-To select the best model from each training run, we use a macro-averaged F1-score as performance metric. The macro F1-score weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on the frequent classes.
+To select the best model from each training run, we use a macro-averaged F<sub>1</sub>-score as performance metric. The macro F<sub>1</sub>-score weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on the frequent classes.
 
 <sup>2</sup> https://pytorch.org
 
@@ -117,7 +161,7 @@ To select the best model from each training run, we use a macro-averaged F1-scor
 
 ### Stage 4: Model Evaluation
 
-In the model evaluation stage, the best model from the training stage is evaluated on test datasets that have not been used for model training or validation. In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models. As in the training stage, the macro-average F1 score is used as the primary evauation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component. Although model evaluation is conceptually a separate pipeline stage, in Kubeflow we have implemented model training and evaluation as a joint pipeline component for performance reasons.
+In the model evaluation stage, the best model from the training stage is evaluated on test datasets that have not been used for model training or validation. In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models' performances. As in the training stage, the macro-average F<sub>1</sub> score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
 
 ### Data Exchange Between Pipeline Components
 
@@ -125,7 +169,7 @@ In the model evaluation stage, the best model from the training stage is evaluat
 
 In Kubeflow pipelines, all outputs of the pipeline stages are stored as files and can be used as inputs for subsequent pipeline stages. Persisting the outputs increases the pipeline's robustness and facilitates failure recovery. Therefore, we follow this approach and use purely file-based interfaces to exchange data between the different components of our pipeline.
 
-Listing 1 shows an example of the directory structure that is used to pass data between the data download and the spectrogram creation stage. As shown, the data download stage is required to create a file named "categories.txt" as well as a number of subdirectories, representing different datasets or different parts of a dataset (e.g., train, validation, and test set). The file "categories.txt" contains a line-by-line listing of all possible class names that may be used as labels for the audio files (Listing 2). Each of the subdirectories representing different datasets has to contain a subdirectory named "audio" and a label file named "audio.csv". The subdirectory "audio" contains the audio files of the respective dataset, which can be grouped in further subdirectories. The label file "audio.csv" contains one line per annotated sound event, i.e., per annotated bird vocalization. An example of such a label file is shown in Table 2. As shown, the label files must contain at least the following columns:
+Listing 1 shows an example of the directory structure that is used to pass data between the data download and the spectrogram creation stage. As shown, the data download stage is required to create a file named "categories.txt" as well as a number of subdirectories, representing different datasets or different parts of a dataset (e.g., train, validation, and test set). The file "categories.txt" contains a line-by-line listing of all possible class names that may be used as labels for the audio files (Listing 2). Each of the subdirectories (representing different datasets) has to contain a subdirectory named "audio" and a label file named "audio.csv". The subdirectory "audio" contains the audio files of the respective dataset, which can be grouped in further subdirectories. The label file "audio.csv" contains one line per annotated sound event, i.e., per annotated bird vocalization. An example of such a label file is shown in Table 2. As shown, the label files must contain at least the following columns:
 
 **id**: Identifier of the audio file that is unique across all datasets.
 
@@ -176,7 +220,7 @@ Erithacus_rubecula_call
 | 619980 | 619980.mp3 | 0     | 11000  | Erithacus_rubecula_call |
 | 619980 | 619980.mp3 | 11000 | 174000 | Turdus_merula_call      |
 
-Listing 3 shows an example of the directory structure that is used to pass data between the spectrogram creation and the model training stage. It is very similar to the directory structure that is used as input of the spectrogram creation stage (Listing 1). As shown, the output directory of the spectrogram creation stage also has to contain a "categories.txt" file matches the format shown in Listing 2. In addition, the spectrogram creation stage has to create a subdirectory named "spectrograms" and a label file "spectrograms.csv" for each dataset. The "spectrograms" subdirectory contains the spectrogram images of the respective dataset. The label file "spectrograms.csv" has to contain one label per spectrogram image. As shown in Table 3, it must contain at least the columns "id", "file_path" and one column per label class containing binary presence-absence labels.
+Listing 3 shows an example of the directory structure that is used to pass data between the spectrogram creation and the model training stage. It is very similar to the directory structure that is used as input of the spectrogram creation stage (Listing 1). As shown, the output directory of the spectrogram creation stage also has to contain a "categories.txt" file which matches the format shown in Listing 2. In addition, the spectrogram creation stage has to create a subdirectory named "spectrograms" and a label file "spectrograms.csv" for each dataset. The "spectrograms" subdirectory contains the spectrogram images of the respective dataset. The label file "spectrograms.csv" has to contain one label per spectrogram image. As shown in Table 3, it must contain at least the columns "id", "file_path" and one column per label class containing binary presence-absence labels.
 
 ```
 ├── categories.txt
@@ -212,7 +256,7 @@ Listing 3 shows an example of the directory structure that is used to pass data 
 
 ## Experiments
 
-To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and are not longer than 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
+To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and a duration of at most 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
 
 For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in Table 3.
 
@@ -253,7 +297,7 @@ Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
 
 ### Baseline Setting
 
-To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F1-score and report the average of the F1-scores of these best models.
+To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F<sub>1</sub>-score and report the average of the F<sub>1</sub>-scores of these best models.
 
 | Parameter               | Baseline Setting                                                  |
 | ----------------------- | ----------------------------------------------------------------- |
@@ -346,7 +390,7 @@ Stefan Kahl et al. “Large-Scale Bird Sound Classification using Convolutional 
 [14] Lukas Müller and Mario Marti. “Bird sound classification using a bidirectional LSTM”. In: Working
 Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–13. URL: http: //ceur-ws.org/Vol-2125/paper_134.pdf.
 
-<!-- audio-monitorung -->
+<!-- audio-monitoring -->
 
 [15] Cristian Pérez-Granados and Juan Traba. “Estimating bird density using passive acoustic monitoring: a review of methods and suggestions for further research”. In: Ibis 163.3 (Feb. 2021), pp. 765–783. ISSN: 1474-919X. DOI: 10.1111/ibi.12944.
 
@@ -354,7 +398,7 @@ Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, Franc
 
 [16] Jesse C. Ross and Paul E. Allen. “Random Forest for improved analysis efficiency in passive acoustic monitoring”. In: Ecological Acoustics 21 (2014), pp. 34–39. ISSN: 1574-9541. DOI: 10.1016/j.ecoinf.2013.12.002.
 
-<!-- monitorung-overview -->
+<!-- monitoring-overview -->
 
 [17] Dirk S. Schmeller et al. “Bird-monitoring in Europe – a first overview of practices, motivations and aims”. In:
 Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ natureconservation.2.3644.
@@ -377,39 +421,88 @@ Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ n
 
 </div>
 
+<div style="text-align: justify">
+
 # Technical Documentation
 
-## Running the pipeline in a Jupyter notebook
+## Running the Pipeline in a Jupyter Notebook
 
-Our pipeline can be run in a Jupyter notebook by creating instances of the pipeline components and calling specific methods on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as an Jupyter notebook named demo.ipynb.
+The individual steps of our pipeline are implemented by Python classes. To run the pipeline in a Jupyter notebook, instances of the corresponding classes must be created and certain methods must be called on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as a Jupyter notebook named `demo.ipynb`.
 
-Our pipeline requires Python 3.7 and Jupyter, please make sure that both are installed.
+### Local Installation of Dependencies
 
-To install the dependencies of our pipeline, we recommend using a virtual environment. A virtual environment can be created and activated with the following commands:
+Our pipeline requires Python 3.7 or higher and Jupyter, please make sure that both are installed. We recommend installing the dependencies of our pipeline in a virtual environment. To create a virtual environment, run the `venv` module inside the directory where you want to create the virtual environment:
 
 ```bash
 python3 -m venv env
 ```
 
+Once you have created a virtual environment, you may activate it. On Windows, run:
+
+```bash
+env\Scripts\activate.bat
+```
+
+On Unix or MacOS, run:
+
 ```bash
 source ./env/bin/activate
 ```
 
-The dependencies can then be installed with the following command:
+To install the dependencies, run:
 
 ```bash
 python3 -m pip install -r requirements-notebook.txt
 ```
 
-The components of our pipeline do not communicate directly with each other, but pass files through a shared directory. The management of the file paths within the shared directory is implemented in the `FileManager` class. The following code creates an instance of the FileManager class. The path of the directory in which the data of the pipeline is to be stored is passed to the constructor of the FileManager class:
+To be able to import the modules from the repository, run:
+
+```bash
+python3 -m pip install -e .
+```
+
+When running the pipeline, make sure that your Jupyter kernel uses the Python installation of the virtual environment.
+
+### Installation of Dependencies in Google Colab
+
+Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To setup the pipeline in Google Colab, create an empty Colab notebook and clone the repository:
+
+```bash
+!git clone github.com/josafatburmeister/BirdSongIdentification
+```
+
+To install the dependencies, run:
+
+```bash
+%cd /content/BirdSongIdentification/
+!python3 -m pip install -r requirements-colab.txt
+```
+
+Afterwards, restart the Google Colab runtime so that the installed dependencies are loaded. To do this, go to the "Runtime" menu item and select "Restart runtime".
+
+To be able to import the modules from the repository, run:
+
+```python
+import sys
+
+sys.path.append('/content/BirdSongIdentification')
+```
+
+### Setting Up the File Manager
+
+As described in the section "Data Exchange Between Pipeline Components", our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directory structures is implemented by the _FileManager_ class. The following code snippet creates an instance of this class:
 
 ```python
 from general import FileManager
 
-path_manager = FileManager("./data")
+file_manager = FileManager("./data")
 ```
 
-All our pipeline components use a shared logger to output status information. For the demo pipeline, we set the logging level to verbose:
+As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure will be created. In this example we use the directory `./data` to store the pipeline's data.As can be seen in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stages have a very similar structure. The directory and file names chosen so that both stages can write their output to the same directory without name conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
+
+### Setting Up the Logger
+
+All pipeline components use a shared logger to output status information. Per default, the logging level is set to "INFO". For our example, we set the logging level to "VERBOSE":
 
 ```python
 import logging
@@ -419,12 +512,16 @@ from general import logger
 logger.setLevel(logging.VERBOSE)
 ```
 
-With this, we can now run the data download stage of the pipeline. For this, instances of the respective downloader classes must be created. In our example, we download audio data from Xeno-Canto and compile train, validation and test split from it. To do this, we create an instance of the `XenoCantoDownloader` class and then call the `create_datasets` method on it. The `create_datasets` has a number of parameters that can be used to specify which data should be downloaded from Xeno-Canto. Among the most important is the parameter `species_list`, which specifies which bird species and sound categories should be included in the compiled dataset, and the parameter `maximum_samples_per_class`, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+### Pipeline Stage 1: Data Download
+
+With this, we are ready to run the first pipeline stage that downloads the datasets. For this, we have to create instances of the respective downloader classes. In our example, we download audio data from Xeno-Canto and compile train, validation and test sets from it. To do this, we create an instance of the _XenoCantoDownloader_ class and then call the "create_datasets" method on it. The "create_datasets" method has several parameters that specify what data should be downloaded from Xeno-Canto. Among them is the "species_list" parameter, which specifies which bird species and sound categories should be included in the datasets, and the "maximum_samples_per_class" parameter, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+
+Note that the FileManager object we created earlier is passed to the XenoCantoDownloader constructor. This way we ensure that the downloaded data is placed in the `./data` directory.
 
 ```python
 from downloader import XenoCantoDownloader
 
-xc_downloader = XenoCantoDownloader(path_manager)
+xc_downloader = XenoCantoDownloader(file_manager)
 
 species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
 
@@ -441,30 +538,224 @@ xc_downloader.create_datasets(
     exclude_special_cases=True,
     maximum_number_of_background_species=0,
     clear_audio_cache=False,
-    clear_label_cache=False,
-    )
+    clear_label_cache=False)
+```
+
+In addition to the data from Xeno-Canto, we use the NIPS4BPlus dataset for model evaluation in our example. To download this dataset, we create an instance of the _NIPS4BPlusDownloader_ class and call the "download_nips4bplus_dataset" method on it. Since the NIPS4BPlus dataset includes less metadata than the Xeno-Canto database, the "download_nips4bplus_dataset" method provides fewer parameters for selecting which data to download. The method compiles two variants of the dataset, named "nips4bplus" and "nips4blpus_filtered". While the first variant contains all recordings of the NIPS4BPlus dataset, the second variant includes only recordings that contain at least one of the species listed in the parameter "species_list".
+
+```python
+from downloader import NIPS4BPlusDownloader
+
+nips4bplus_downloader = NIPS4BPlusDownloader(file_manager)
+
+species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
+
+nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
+```
+
+### Pipeline Stage 2: Spectrogram Creation
+
+After downloading the audio files, the next step is to convert them into spectrograms. To do this, we create an instance of the _SpectrogramCreator_ class and call the method "create_spectrograms_for_datasets" on it:
+
+```python
+from spectrograms import SpectrogramCreator
+
+spectrogram_creator = SpectrogramCreator(
+    chunk_length=1000,
+    audio_file_manager=file_manager,
+    spectrogram_file_manager=file_manager,
+    include_noise_samples=True)
+
+spectrogram_creator.create_spectrograms_for_datasets(datasets=["train", "val", "test"],
+                                                     signal_threshold=3,
+                                                     noise_threshold=1,
+                                                     clear_spectrogram_cache=False)
+
+spectrogram_creator.create_spectrograms_for_datasets(datasets=["nips4bplus", "nips4bplus_filtered"],
+                                                     signal_threshold=0,
+                                                     noise_threshold=0,
+                                                     clear_spectrogram_cache=False)
+```
+
+Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the
+"audio_file_manager" parameter and the "spectrogram_file_manager" parameter of the SpectrogramCreator constructor.
+
+As described in the section "Stage 2: Spectrogram Creation", our pipeline implements a prefiltering of the spectrograms into "signal" and "noise" spectrograms. The "signal_threshold" and "noise_threshold" parameters of the "create_spectrograms_for_datasets" method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
+
+### Pipeline Stage 3: Model Training and Hyperparameter Tuning
+
+Using the spectrograms created in the previous step, we can noew train image classification models. Since we do not yet know which hyperparameter settings are most suitable, we start by tuning the hyperparameters "batch size" and "learning rate". For this, we create an instance of the _HyperparameterTuner_ class and call the "tune_model" method on it:
+
+```python
+from training import hyperparameter_tuner
+
+tuner = hyperparameter_tuner.HyperparameterTuner(
+    file_manager,
+    architecture="resnet18",
+    experiment_name="Tuning of batch size and learning rate",
+    batch_size=[32, 64, 128],
+    early_stopping=True,
+    include_noise_samples=True,
+    layers_to_unfreeze=["layer3", "layer4", "avg_pool", "fc"],
+    learning_rate=[0.01, 0.001, 0.0001],
+    learning_rate_scheduler="cosine",
+    monitor="f1-score",
+    multi_label_classification=True,
+    multi_label_classification_threshold=0.5,
+    number_epochs=10,
+    number_workers=0,
+    optimizer="Adam",
+    patience=3,
+    p_dropout=0,
+    track_metrics=False,
+    wandb_entity_name="",
+    wandb_key="",
+    wandb_project_name="",
+    weight_decay=0)
+
+tuner.tune_model()
+
+```
+
+As you can see, the HyperparameterTuner constructor takes a number of parameters that specify the model architecture, hyperparameters, and training settings. A detailed documentation of these hyperparameters can be found in the docstrings of the class. Note that for the hyperparameters to be tuned (batch size and learning rate in our example), a list of values to be tested is passed.
+
+After tuning batch size and learning rate, we train a model with fixed hyperparameters. For this, we create an instance of the _ModelTrainer_ class and call the method "train_model" on it:
+
+```python
+from training import training
+
+trainer = training.ModelTrainer(
+    file_manager,
+    architecture="resnet18",
+    experiment_name="Test run",
+    batch_size=64,
+    early_stopping=False,
+    is_hyperparameter_tuning=False,
+    include_noise_samples=True,
+    layers_to_unfreeze=["layer3", "layer4", "avg_pool", "fc"],
+    learning_rate=0.0001,
+    learning_rate_scheduler="cosine",
+    multi_label_classification=True,
+    multi_label_classification_threshold=0.5,
+    number_epochs=10,
+    number_workers=0,
+    optimizer="Adam",
+    p_dropout=0,
+    track_metrics=False,
+    wandb_entity_name="",
+    wandb_key="",
+    wandb_project_name="",
+    weight_decay=0)
+
+best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
+```
+
+The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class. The return value of the "train_model" method is a tuple containing three elements. The first element is the model that achieved the highest macro-averaged F1-score in the validation set. The second element is the model that achieved the highest minimum F1-score of all classes on the validation set. The third element is a dictionary that maps each class name to the model that achieved the highest F1-score for that class on the validation set.
+
+### Pipeline Stage 4: Model Evaluation
+
+Finally, we evaluate the model that achieved the highest macro-averaged F1-score on the validation set, both on the Xeno-Canto test set and on the NIPS4BPlus dataset. To do this, we create an instance of the _ModelEvaluator_ class and call its "evaluate_model" method. Since the model's confidence on unseen data may be lower than on the training set, we run the model evaluation with multiple confidence thresholds:
+
+```python
+from training import model_evaluator
+
+for confidence_threshold in [0.3, 0.4, 0.5]:
+    evaluator = model_evaluator.ModelEvaluator(file_manager,
+                                               architecture="resnet18",
+                                               batch_size=32,
+                                               include_noise_samples=True,
+                                               multi_label_classification=True,
+                                               multi_label_classification_threshold=confidence_threshold,
+                                               track_metrics=False)
+
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_test",
+                             dataset="test")
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_nips4bplus",
+                             dataset="nips4bplus")
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_nips4bplus_filtered",
+                             dataset="nips4bplus_filtered")
 ```
 
 ## Running the Pipeline in Kubeflow
+
+To run the pipeline in Kubeflow, a Kubernetes cluster with a [Kubeflow](https://www.kubeflow.org/docs/started/installing-kubeflow/) installation is required. Currently, our pipeline supports Kubeflow version 1.0.0. If you have such a Kubeflow cluster available, the pipeline can be run on it as follows:
+
+First, the Kubeflow pipeline definition must be compiled. To compile a pipeline definition for a cluster with only CPU nodes, insert the name of your cluster's Docker registry in the following command and run it within the repository:
+
+```bash
+python3 kubeflow_pipeline/compile_pipeline.py compile_pipeline --docker_registry <name of your Docker registry> --use_gpu False
+```
+
+If there are GPU nodes available in your cluster, you can run the following command to compile a pipeline definition with GPU-accelerated model training:
+
+```bash
+python3 kubeflow_pipeline/compile_pipeline.py --docker_registry <name of your Docker registry> compile_pipeline --use_gpu True
+```
+
+Both compilation commands will produce a pipeline defintion file named `birdsong_pipeline.yaml`.
+
+Next, build and push the pipeline's Docker image to the Docker registry of your cluster:
+
+```bash
+python3 kubeflow_pipeline/compile_pipeline.py build_docker_image --docker_registry <name of your Docker registry>
+```
+
+Now, open the Kubeflow UI of your cluster, go to the "Pipelines" section and click "Upload Pipeline". Upload the `birdsong_pipeline.yaml` file that you compiled before:
+
+![Kubeflow-1](https://drive.google.com/uc?id=1DSyp6En5aM5sLzxmGkG2NtiwsszHU94w)
+
+After creating the pipeline, click the "Create run" button, to start a pipeline run:
+
+![Kubeflow-2](https://drive.google.com/uc?id=1NXqVRQgVpMI7tNCf-7xkDvv1WrstIhFl)
 
 ## Implementing Custom Pipeline Components
 
 ### Implementing Custom Data Downloaders
 
-To apply our machine learning pipeline to another dataset than Xeno-Canto or NIPS4BPlus, it is necessary to implement a custom downloader for that dataset. This downloader must place the data in a directory structure as described in the section "Data Exchange Between Pipeline Components" (Listing 1). Let's suppose we want to implement a downloader for a dataset named "test" that will be stored under the path `/data`. To do this, we need to implement the following things:
+To apply our machine learning pipeline to another dataset than Xeno-Canto or NIPS4BPlus, it is necessary to implement a custom downloader for that dataset. This downloader must store the data in a directory structure as described in the section "Data Exchange Between Pipeline Components" (Listing 1). Let's suppose we want to implement a downloader for a dataset named "test" that will be stored under the path `/data`. To do this, the following things need to be implemented:
 
-(1) In the `/data` directory, the `categories.txt` file needs to be created. This file must list the class names of the data set in the format shown in Listing 2.
+(1) In the `/data` directory, a `categories.txt` file needs to be created. This file must list the class names of the dataset in the format shown in Listing 2.
 
 (2) The audio files of the dataset must be placed in the `/data/test/audio` directory.
 
 (3) A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in Table 2.
 
-To facilitate the implementation of custom downloaders, we provide a `Downloader` class in the `downloader` module. This class implements several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a `FileManager` object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
+To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
 
 By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
 
-(1) The Downloader class provides a method `save_categories_file(categories)`. This method takes a list of class names and creates a `categories.txt` file from it.
+(1) The Downloader class provides a method `save_categories_file(categories: List[str])`. This method takes a list of class names and creates a `categories.txt` file from it.
 
-(2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
+(2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager object provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
 
-(3) The Downloader class implements a method `save_label_file(labels, dataset_name)`. This method takes a Pandas dataframe and creates a label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
+(3) The Downloader class implements a method `save_label_file(labels: pandas.Dataframe, dataset_name: str)`. This method takes a Pandas dataframe and creates a audio label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
+
+### Implementing Custom Spectrogram Creation Methods
+
+To implement custom spectrogram creation methods, we recommend to create a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
+
+### Implementing Custom Model Architectures
+
+To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fullfil the following requirements:
+
+(1) The model needs to be implemented in Pytorch and should be derived from the `torch.nn.Module` class.
+
+(2) The model's constructor should have the following signature:
+
+```python
+__init__(self,
+         architecture: str,
+         num_classes: int,
+         layers_to_unfreeze: Optional[Union[str, List[str]]],
+         logger: Optional[VerboseLogger],
+         p_dropout: float)
+```
+
+The purpose of each parameter is documented in the docstrings of the `setup_model` method of the _ModelRunner_ class.
+
+(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the `num_classes` constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
+
+</div>

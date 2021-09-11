@@ -16,7 +16,7 @@ class Downloader:
     """
 
     @staticmethod
-    def parse_species_list(species_list: List[str], default_sound_types: Union[List[str], Set[str]]) -> Dict[str, set]:
+    def _parse_species_list(species_list: List[str], default_sound_types: Union[List[str], Set[str]]) -> Dict[str, set]:
         """
         Parses a list of strings, where each string contains a species name and its sound types.
         The list has to be in the format ["species name, sound type name 1, sound type name 2, ...", "..."].
@@ -135,7 +135,7 @@ class Downloader:
             else:
                 raise NameError("File could not be retrieved")
 
-    def save_label_file(self, labels: pd.DataFrame, dataset_name: str) -> None:
+    def _save_label_file(self, labels: pd.DataFrame, dataset_name: str) -> None:
         """
         Creates an audio label file for a dataset from a Pandas dataframe according to the format described in the
         Readme.
@@ -155,7 +155,7 @@ class Downloader:
 
         labels.to_csv(self.file_manager.label_file(dataset_name, "audio"))
 
-    def save_categories_file(self, categories: List[str]) -> None:
+    def _save_categories_file(self, categories: List[str]) -> None:
         """
         Creates categories.txt file according to the format described in the Readme.
 
