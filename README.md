@@ -540,11 +540,9 @@ As described in the section "Stage 2: Spectrogram Creation", our pipeline implem
 
 ### Pipeline Stage 3: Model Training and Hyperparameter Tuning
 
-We can now train image classification models on the spectrograms that were produced in the previous step. Since we do not yet know which hyperparameter settings are most suitable, we start by tuning the hyperparameters batch size and learning rate. For this, we create an instance of the `HyperparameterTuner` class and call the `tune_model` method on it:
+Using the spectrograms created in the previous step, we can noew train image classification models. Since we do not yet know which hyperparameter settings are most suitable, we start by tuning the hyperparameters "batch size" and "learning rate". For this, we create an instance of the _HyperparameterTuner_ class and call the "tune_model" method on it:
 
 ```python
-# run hyperparameter tuning for batch size and learning rate
-
 from training import hyperparameter_tuner
 
 tuner = hyperparameter_tuner.HyperparameterTuner(
@@ -569,16 +567,15 @@ tuner = hyperparameter_tuner.HyperparameterTuner(
     wandb_entity_name="",
     wandb_key="",
     wandb_project_name="",
-    weight_decay=0
-)
+    weight_decay=0)
 
 tuner.tune_model()
 
 ```
 
-As you can see, the HyperparameterTuner constructor takes a number of parameters that specify the model architecture, hyperparameters, and training settings. A detailed documentation of these hyperparameters can be found in the docstrings of the class. Note that for the hyperparameters to be tuned, a list of values to be tested is passed.
+As you can see, the HyperparameterTuner constructor takes a number of parameters that specify the model architecture, hyperparameters, and training settings. A detailed documentation of these hyperparameters can be found in the docstrings of the class. Note that for the hyperparameters to be tuned (batch size and learning rate in our example), a list of values to be tested is passed.
 
-After tuning batch Size and learning rate, we now decide to train a model with fixed hyperparameters. For this, we create an instance of the `ModelTrainer` class and call the method `train_model` on it:
+After tuning batch size and learning rate, we train a model with fixed hyperparameters. For this, we create an instance of the _ModelTrainer_ class and call the method "train_model" on it:
 
 ```python
 from training import training
@@ -604,13 +601,12 @@ trainer = training.ModelTrainer(
     wandb_entity_name="",
     wandb_key="",
     wandb_project_name="",
-    weight_decay=0
-)
+    weight_decay=0)
 
 best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 ```
 
-As you might have noticed, the constructor parameters of the ModelTrainer class are mainly the same as in the HyperparameterTuner class.
+The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class.
 
 ### Pipeline Stage 4: Model Evaluation
 
