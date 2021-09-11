@@ -161,8 +161,10 @@ class ModelTrainer(model_runner.ModelRunner):
         )
         return model
 
-    def _setup_optimization(self, model: torch.nn.Module):  # -> #Tuple[
-        # torch.nn._Loss, torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    def _setup_optimization(self, model: torch.nn.Module) -> Tuple[
+        Union[torch.nn.BCEWithLogitsLoss, torch.nn.CrossEntropyLoss],
+        torch.optim.Optimizer,
+        Union[lr_scheduler.CosineAnnealingLR, lr_scheduler.StepLR]]:
         """
         Sets up tools for model optimization.
 
