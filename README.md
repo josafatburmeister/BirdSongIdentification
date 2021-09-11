@@ -494,7 +494,8 @@ xc_downloader.create_datasets(
     exclude_special_cases=True,
     maximum_number_of_background_species=0,
     clear_audio_cache=False,
-    clear_label_cache=False)
+    clear_label_cache=False
+)
 ```
 
 In addition to the data from Xeno-Canto, we use the NIPS4BPlus dataset for model evaluation in our example. To download this dataset, we create an instance of the _NIPS4BPlusDownloader_ class and call the "download_nips4bplus_dataset" method on it. Since the NIPS4BPlus dataset includes less metadata than the Xeno-Canto database, the "download_nips4bplus_dataset" method provides fewer parameters for selecting which data to download. The method compiles two variants of the dataset, named "nips4bplus" and "nips4blpus_filtered". While the first variant contains all recordings of the NIPS4BPlus dataset, the second variant includes only recordings that contain at least one of the species listed in the parameter "species_list".
@@ -509,23 +510,30 @@ species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
 nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 ```
 
-### Pipeline Stage 2:
+### Pipeline Stage 2: Spectorgram Creation
 
-After downloading the audio files, the next step is to convert them into spectrograms. To do this, we create an instance of the `SpectrogramCreator` class and call the `...` method on it:
+After downloading the audio files, the next step is to convert them into spectrograms. To do this, we create an instance of the _SpectrogramCreator_ class and call the method "create_spectrograms_for_datasets" on it:
 
 ```python
-from downloader import NIPS4BPlusDownloader
+from spectrograms import SpectrogramCreator
 
-nips4bplus_downloader = NIPS4BPlusDownloader(file_manager)
+spectrogram_creator = SpectrogramCreator(
+    chunk_length=1000,
+    audio_file_manager=file_manager,
+    spectrogram_file_manager=file_manager,
+    include_noise_samples=True)
 
-species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
+spectrogram_creator.create_spectrograms_for_datasets(datasets=["train", "val", "test"],
+                                                   signal_threshold=3, noise_threshold=1, clear_spectrogram_cache=False)
 
-nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
+spectrogram_creator.create_spectrograms_for_datasets(datasets=["nips4bplus", "nips4bplus_filtered"],
+                                                   signal_threshold=0, noise_threshold=0, clear_spectrogram_cache=False)
 ```
 
-Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the `audio_file_manager` parameter and the `spectorgram_file_manager` parameter of the SpectrogramCreator constructor.
+Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the
+"audio_file_manager" parameter and the "spectorgram_file_manager" parameter of the SpectrogramCreator constructor.
 
-As described in section "", our pipeline implements a prefiltering of the spectrograms into "signal" and "noise spectrograms". The signal_threshold and noise_threshold parameters of the create_spectrograms_for_datasets method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
+As described in the section "Stage 2: Spectrogram Creation", our pipeline implements a prefiltering of the spectrograms into "signal" and "noise" spectrograms. The "signal_threshold" and "noise_threshold" parameters of the "create_spectrograms_for_datasets" method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
 
 ### Pipeline Stage 3: Model Training and Hyperparameter Tuning
 
