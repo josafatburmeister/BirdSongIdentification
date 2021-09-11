@@ -123,7 +123,6 @@ class MetricLogger:
 
         if not config:
             config = {}
-        self.trainer = model_trainer
         self.config = config
         self.is_pipeline_run = is_pipeline_run
         self.track_metrics = track_metrics
