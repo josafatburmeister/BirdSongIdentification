@@ -144,7 +144,8 @@ class ModelTrainer(model_runner.ModelRunner):
         config = locals().copy()
         del config['spectrogram_file_manager']
         self.device = self._setup_device()
-        self.logger = self._setup_metric_logger(config)
+        self.logger = self._setup_metric_logger(self.datasets[self.train_dataset].id_to_class_mapping(),
+                                                self.datasets[self.train_dataset].class_to_id_mapping(), config)
 
     def _setup_model(self) -> torch.nn.Module:
         """

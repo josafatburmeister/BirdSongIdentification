@@ -64,7 +64,7 @@ class ModelEvaluator(model_runner.ModelRunner):
                          wandb_project_name=wandb_project_name)
 
     def _setup_model(self, model: Union[str, torch.nn.Module],
-                    num_classes: int) -> torch.nn.Module:
+                     num_classes: int) -> torch.nn.Module:
         """
         Creates model with the required number of classes and the required architecture.
 
@@ -107,8 +107,9 @@ class ModelEvaluator(model_runner.ModelRunner):
         model.to(self.device)
         model.eval()
 
-        metric_logger = self._setup_metric_logger(
-            {"experiment_name": model_name, "split": dataset})
+        metric_logger = self._setup_metric_logger(datasets[dataset].id_to_class_mapping(),
+                                                  datasets[dataset].class_to_id_mapping(),
+                                                  {"experiment_name": model_name, "split": dataset})
 
         model_metrics = metrics.Metrics(num_classes=num_classes,
                                         multi_label=self.multi_label_classification)

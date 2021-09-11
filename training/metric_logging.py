@@ -100,13 +100,14 @@ class MetricLogger:
         wandb.run.summary[f"max_f1_score_avg_model"] = torch.max(
             metrics.f1_score())
 
-    def __init__(self, model_trainer, config: Dict[str, Any] = None, is_pipeline_run: bool = False,
+    def __init__(self, id_to_class_mapping: Dict[int, str], class_to_id_mapping: Dict[str, int], config: Dict[str, Any] = None, is_pipeline_run: bool = False,
                  track_metrics: bool = False, wandb_entity_name: str = "", wandb_key: str = "",
                  wandb_project_name: str = "") -> None:
         """
 
         Args:
-            model_trainer: ModelTrainer object used for model training.
+            id_to_class_mapping: Dictionary that maps class indices to human-readable class names.
+            class_to_id_mapping: Dictionary that maps human-readable class names to class indices.
             config: Model training configuration to be logged in Weights and Biases; only
                 considered if "track_metrics" is set to True.
             is_pipeline_run: Whether the model training is run in a non-notebook execution environment.
@@ -127,10 +128,8 @@ class MetricLogger:
         self.is_pipeline_run = is_pipeline_run
         self.track_metrics = track_metrics
 
-        self.id_to_class_mapping = list(self.trainer.datasets.values())[
-            0].id_to_class_mapping()
-        self.class_to_id_mapping = list(self.trainer.datasets.values())[
-            0].class_to_id_mapping()
+        self.id_to_class_mapping = id_to_class_mapping
+        self.class_to_id_mapping = class_to_id_mapping
 
         if track_metrics:
             wandb.login(key=wandb_key)

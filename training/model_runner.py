@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import torch
 from torch.utils.data import DataLoader
@@ -84,10 +84,26 @@ class ModelRunner:
         logger.info('Device set to: %s', device)
         return torch.device(device)
 
-    def _setup_metric_logger(self, config=None) -> MetricLogger:
+    def _setup_metric_logger(self, id_to_class_mapping: Dict[int, str], class_to_id_mapping: Dict[str, int],
+                             config: Dict[str, Any] = None) -> MetricLogger:
+        """
+        Creates MetricLogger object.
+
+        Args:
+            id_to_class_mapping: Dictionary that maps class indices to human-readable class names.
+            class_to_id_mapping: Dictionary that maps human-readable class names to class indices.
+            config: The model configuration to be logged, dictionary that maps configuration parameter names to values.
+
+        Returns:
+            A MetricLogger object.
+        """
+
         if config is None:
             config = {}
-        metric_logger = metric_logging.MetricLogger(self, config, self.is_pipeline_run,
+        metric_logger = metric_logging.MetricLogger(id_to_class_mapping,
+                                                    class_to_id_mapping,
+                                                    config,
+                                                    self.is_pipeline_run,
                                                     track_metrics=self.track_metrics,
                                                     wandb_entity_name=self.wandb_entity_name,
                                                     wandb_project_name=self.wandb_project_name,
@@ -111,7 +127,7 @@ class ModelRunner:
         datasets = {}
         dataloaders = {}
 
-        for dataset_name in dataset_names_no_shuffle + dataset_names_shuffle:
+        for dataset_name in dataset_names_shuffle + dataset_names_no_shuffle:
             datasets[dataset_name] = dataset.SpectrogramDataset(
                 self.spectrogram_file_manager,
                 include_noise_samples=self.include_noise_samples, dataset=dataset_name,
