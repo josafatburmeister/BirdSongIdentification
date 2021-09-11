@@ -710,8 +710,8 @@ __init__(self,
          p_dropout: float)
 ```
 
-The purpose of each parameter is documented in the docstrings of the "setup_model" method of the _ModelRunner_ class.
+The purpose of each parameter is documented in the docstrings of the `setup_model` method of the _ModelRunner_ class.
 
-(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the "num_classes" constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
+(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the `num_classes` constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
 
 </div>
