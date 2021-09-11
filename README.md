@@ -606,7 +606,7 @@ trainer = training.ModelTrainer(
 best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 ```
 
-The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class.
+The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class. The return value of the "train_model" method is a tuple containing three elements. The first element is the model that achieved the highest macro-averaged F1-score in the validation set. The second element is the model that achieved the highest minimum F1-score of all classes on the validation set. The third element is a dictionary that maps each class name to the model that achieved the highest F1-score for that class on the validation set.
 
 ### Pipeline Stage 4: Model Evaluation
 
