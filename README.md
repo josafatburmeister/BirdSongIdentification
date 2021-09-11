@@ -494,8 +494,7 @@ xc_downloader.create_datasets(
     exclude_special_cases=True,
     maximum_number_of_background_species=0,
     clear_audio_cache=False,
-    clear_label_cache=False
-)
+    clear_label_cache=False)
 ```
 
 In addition to the data from Xeno-Canto, we use the NIPS4BPlus dataset for model evaluation in our example. To download this dataset, we create an instance of the _NIPS4BPlusDownloader_ class and call the "download_nips4bplus_dataset" method on it. Since the NIPS4BPlus dataset includes less metadata than the Xeno-Canto database, the "download_nips4bplus_dataset" method provides fewer parameters for selecting which data to download. The method compiles two variants of the dataset, named "nips4bplus" and "nips4blpus_filtered". While the first variant contains all recordings of the NIPS4BPlus dataset, the second variant includes only recordings that contain at least one of the species listed in the parameter "species_list".
@@ -524,10 +523,14 @@ spectrogram_creator = SpectrogramCreator(
     include_noise_samples=True)
 
 spectrogram_creator.create_spectrograms_for_datasets(datasets=["train", "val", "test"],
-                                                   signal_threshold=3, noise_threshold=1, clear_spectrogram_cache=False)
+                                                     signal_threshold=3,
+                                                     noise_threshold=1,
+                                                     clear_spectrogram_cache=False)
 
 spectrogram_creator.create_spectrograms_for_datasets(datasets=["nips4bplus", "nips4bplus_filtered"],
-                                                   signal_threshold=0, noise_threshold=0, clear_spectrogram_cache=False)
+                                                     signal_threshold=0,
+                                                     noise_threshold=0,
+                                                     clear_spectrogram_cache=False)
 ```
 
 Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the
