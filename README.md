@@ -671,60 +671,47 @@ After creating the pipeline, click the "Create run" button, to start a pipeline 
 
 ### Implementing Custom Data Downloaders
 
-To apply our machine learning pipeline to another dataset than Xeno-Canto or NIPS4BPlus, it is necessary to implement a custom downloader for that dataset. This downloader must place the data in a directory structure as described in the section "Data Exchange Between Pipeline Components" (Listing 1). Let's suppose we want to implement a downloader for a dataset named "test" that will be stored under the path `/data`. To do this, we need to implement the following things:
+To apply our machine learning pipeline to another dataset than Xeno-Canto or NIPS4BPlus, it is necessary to implement a custom downloader for that dataset. This downloader must store the data in a directory structure as described in the section "Data Exchange Between Pipeline Components" (Listing 1). Let's suppose we want to implement a downloader for a dataset named "test" that will be stored under the path `/data`. To do this, the following things need to be implemented:
 
-(1) In the `/data` directory, the `categories.txt` file needs to be created. This file must list the class names of the data set in the format shown in Listing 2.
+(1) In the `/data` directory, a `categories.txt` file needs to be created. This file must list the class names of the dataset in the format shown in Listing 2.
 
 (2) The audio files of the dataset must be placed in the `/data/test/audio` directory.
 
 (3) A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in Table 2.
 
-To facilitate the implementation of custom downloaders, we provide a `Downloader` class in the `downloader` module. This class implements several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a `FileManager` object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
+To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
 
 By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
 
-(1) The Downloader class provides a method `save_categories_file(categories)`. This method takes a list of class names and creates a `categories.txt` file from it.
+(1) The Downloader class provides a method `save_categories_file(categories: List[str])`. This method takes a list of class names and creates a `categories.txt` file from it.
 
-(2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
+(2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager object provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
 
-(3) The Downloader class implements a method `save_label_file(labels, dataset_name)`. This method takes a Pandas dataframe and creates a label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
+(3) The Downloader class implements a method `save_label_file(labels: pandas.Dataframe, dataset_name: str)`. This method takes a Pandas dataframe and creates a audio label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
 
 ### Implementing Custom Spectrogram Creation Methods
 
-To implement custom spectrogram creation methods, we recommend to create a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method takes an Numpy ndarray as input that contains the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectogram creation, such as hop length, window length, minimum frequency, maximum frequency can be accessed as object attributes.
-
-Um eigene Methoden der Spektrogram-Erzeugung zu implementieren, empfehlen wir eine von der SpectrogramCreator abgeleitete Klasse zu implementieren. Um eine andere Art von Spektorgrammen zu erzeugen, muss in der abgeleiteten Klasse die Methode `__get_spectrogram` überschrieben werden. Diese erhält als Eingabe ein Numpy ndarray, welches die Amplitudenwerte für den Chunk enthält, für den das Spektrogramm erzeugt werden soll. Die allgemeinen Parameter der Spektrogramm-Erzeugung (hop length, window length, minimum frequency, maximum frequency usw.) sind als Objekt-Attribute in der Methode zugreifbar.
+To implement custom spectrogram creation methods, we recommend to create a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
 
 ### Implementing Custom Model Architectures
 
-To integrate custom model architecture into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` of the `__init__.py`. A custom model class needs to fullfil the following requirements:
+To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fullfil the following requirements:
 
-(1) The model needs to be implemented in Pytorch and should be derived from the torch.nn.Module class.
+(1) The model needs to be implemented in Pytorch and should be derived from the `torch.nn.Module` class.
 
 (2) The model's constructor should have the following signature:
 
 ```python
-
-**init**(self, architecture: str, num_classes: int,
-layers_to_unfreeze: Optional[Union[str, List[str]]], logger: Optional[VerboseLogger],
-p_dropout: float)
-
+__init__(self,
+         architecture: str,
+         num_classes: int,
+         layers_to_unfreeze: Optional[Union[str, List[str]]],
+         logger: Optional[VerboseLogger],
+         p_dropout: float)
 ```
 
-(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with `num_classes` being the number of entries. The result tensor should contain the log-odds of the classes.
+The purpose of each parameter is documented in the docstrings of the "setup_model" method of the _ModelRunner_ class.
 
-Um eigene Modellarchitekturen in die Pipeline zu integrieren, muss im Modul models eine eigene Modellklasse angelegt werden und die Modellklasse im Dictionary `model_architectures` in der `__init__.py` des Moduls eingetragen werden. An eigene Modellklassen werden folgende Anforderungen gestellt:
-
-(1) Das Modell muss in Pytorch implementiert und eine von torch.nn.Module abgeleitete Klasse sein.
-
-(1) Der Konstruktor der Modellklasse sollte die folgende Signatur haben:
-
-```python
-__init__(self, architecture: str, num_classes: int,
-                 layers_to_unfreeze: Optional[Union[str, List[str]]], logger: Optional[VerboseLogger],
-                 p_dropout: float)
-```
-
-(2) Die forward-Methode des Modells muss einen Pytorch-Tensor mit den Spektrogramm-Bildern entegegen nehmen und einen Ergebnistensor mit `num_classes` Einträgen liefern.
+(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the "num_classes" constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
 
 </div>
