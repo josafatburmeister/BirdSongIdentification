@@ -610,7 +610,7 @@ The constructor parameters of the ModelTrainer class are mostly the same as in t
 
 ### Pipeline Stage 4: Model Evaluation
 
-Finally, we would like to evaluate our classification model both on the Xeno-Canto test set and the NIPS4BPlus dataset. For this, we create an instance of the `ModelEvaluator class` and call the method `evaluate_model` on it. Since the confidence of our model on unseen data may be lower than on the training set, we run the model evaluation with different confidence thresholds:
+Finally, we evaluate the model that achieved the highest macro-averaged F1-score on the validation set, both on the Xeno-Canto test set and on the NIPS4BPlus dataset. To do this, we create an instance of the _ModelEvaluator_ class and call its "evaluate_model" method. Since the model's confidence on unseen data may be lower than on the training set, we run the model evaluation with multiple confidence thresholds:
 
 ```python
 from training import model_evaluator
@@ -624,11 +624,15 @@ for confidence_threshold in [0.3, 0.4, 0.5]:
                                                multi_label_classification_threshold=confidence_threshold,
                                                track_metrics=False)
 
-    evaluator.evaluate_model(model=best_average_model, model_name=f"test_model_{confidence_threshold}", dataset="test")
-    evaluator.evaluate_model(model=best_average_model, model_name=f"test_model_{confidence_threshold}",
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_test",
+                             dataset="test")
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_nips4bplus",
                              dataset="nips4bplus")
-    evaluator.evaluate_model(model=best_average_model, model_name=f"test_model_{confidence_threshold}",
-                             dataset="nips4bplus_all")
+    evaluator.evaluate_model(model=best_average_model,
+                             model_name=f"test_model_{confidence_threshold}_nips4bplus_filtered",
+                             dataset="nips4bplus_filtered")
 ```
 
 ## Running the Pipeline in Kubeflow
