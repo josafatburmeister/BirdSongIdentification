@@ -98,7 +98,52 @@ For spectrogram creation, we largely follow the approach described by Kot et al.
 
 Table 1: Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
-Since the audio files from Xeno-Canto are only labeled at file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value. First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows including noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only labeled at file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [\cite{kahl-2017}]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value (Figure 1). First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows including noise spectrograms for training as a separate class.
+
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1wD_RyvBCkvVM9y8sKFEz3-HS4IVZ1gvv" width="150" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1jK6ccjBxzIlIBxUJbbjRXU8kAnZv2o2z" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1qz1Pi_8xF7db6J8zwCDxh9ZP6yE_Gq-0" width="150" style="border: 1px solid black;"/>
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) Original spectrograms.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1I2yeGT_EaSoPrl4YJ35RroxMPIykzeh5" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1n2sks2tmGlEGf1Otwq7ljlKlZFaGwofL" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=15_oIqICXk0e0dQqNEQV0kQkz3k70rAXT" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(b) Spectrograms after median blurring.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1VgE8r4UMHB2zECLYk_mXfqki7qZgOKrc" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1ooS0Re-MQo3oPkGa8ije4pwnJaPdZuX9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1H3307qKdmWgSaDpfs8qMhAgxmfLkYbmx" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(c) Spectrograms after median filtering.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=14fgZc7GkJmAE6ikHNg6bI2ceHWrI9MEl" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1QOICjC7DMsoYZwORyMUYYLlHGY2l_ux9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=19OCBhuoAHL5fnJhyIlGL1xguDAeZqhV6" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(d) Spectrograms after spot removal.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=15eVBJ_02WjxShwo_N2RPPpnw_E45Xg2_" width="150" style="border: 1px solid black;" />
+        <img src="https://drive.google.com/uc?id=1kz41gi2szgQJycvVg5Dse3svAa3t4FzO" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="https://drive.google.com/uc?id=1IeZZrl_kCJ9okjuze2CVuuiXVwcopq-Y" width="150" style="border: 1px solid black;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(e) Spectrograms after morphological closing.</p>
+    </div>
+</div>
+
+**Figure 1**: Steps of the noise filtering algorithm shown by three example spectrograms.
 
 <sup>1</sup> https://librosa.org
 
@@ -508,7 +553,7 @@ species_list=["Turdus merula, song, call", "Erithacus rubecula, song, call"]
 nips4bplus_downloader.download_nips4bplus_dataset(species_list=species_list)
 ```
 
-### Pipeline Stage 2: Spectorgram Creation
+### Pipeline Stage 2: Spectrogram Creation
 
 After downloading the audio files, the next step is to convert them into spectrograms. To do this, we create an instance of the _SpectrogramCreator_ class and call the method "create_spectrograms_for_datasets" on it:
 
@@ -533,7 +578,7 @@ spectrogram_creator.create_spectrograms_for_datasets(datasets=["nips4bplus", "ni
 ```
 
 Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the
-"audio_file_manager" parameter and the "spectorgram_file_manager" parameter of the SpectrogramCreator constructor.
+"audio_file_manager" parameter and the "spectrogram_file_manager" parameter of the SpectrogramCreator constructor.
 
 As described in the section "Stage 2: Spectrogram Creation", our pipeline implements a prefiltering of the spectrograms into "signal" and "noise" spectrograms. The "signal_threshold" and "noise_threshold" parameters of the "create_spectrograms_for_datasets" method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
 
