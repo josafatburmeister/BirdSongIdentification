@@ -1,11 +1,14 @@
 import os
 import subprocess
-import yaml
 
 import fire
 import kfp
 from kfp.compiler import compiler
 from kubernetes.client import V1Toleration
+import yaml
+
+from general import FileManager
+
 
 def __set_gpu_resources(yaml_file_path: str) -> None:
     """
@@ -21,7 +24,7 @@ def __set_gpu_resources(yaml_file_path: str) -> None:
     with open(yaml_file_path, 'r') as stream:
         try:
             pipeline_yaml = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
+        except yaml.YAMLError:
             raise NameError(f"Could not read pipeline YAML file")
 
     for idx, template in enumerate(pipeline_yaml["spec"]["templates"]):
@@ -33,28 +36,69 @@ def __set_gpu_resources(yaml_file_path: str) -> None:
     with open(yaml_file_path, 'w') as stream:
         try:
             yaml.dump(pipeline_yaml, stream, default_flow_style=False)
-        except yaml.YAMLError as exc:
+        except yaml.YAMLError:
             raise NameError(f"Could not write pipeline YAML file")
 
-def compile_pipeline(use_gpu: bool = True) -> None:
+
+def __set_docker_registry(input_yaml_file_path: str, output_yaml_file_path: str, docker_registry: str) -> None:
+    """
+    Adds Docker registry name to pipeline component definition file.
+
+    Args:
+        input_yaml_file_path: Path of a YAML file containing a Kubeflow pipeline component definition.
+        output_yaml_file_path: Path where the modified Kubeflow pipeline component definition is to be saved.
+        docker_registry: Name of the Docker registry from which to pull the Docker image of the pipeline component.
+
+    Returns:
+        None
+    """
+
+    with open(input_yaml_file_path, 'r') as stream:
+        try:
+            pipeline_yaml = yaml.safe_load(stream)
+        except yaml.YAMLError:
+            raise NameError(f"Could not read pipeline YAML file")
+
+    pipeline_yaml["implementation"]["container"]["image"] = FileManager.ensure_trailing_slash(docker_registry) + \
+                                                            pipeline_yaml["implementation"]["container"]["image"]
+
+    with open(output_yaml_file_path, 'w') as stream:
+        try:
+            yaml.dump(pipeline_yaml, stream, default_flow_style=False)
+        except yaml.YAMLError:
+            raise NameError(f"Could not write pipeline YAML file")
+
+
+def compile_pipeline(docker_registry: str, use_gpu: bool = True) -> None:
     """
     Compiles full Kubeflow pipeline to a Kubeflow pipeline definition file.
 
     Args:
+        docker_registry: Name of the Docker registry from which to pull the Docker image of the pipeline.
         use_gpu: Whether the pipeline is intended to run on GPU.
 
     Returns:
         None
     """
 
+    __set_docker_registry('kubeflow_pipeline/download_component.yaml',
+                          'kubeflow_pipeline/download_component_temp.yaml',
+                          docker_registry)
+    __set_docker_registry('kubeflow_pipeline/spectrogram_component.yaml',
+                          'kubeflow_pipeline/spectrogram_component_temp.yaml',
+                          docker_registry)
+    __set_docker_registry('kubeflow_pipeline/training_component.yaml',
+                          'kubeflow_pipeline/training_component_temp.yaml',
+                          docker_registry)
+
     download_data_container_op = kfp.components.load_component_from_file(
-        os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component.yaml'))
+        os.path.join(os.getcwd(), 'kubeflow_pipeline/download_component_temp.yaml'))
 
     spectrogram_container_op = kfp.components.load_component_from_file(
-        os.path.join(os.getcwd(), 'kubeflow_pipeline/spectrogram_component.yaml'))
+        os.path.join(os.getcwd(), 'kubeflow_pipeline/spectrogram_component_temp.yaml'))
 
     training_container_op = kfp.components.load_component_from_file(
-        os.path.join(os.getcwd(), 'kubeflow_pipeline/training_component.yaml'))
+        os.path.join(os.getcwd(), 'kubeflow_pipeline/training_component_temp.yaml'))
 
     def pipeline(gcs_bucket="bird-song-identification",
                  species_list=None,
@@ -169,17 +213,30 @@ def compile_pipeline(use_gpu: bool = True) -> None:
     if use_gpu:
         __set_gpu_resources(pipeline_filename)
 
-def compile_demo_pipeline(use_gpu: bool = True) -> None:
+    os.remove('kubeflow_pipeline/download_component_temp.yaml')
+    os.remove('kubeflow_pipeline/spectrogram_component_temp.yaml')
+    os.remove('kubeflow_pipeline/training_component_temp.yaml')
+
+
+def compile_demo_pipeline(docker_registry: str, use_gpu: bool = True) -> None:
     """
     Compiles a demo Kubeflow pipeline (without data download and spectrogram creation stages) to a Kubeflow pipeline
     definition file.
 
     Args:
+        docker_registry: Name of the Docker registry from which to pull the Docker image of the pipeline.
         use_gpu: Whether the pipeline is intended to run on GPU.
 
     Returns:
         None
     """
+    __set_docker_registry('kubeflow_pipeline/demo_data_component.yaml',
+                          'kubeflow_pipeline/demo_data_component_temp.yaml',
+                          docker_registry)
+    __set_docker_registry('kubeflow_pipeline/training_component.yaml',
+                          'kubeflow_pipeline/training_component_temp.yaml',
+                          docker_registry)
+
     data_loader_op = kfp.components.load_component_from_file(
         os.path.join(os.getcwd(), 'kubeflow_pipeline/demo_data_component.yaml'))
 
@@ -252,11 +309,16 @@ def compile_demo_pipeline(use_gpu: bool = True) -> None:
     if use_gpu:
         __set_gpu_resources(pipeline_filename)
 
-def build_docker_image(cwd: str = ".", rebuild_prebuild_image: bool = True) -> None:
+    os.remove('kubeflow_pipeline/demo_data_component_temp.yaml')
+    os.remove('kubeflow_pipeline/training_component_temp.yaml')
+
+
+def build_docker_image(docker_registry: str, cwd: str = ".", rebuild_prebuild_image: bool = True) -> None:
     """
-    Builds and pushes the Dockerimage used by the Kubeflow pipeline.
+    Builds and pushes the Docker image used by the Kubeflow pipeline.
 
     Args:
+        docker_registry: Name of the Docker registry to which the Docker image should be pushed.
         cwd: Path of the directory where the Dockerfiles are located.
         rebuild_prebuild_image: Whether the base image (defined by "PrebuildDockerfile") should be rebuild.
 
@@ -271,11 +333,14 @@ def build_docker_image(cwd: str = ".", rebuild_prebuild_image: bool = True) -> N
 
     try:
         if rebuild_prebuild_image:
-            subprocess.run(["docker", "build", "-f", "PrebuildDockerfile", "-t", "bird-song-prebuild", "."], cwd=cwd, check=True)
-        subprocess.run(["docker", "build", "-t", "us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest", "--build-arg", "PREBUILD_IMAGE=bird-song-prebuild", "."], cwd=cwd, check=True)
-        subprocess.run(["docker", "push", "us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest"], cwd=cwd, check=True)
+            subprocess.run(["docker", "build", "-f", "PrebuildDockerfile", "-t", "bird-song-prebuild", "."], cwd=cwd,
+                           check=True)
+        subprocess.run(["docker", "build", "-t", f"{docker_registry}/bird-song-identification:latest", "--build-arg",
+                        "PREBUILD_IMAGE=bird-song-prebuild", "."], cwd=cwd, check=True)
+        subprocess.run(["docker", "push", f"{docker_registry}/bird-song-identification:latest"], cwd=cwd, check=True)
     except subprocess.CalledProcessError:
         raise NameError(f"Could build docker image")
+
 
 if __name__ == "__main__":
     fire.Fire()
