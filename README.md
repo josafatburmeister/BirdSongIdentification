@@ -321,6 +321,22 @@ In addition to hyperparameter tuning, we also study how quality and size of the 
 
 </div>
 
+# Results and Discussion
+
+### Baseline Setting
+
+On the Xeno-Canto validation set, the three baseline runs achieved an average macro F<sub>1</sub>-score of 0,741 ± 0,003 (at a confidence threshold of 0.5). The performance on the Xeno-Canto test set was very similar, with an average macro F<sub>1</sub>-score of 0,736 ± 0,001 (at a confidence threshold of 0.5). The training of our baseline models was characterized by overfitting, with all models reaching a training F<sub>1</sub>-score close to one after 15-20 epochs. The best performance on the validation set was achieved between the fourth and sixth training epoch in all runs.
+
+As shown in Figure ... the class "_Phylloscopus collybita_, call" was the class with the highest F<sub>1</sub>-score on both the validation and the test set. On the test set, an average F<sub>1</sub>-score of 0.861 ± 0.002 was obtained for this class.
+
+![baseline](./plots/baseline.png)
+
+**Figure ..** Average class-wise F1 scores of the three baseline models on the training, validation, and test sets. The error bars show the standard error.
+
+As shown in Figure ... the class "_Phylloscopus collybita_, call" was the class with the highest F<sub>1</sub>-score on both the validation and the test set. On the test set, an average F<sub>1</sub>-score of 0.861 ± 0.002 was obtained for this class. The lowest average F<sub>1</sub>-score on the validation set, 0.645 ± 0.014, was obtained for the class "_Cyanistes caeruleuss_, song". On the test set, "_Fringilla coelebs_, song" was the worst performing class with an average F<sub>1</sub>-score of 0.626 ± 0.008".
+
+On the NIPS4BPlus data set, the performance of the baseline models was significantly worse than on the Xeno-Canto data. The average macro F<sub>1</sub>-score was 0,139 ± 0,007. On the filtered NIPS4BPlus dataset the performance was very similar, with an macro F<sub>1</sub>-score of 0,139 ± 0,003.
+
 # References
 
 <div style="text-align: justify">
