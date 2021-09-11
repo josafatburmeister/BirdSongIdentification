@@ -558,7 +558,7 @@ tuner = hyperparameter_tuner.HyperparameterTuner(
     monitor="f1-score",
     multi_label_classification=True,
     multi_label_classification_threshold=0.5,
-    number_epochs=1,
+    number_epochs=10,
     number_workers=0,
     optimizer="Adam",
     patience=3,
@@ -637,35 +637,35 @@ for confidence_threshold in [0.3, 0.4, 0.5]:
 
 ## Running the Pipeline in Kubeflow
 
-To run our pipeline in Kubeflow, a Kubernetes cluster with a Kubeflow installation is required. Currently, our pipeline supports Kubeflow version 1.0.0.
+To run the pipeline in Kubeflow, a Kubernetes cluster with a [Kubeflow](https://www.kubeflow.org/docs/started/installing-kubeflow/) installation is required. Currently, our pipeline supports Kubeflow version 1.0.0. If you have such a Kubeflow cluster available, the pipeline can be run on it as follows:
 
-First, the Kubeflow pipeline definition need to be compiled. To compile a pipeline defintion for a cluster with CPU nodes only, run inside the repository:
-
-```bash
-python3 kubeflow_pipeline/compile_pipeline.py compile_pipeline --use_gpu False
-```
-
-If there are GPU nodes available in your cluster, run to enable GPU-accelerated model training:
+First, the Kubeflow pipeline definition must be compiled. To compile a pipeline definition for a cluster with only CPU nodes, insert the name of your cluster's Docker registry in the following command and run it within the repository:
 
 ```bash
-python3 kubeflow_pipeline/compile_pipeline.py compile_pipeline --use_gpu True
+python3 kubeflow_pipeline/compile_pipeline.py compile_pipeline --docker_registry <name of your Docker registry> --use_gpu False
 ```
 
-The compilation command will produce a pipeline defintion file named `birdsong_pipeline.yaml`.
+If there are GPU nodes available in your cluster, you can run the following command to compile a pipeline definition with GPU-accelerated model training:
+
+```bash
+python3 kubeflow_pipeline/compile_pipeline.py --docker_registry <name of your Docker registry> compile_pipeline --use_gpu True
+```
+
+Both compilation commands will produce a pipeline defintion file named `birdsong_pipeline.yaml`.
 
 Next, build and push the pipeline's Docker image to the Docker registry of your cluster:
 
 ```bash
-python3 kubeflow_pipeline/compile_pipeline.py build_docker_image
+python3 kubeflow_pipeline/compile_pipeline.py build_docker_image --docker_registry <name of your Docker registry>
 ```
 
 Now, open the Kubeflow UI of your cluster, go to the "Pipelines" section and click "Upload Pipeline". Upload the `birdsong_pipeline.yaml` file that you compiled before:
 
-![Kubeflow-1](https://lh6.googleusercontent.com/uyVJARH9d8HByY_g0LSA-BhSVB7KVE-mFo28nQOua6b1ZfnfBiFgrtTPrX-kgFs1scES3JQn7GaYMg=w2880-h766)
+![Kubeflow-1](https://drive.google.com/uc?id=1DSyp6En5aM5sLzxmGkG2NtiwsszHU94w)
 
 After creating the pipeline, click the "Create run" button, to start a pipeline run:
 
-![Kubeflow-2](https://lh5.googleusercontent.com/iuUn-Pk9TtN6Af64cBNBMiseAgOz27XNGPsRqSVGOaqydNyYSaFY_z5W1vb9UPZWO_ZUcvGWEFvjl7IQjnLt=w2210-h1478-rw)
+![Kubeflow-2](https://drive.google.com/uc?id=1NXqVRQgVpMI7tNCf-7xkDvv1WrstIhFl)
 
 ## Implementing Custom Pipeline Components
 
