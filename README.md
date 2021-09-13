@@ -10,7 +10,7 @@ maximilian.goetz@student.hpi.de
 
 ## Abstract
 
-<div style="text-align: justify;">
+<div align="justify">
 Audio recorders that capture bird sounds are increasingly used in conservation biology to monitor bird
 populations. However, labeling the collected audio data requires trained ornithologists and is a very time-consuming task. To facilitate training of deep learning models that automate the labeling process, this work implements an end-to-end machine learning pipeline for the automated recognition of bird sound in audio recordings. The presented pipeline can be run both as a Jupyter notebook and as a Kubeflow pipeline. The pipeline includes steps for collecting and downloading suitable training data, preprocessing and filtering the training data, and for training, tuning, and evaluating deep learning models. As this approach has been very successful in previous work, the pipeline is focused on training image classification models on spectrogram images. The pipeline is evaluated using an example dataset with ten different bird sound classes from the Xeno-Canto database. A macro F<sub>1</sub>-score of 72.6% is achieved on this dataset, with F<sub>1</sub>-scores for all classes above 66%.
 </div>
@@ -47,7 +47,7 @@ Following a similar approach, Koh et al. achieved second place in the BirdCLEF c
 
 ### 3.1 Use Case Specification
 
-<div style="text-align: justify">
+<div align="justify">
 
 Our work aims to implement an end-to-end machine learning pipeline that automates the training of bird sound recognition models. Based on promising results of previous works, we focus on training deep convolutional neural networks (DCNNs) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [\cite{koh-2018}]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
 
@@ -57,7 +57,7 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 ### 3.2 Pipeline Architecture
 
-<div style="text-align: justify">
+<div align="justify">
 
 Conceptually, our machine learning pipeline consists of the following four stages:
 
@@ -75,7 +75,7 @@ All pipeline steps are implemented by Python classes, which are described in mor
 
 ### Stage 1: Data Download
 
-<div style="text-align: justify">
+<div align="justify">
 
 The downloader stage is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format.
 
@@ -164,7 +164,7 @@ In the model evaluation stage, the best model from the training stage is evaluat
 
 ### Data Exchange Between Pipeline Components
 
-<div style="text-align: justify">
+<div align="justify">
 
 In Kubeflow pipelines, all outputs of the pipeline stages are stored as files and can be used as inputs for subsequent pipeline stages. Persisting the outputs increases the pipeline's robustness and facilitates failure recovery. Therefore, we follow this approach and use purely file-based interfaces to exchange data between the different components of our pipeline.
 
