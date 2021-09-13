@@ -63,7 +63,7 @@ Conceptually, our machine learning pipeline consists of the following four stage
 
 (1) Download of audio data and labels
 
-(2) Conversion of audio files into spectrograms and filtering of spectrograms containing only noise
+(2) Conversion of audio files into spectrogram images and separation of spectrograms into "signal" spectrograms containing bird vocalizations and "noise" spectrograms
 
 (3) Training of DCNN image classification models on the spectrograms and tuning of model hyperparameters
 
