@@ -295,6 +295,81 @@ Table 2: Class distribution of the Xeno-Canto dataset used for training the base
 
 Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
 
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1VSnSiRpylTvqmGD1g2nO4liBGcb0fOQH" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1ydpr_RxlND9nClHLYUDWIXfMZn9geLsE" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Cyanistes caeruleus</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1UR402ZN_LwFAQOvxtIg8aj_ttRNQ0R81" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1IhhU-oed-5ELCyl0KGCc4B1bJ9mZ-Dun" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Erithacus rubecula</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1epw7tlJPZIH6l15seimgwfWEybLRUvuM" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1UEFjhiM8uYrCB_u1Ec0ZjPZs7VWc0isj" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Fringilla coelebs</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1r3FSk1na1Llk5uYZ_Fnsu1Dh29R0Zow3" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1Q6UQ8t5VRuxa3JOEkJhLi98bJo2S-a92" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Luscinia megarhynchos</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1YdW7FaWsJbnXo21Svj0MEr1uDnYtj_k8" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1aXEXf44HTnHyJXP_LNrbqOq3ejOq7wlO" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Parus major</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1ZRylQHpivA8q3CACIOw2_l3-Swym-LC4" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1s0oXh9pUzQPokoxcAogLOfoEi6hAvvbe" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Phylloscopus collybita</i>, call.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1ueqA3IRdZATVrlAr_nKPWrK2PIw4ymzp" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1-eHr6rmaWiWAnNpngyM_mp1gQ7EW4Qik" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Phylloscopus collybita</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1OouGhMC96kqVz-a8kq-4A6BPBjfNP_T-" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1PphCul0l4qFOSOc3X9jpQwp2IlHJD-uh" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Sylvia atricapilla</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1ErJJ6rkVcVO_k6s6VBqW8gR5xagJh9Q6" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=18WBSFopg7uzybfTw3jMt2K7DhkBIAbFl" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Troglodytes troglodytes</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="https://drive.google.com/uc?id=1DDzmx8-mH57tnYW6rIxQ4kdAecl02mjl" width="200" style="border: 1px solid black;"/>
+        <img src="https://drive.google.com/uc?id=1X-Qav5m5v5Rw8yY7BngK5J0sfhJ3RKtx" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;">(a) <i>Turdus philomelos</i>, song.</p>
+    </div>
+</div>
+
+**Figure ...**: Examples of spectrograms of the ten classes of our data set.
+
 ### Baseline Setting
 
 To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F<sub>1</sub>-score and report the average of the F<sub>1</sub>-scores of these best models.
