@@ -16,7 +16,7 @@ populations. However, labeling the collected audio data requires trained ornitho
 The pipeline is evaluated using an example sample dataset with ten different bird vocalization classes from the Xeno-Canto database. On this dataset an average F<sub>1</sub>-score of ... is achieved.
 </div>
 
-## Motivation
+## 1 Motivation
 
 <div style="text-align: justify">
 
@@ -26,7 +26,7 @@ Since different monitoring projects focus on different bird species and research
 
 </div>
 
-## Related Work
+## 2 Related Work
 
 <div style="text-align: justify">
 
@@ -44,9 +44,9 @@ Following a similar approach, Koh et al. achieved second place in the BirdCLEF c
 
 </div>
 
-## Our Approach
+## 3 Our Approach
 
-### Use Case Specification
+### 3.1 Use Case Specification
 
 <div style="text-align: justify">
 
@@ -56,7 +56,7 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 </div>
 
-### Pipeline Architecture
+### 3.2 Pipeline Architecture
 
 <div style="text-align: justify">
 
@@ -254,7 +254,7 @@ Listing 3 shows an example of the directory structure that is used to pass data 
 
 </div>
 
-## Experiments
+## 4 Experiments
 
 To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and a duration of at most 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
 
@@ -370,7 +370,7 @@ Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
 
 **Figure ...**: Examples of spectrograms of the ten classes of our data set.
 
-### Baseline Setting
+### 4.1 Baseline Setting
 
 To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F<sub>1</sub>-score and report the average of the F<sub>1</sub>-scores of these best models.
 
@@ -386,19 +386,19 @@ To establish a baseline for our experiments, we first train a model with a stand
 
 Table 4: Training setting of our baseline model
 
-### Hyperparameter-Tuning
+### 4.2 Hyperparameter-Tuning
 
 With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, regularization, probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch Size and learning Rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
 
-### Additional Data
+### 4.3 Additional Data
 
 In addition to hyperparameter tuning, we also study how quality and size of the training dataset affect model performance. For this purpose, we compare the performance of our baseline model with the performance of models trained on two modified training datasets: In the first case, we used a training dataset with lower audio quality. For this, we set the minimum aud, and we used a maximum of 500 audio samples per sound class. In the second case, we used the same quality settings (minimum quality "E", up to ten background species) but increased the maximum number of audio files per class to 1000.
 
 </div>
 
-# Results and Discussion
+# 5 Results and Discussion
 
-### Baseline Setting
+### 5.1 Baseline Setting
 
 On the Xeno-Canto validation set, the three baseline runs achieved an average macro F<sub>1</sub>-score of 0,741 ± 0,003 (at a confidence threshold of 0.5). The performance on the Xeno-Canto test set was very similar, with an average macro F<sub>1</sub>-score of 0,736 ± 0,001 (at a confidence threshold of 0.5). The training of our baseline models was characterized by overfitting, with all models reaching a training F<sub>1</sub>-score close to one after 15-20 epochs. The best performance on the validation set was achieved between the fourth and sixth training epoch in all runs.
 
