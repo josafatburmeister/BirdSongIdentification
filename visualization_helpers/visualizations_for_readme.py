@@ -213,6 +213,7 @@ def visualize_additionl_data():
     plt.legend(loc='best')
     plt.show()
 
+
 if __name__ == 'main':
     visualize_matrix()
     visualize_hyperparameter_bars()

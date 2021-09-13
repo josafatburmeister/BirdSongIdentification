@@ -389,33 +389,13 @@ Table 4: Training setting of our baseline model
 
 With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, regularization, probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch size and learning rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
 
-First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-dimensional slices in hyperparameter space. For our data we can not see any obvious dependency between batch size and learning rate. But what we find is, that the batch size has no big influence on the outcome, while a learning rate of 0.0001 performs best. Also, at learning rates of 10<sup>-6</sup> the performance drops greatly. 
-
-![plot](.\plots\myplot.png)
-![plot](.\plots\lr_batch_mean_cut.png)
-
-Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results, the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
-
-Lastly we also tuned the weight decay. As you can see in the plot below, a weight decay of 0.001 performed the best. The real outlier here is the biggest value with an F<sub>1</sub>-score of only _0.64_, compared to _0.74_. This can be explained by the fact that our model tended to overfit. Smaller weight decay helps with this problem.
-
-
-A list of our complete training results can be found in our included Excel file and as csv.
-
 ### 4.3 Additional Data
 
 In addition to hyperparameter tuning, we also study how quality and size of the training dataset affect model performance. For this purpose, we compare the performance of our baseline model with the performance of models trained on two modified training datasets: In the first case, we used a training dataset with lower audio quality. For this, we set the minimum aud, and we used a maximum of 500 audio samples per sound class. In the second case, we used the same quality settings (minimum quality "E", up to ten background species) but increased the maximum number of audio files per class to 1000.
 
-
-
 </div>
 
 # 5 Results and Discussion
-
-# Outlook
-Overall we are pleased with the outcome of our project. We successfully implemented a pipeline for an automated recognition of bird vocalizations in audio files. But there still are lots of things one can try out. For example are there different hyperparameters for the spectrogram creation, like the noise threshold, the spectrogram choice or all the different options for image filtering we did not have the time to test.
-It also would be interesting to do further testing with different transfer learning architectures.
-And one final idea we were interested in, was a model that trained on all our different model outputs. This way you could utilize the ability of different models that perform best on different birds or sound file qualities. 
-Luckily, we designed our pipeline in a way, that it is easy to continue our work and using this pipeline as a basis for further experimentation.
 
 ### 5.1 Baseline Setting
 
@@ -441,6 +421,22 @@ F<sub>1</sub>-scores on the NIPS4BPlus dataset were significantly lower than on 
 
 From our point of view, the differences in performance between classes are mainly related to two factors: the complexity of the sound patterns and the number of training samples. Of the ten sound classes in our dataset, nine classes are bird songs and one class is a call ("_Phylloscopus collybita_, call"). While songs consist of a sequence of different phrases and motives, calls are much less complex. In spectrograms, calls are usually visible as a single pattern, whereas songs are visible as a sequence of patterns. In some cases, these sequences are longer than the 1-second chunks represented by the spectrograms we use. We suspect that the model learns best those calls and songs that consist of simple patterns that can be represented by a single spectrogram. For example, it is noteworthy that on the Xeno-Canto data, the highest classification accuracy is achieved for the call of the common chiffchaff ("_Phylloscopus collybita_, call"), although this is the class with the fewest training samples (Table ...). As can be seen in Figure ... , the call appears as a short, simple pattern in the spectrograms. The second highest accuracy on the Xeno-Canto data is obtained for the song of the common chiffchaff ("_Phylloscopus collybita_, song"), which consists of a uniform sequence of a simple pattern. However, similar high F<sub>1</sub>-scores as for the song of the common chiffchaff are also obtained for the songs of the nightingale ("_Luscinia megarhynchos_, song") and the song thrush ("_Turdus philomelos_, song"). These species have very complex songs, but are also represented by a higher number of spectrograms in our training dataset. Therefore, we believe that the number of training samples has a positive effect on model performance and can support the models to learn even complex patterns.
 
+# 5.2 Hyperparameter Tuning
+
+First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-dimensional slices in hyperparameter space. For our data we can not see any obvious dependency between batch size and learning rate. But what we find is, that the batch size has no big influence on the outcome, while a learning rate of 0.0001 performs best. Also, at learning rates of 10<sup>-6</sup> the performance drops greatly. 
+
+![plot](./plots/myplot.png)
+![plot](./plots/lr_batch_mean_cut.png)
+
+Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results, the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
+
+Lastly we also tuned the weight decay. As you can see in the plot below, a weight decay of 0.001 performed the best. The real outlier here is the biggest value with an F<sub>1</sub>-score of only _0.64_, compared to _0.74_. This can be explained by the fact that our model tended to overfit. Smaller weight decay helps with this problem.
+
+
+A list of our complete training results can be found in our included Excel file and as csv.
+
+# 5.3 Additional Data
+
 ### Final Model
 
 Our final model was trained by combining the hyperparameter settings that performed best in hyperparameter tuning: Since this performed best in our experiments, the ResNet18 architecture was used and all model layers were unfrozen for fine-tuning. An Adam optimizer was used combined with a learning rate of 0.0001 and a cosine annealing learning rate scheduler. To reduce overfitting, L<sub>2</sub>-regularization (weight decay) with a weight factor λ = 0.001 and dropout before the fully-connected layer with a probability of 0.2 were applied. The final model was trained on the larger, noisier data set from the "More Data" experiment (100 audio samples per class, minimum quality "E", up to ten background species), as we found this led to better generalizing models.
@@ -452,6 +448,12 @@ On the Xeno-Canto validation set, the final model achieved a macro F<sub>1</sub>
 **Figure ..** Class-wise F1 scores of the final model on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown.
 
 For the Xeno-Canto data, the final model did not improve over the baseline models. However, for the NIPS4BPlus dataset, the final model performs significantly than the baseline models and also better than the models form the "More Data" experiment. This shows that both the quality and size of the training data and the tuning of the hyperparameters have a substantial impact on the performance and generalizability of the models.
+
+# 6 Outlook
+Overall we are pleased with the outcome of our project. We successfully implemented a pipeline for an automated recognition of bird vocalizations in audio files. But there still are lots of things one can try out. For example are there different hyperparameters for the spectrogram creation, like the noise threshold, the spectrogram choice or all the different options for image filtering we did not have the time to test.
+It also would be interesting to do further testing with different transfer learning architectures.
+And one final idea we were interested in, was a model that trained on all our different model outputs. This way you could utilize the ability of different models that perform best on different birds or sound file qualities. 
+Luckily, we designed our pipeline in a way, that it is easy to continue our work and using this pipeline as a basis for further experimentation.
 
 # References
 
