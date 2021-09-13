@@ -61,27 +61,59 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 Conceptually, our machine learning pipeline consists of the following four stages:
 
-(1) Download of audio data and labels
+1. Download of audio data and labels
 
-(2) Conversion of audio files into spectrogram images and separation of spectrograms into "signal" spectrograms containing bird vocalizations and "noise" spectrograms
+2. Conversion of audio files into spectrogram images and separation of spectrograms into "signal" spectrograms containing bird vocalizations and "noise" spectrograms
 
-(3) Training of DCNN image classification models on the spectrograms and tuning of model hyperparameters
+3. Training of DCNN image classification models on the spectrograms and tuning of model hyperparameters
 
-(4) Model evaluation on test datasets
+4. Model evaluation on test datasets
 
 All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook and a Kubeflow pipeline. Both variants use the same Python implementation, with the definition of our Kubeflow pipeline providing a wrapper for the interface of our Python classes.
 
 </div>
 
-### Stage 1: Data Download
+### 3.2.1 Pipeline Stage 1: Data Download
 
 <div align="justify">
 
-The downloader stage is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format.
+The downloader stage of the pipeline is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format. For this purpose, we provide a generic downloader implementation, based on which downloaders for specific datasets can be implemented.
 
-To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from a common base class. For downloading audio files from Xeno-Canto, we use the public Xeno-Canto API. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files. Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API. Based on the criteria defined by the pipeline user, the downloader compiles training, validation and test sets. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from the above mentioned downloader base class. For downloading audio files from Xeno-Canto, we use the public Xeno-Canto API<sup>1</sup>. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files (Figure 1). Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API. Based on the criteria defined by the pipeline user, the downloader compiles training, validation and test sets. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+
+```json
+[
+  {
+    "id": "567435",
+    "gen": "Petronia",
+    "sp": "petronia",
+    "en": "Rock Sparrow",
+    "rec": "Testaert Dominique",
+    "cnt": "France",
+    "loc": "Albussac, Corr\u00e8ze, Nouvelle-Aquitaine",
+    "lat": "45.1485",
+    "lng": "1.8464",
+    "alt": "420",
+    "type": "adult, male, song",
+    "url": "//www.xeno-canto.org/567435",
+    "file": "//www.xeno-canto.org/567435/download",
+    "file-name": "XC567435-20200610 11h21 Moineau soulcie.mp3",
+    "length": "0:08",
+    "time": "11:21",
+    "date": "2020-06-10",
+    "uploaded": "2020-06-11",
+    "also": [],
+    "bird-seen": "yes",
+    "playback-used": "no"
+  }
+]
+```
+
+**Figure 1:** Example result of a search query to the Xeno-Canto API.
 
 To speed up the download phase, our downloader classes use multithreading where possible. In addition, we implemented local caching of files such that subsequent pipeline runs do not need to download the same files more than once. When the pipeline is run as a Jupyter notebook, an ordinary directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage bucket is used for file caching.
+
+<sup>1</sup> https://www.xeno-canto.org/explore/api
 
 ### Stage 2: Spectrogram Creation
 
