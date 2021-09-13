@@ -72,6 +72,7 @@ Conceptually, our machine learning pipeline consists of the following four stage
 All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook<sup>1</sup> and a Kubeflow pipeline.<sup>2</sup> Both variants use the same Python implementation, with the definition of our Kubeflow pipeline providing a wrapper for the interface of our Python classes.
 
 <sup>1</sup> https://jupyter.org
+
 <sup>2</sup> https://www.kubeflow.org
 
 </div>
@@ -122,19 +123,19 @@ To speed up the download phase, local caching of files is used in addition to mu
 
 ### Stage 2: Spectrogram Creation
 
-For spectrogram creation, we largely follow the approach described by Kot et al. [[11](#koh2019)]. As in the work of Koh et al, we divide the audio files into non-overlapping 1-second chunks and create a mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_<sup>1</sup>. We choose the parameters of the STFT so that the resulting spectrograms have a size of approximately 224 x 112 pixels. Table 1 provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [[11](#koh2019)]. The spectrogram images are stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
+For spectrogram creation, we largely follow the approach described by Kot et al. [[11](#koh2019)]. As in the work of Koh et al, we divide the audio files into non-overlapping 1-second chunks and create one mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_<sup>5</sup>. We choose the parameters of the STFT so that the resulting spectrograms have a size of approximately 224 x 112 pixels. Table 1 provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [[11](#koh2019)]. The spectrogram images are stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
 
 | Parameter         | Value     |
 | ----------------- | --------- |
-| Sampling rate     | 44100 Hz  |
-| Window length     | 1024      |
+| Sampling rate     | 44,100 Hz |
+| Window length     | 1,024     |
 | Hop length        | 196       |
 | Minimum frequency | 500 Hz    |
 | Maximum frequency | 15,000 Hz |
 
 Table 1: Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
-Since the audio files from Xeno-Canto are only labeled at file level, it is uncertain which parts of the recording contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of signal rows is compared to a threshold value (Figure 1). First, the image is blurred with a median blur kernel of size 5. Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white. To remove isolated black pixels, spot removal and morphological closing operations are applied. Finally, the number of rows with black pixels (signal pixels) is compared to a predefined threshold, the signal threshold. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the noise threshold, the spectrogram is considered to contain only noise. To have a decision margin, we choose the noise threshold smaller than the signal threshold. To increase model robustness, our pipeline allows including noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 (Figure [1b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white (Figure [1c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied (Figures [1d](#fig-noise-filtering-d), Figure [1e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide the option to include noise spectrograms for training as a separate class.
 
 <div style="display: flex; flex-direction: column;">
     <div>
@@ -143,7 +144,7 @@ Since the audio files from Xeno-Canto are only labeled at file level, it is unce
         <img src="https://drive.google.com/uc?id=1jK6ccjBxzIlIBxUJbbjRXU8kAnZv2o2z" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1qz1Pi_8xF7db6J8zwCDxh9ZP6yE_Gq-0" width="150" style="border: 1px solid black;"/>
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) Original spectrograms.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-a">(a)</a> Original spectrograms.</p>
     </div>
     <div>
         <div style="display: flex;">
@@ -151,7 +152,7 @@ Since the audio files from Xeno-Canto are only labeled at file level, it is unce
         <img src="https://drive.google.com/uc?id=1n2sks2tmGlEGf1Otwq7ljlKlZFaGwofL" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=15_oIqICXk0e0dQqNEQV0kQkz3k70rAXT" width="150" style="border: 1px solid black;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(b) Spectrograms after median blurring.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-b">(b)</a> Spectrograms after median blurring.</p>
     </div>
     <div>
         <div style="display: flex;">
@@ -159,7 +160,7 @@ Since the audio files from Xeno-Canto are only labeled at file level, it is unce
         <img src="https://drive.google.com/uc?id=1ooS0Re-MQo3oPkGa8ije4pwnJaPdZuX9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1H3307qKdmWgSaDpfs8qMhAgxmfLkYbmx" width="150" style="border: 1px solid black;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(c) Spectrograms after median filtering.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-c">(c)</a> Spectrograms after median filtering.</p>
     </div>
     <div>
         <div style="display: flex;">
@@ -167,7 +168,7 @@ Since the audio files from Xeno-Canto are only labeled at file level, it is unce
         <img src="https://drive.google.com/uc?id=1QOICjC7DMsoYZwORyMUYYLlHGY2l_ux9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=19OCBhuoAHL5fnJhyIlGL1xguDAeZqhV6" width="150" style="border: 1px solid black;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(d) Spectrograms after spot removal.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-d">(d)</a> Spectrograms after spot removal.</p>
     </div>
     <div>
         <div style="display: flex;">
@@ -175,13 +176,13 @@ Since the audio files from Xeno-Canto are only labeled at file level, it is unce
         <img src="https://drive.google.com/uc?id=1kz41gi2szgQJycvVg5Dse3svAa3t4FzO" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1IeZZrl_kCJ9okjuze2CVuuiXVwcopq-Y" width="150" style="border: 1px solid black;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(e) Spectrograms after morphological closing.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-e">(e)</a> Spectrograms after morphological closing.</p>
     </div>
 </div>
 
-**Figure 1**: Steps of the noise filtering algorithm shown by three example spectrograms.
+**<a name="fig-noise-filtering">Figure 2</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[17](#kahl-2017)] shown by three example spectrograms.
 
-<sup>1</sup> https://librosa.org
+<sup>5</sup> https://librosa.org
 
 ### Stage 3: Model Training
 
