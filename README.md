@@ -119,7 +119,7 @@ To demonstrate the capability of our pipeline, we use audio data from the Xeno-C
 
 **Figure 2:** Example result of a search query to the Xeno-Canto API.
 
-To speed up the download phase, local caching of files is used in addition to multithreading. This way, successive pipeline runs do not have to download the same files more than once. When the pipeline is run as a Jupyter notebook, a regular directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage<sup>4</sup> bucket is used for file caching.
+To speed up the download phase, local caching of files is used in addition to multithreading. This way, successive pipeline runs do not have to download the same files more than once. When the pipeline is run as a Jupyter notebook, a regular directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a _Google Cloud Storage_<sup>4</sup> bucket is used for file caching.
 
 <sup>3</sup> https://www.xeno-canto.org/explore/api
 
@@ -190,15 +190,17 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
 
 ### Stage 3: Model Training
 
-The model training stage of our pipeline can be either used to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It is implemented using the Pytorch framework<sup>6</sup> and the Torchvision library<sup>7</sup>. Building on Torchvision conventions, the training component is designed in such a way that the model architecture used can be exchanged easily. For our use case, we mainly use the ResNet18 architecture [[7](#resnet)], as it has been successfully applied to bird sound classification in previous work [[13](#koh2019)]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures [[7](#resnet), [8](#densenet)]. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird vocalizations may occur simultaneously in some recordings.
+The model training stage of our pipeline can be either used to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It is implemented using the _Pytorch_ framework<sup>6</sup> and the _Torchvision_ library<sup>7</sup>. Building on Torchvision conventions, the training component is designed in such a way that the model architecture used can be exchanged easily. For our use case, we mainly use the ResNet18 architecture [[7](#resnet)], as it has been successfully applied to bird sound classification in previous work [[13](#koh2019)]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures [[7](#resnet), [8](#densenet)]. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird vocalizations may occur simultaneously in some recordings.
 
-The models are trained using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [[1](#image-net)]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
+The models are trained using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [[1](#image-net)]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from re-training only the fully connected layer to fine-tuning all model layers.
 
-To select the best model from each training run, we use a macro-averaged F<sub>1</sub>-score as performance metric. The macro F<sub>1</sub>-score weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on the frequent classes.
+To select the best model from each training run, we use the macro-averaged F<sub>1</sub>-score (macro F<sub>1</sub>-score) as primary performance metric. The macro F<sub>1</sub>-score is the unweighted average of the F<sub>1</sub>-scores of all classes. Thus, it weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on frequent classes. In addition to the macro F<sub>1</sub>-score, we also monitor the minimum and maximum class-wise F1-score as additional performance indicators. To track and visualize the performance metrics, we use the _Weights and Biases_ platform<sup>8</sup>.
 
 <sup>6</sup> https://pytorch.org
 
 <sup>7</sup> https://pytorch.org/vision/stable/index.html
+
+<sup>8</sup> http://wandb.ai/
 
 ### Stage 4: Model Evaluation
 
