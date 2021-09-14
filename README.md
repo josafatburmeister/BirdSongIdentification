@@ -566,29 +566,29 @@ Luckily, we designed our pipeline in a way, that it is easy to continue our work
 
 <!-- image-net -->
 
-<a name="image-net">[1]</a> Jia Deng et al. “ImageNet: A large-scale hierarchical image database”. In: Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition (San Francisco, USA). IEEE, 2009, pp. 248–255. ISBN: 978-1-4244-3992-8. DOI: 10.1109/CVPR.2009.5206848.
+<a name="image-net">[1]</a> Jia Deng et al. "ImageNet: A large-scale hierarchical image database". In: _Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition_ (San Francisco, USA). IEEE, 2009, pp. 248–255. ISBN: 978-1-4244-3992-8. DOI: [10.1109/CVPR.2009.5206848](https://doi.org/10.1109/CVPR.2009.5206848).
 
 <!-- bird-clef-2014 -->
 
-<a name="bird-clef-2014">[2]</a> Hervé Goëau et al. “LifeCLEF Bird Identification Task 2014”. In: Working Notes of CLEF2014 - Conference and Labs of the Evaluation Forum (Sheffield, United Kingdom). Ed. by Linda Cappellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: https://hal.inria.fr/hal-01088829.
+<a name="bird-clef-2014">[2]</a> Hervé Goëau et al. "LifeCLEF Bird Identification Task 2014". In: _Working Notes of CLEF2014 - Conference and Labs of the Evaluation Forum_ (Sheffield, United Kingdom). Ed. by Linda Cappellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: https://hal.inria.fr/hal-01088829.
 
 <!-- bird-clef-2015 -->
 
-<a name="bird-clef-2015">[3]</a> Hervé Goëau et al. “LifeCLEF Bird Identification Task 2015”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–11. URL: http://ceur-ws.org/Vol- 1391/156- CR.pdf.
+<a name="bird-clef-2015">[3]</a> Hervé Goëau et al. "LifeCLEF Bird Identification Task 2015". In: _Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum_ (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–11. URL: http://ceur-ws.org/Vol-1391/156-CR.pdf.
 
 <!-- bird-clef-2016 -->
 
-<a name="bird-clef-2016">[4]</a> Hervé Goëau et al. “LifeCLEF Bird Identification Task 2016: The arrival of Deep learning”. In: Working NotesofCLEF2016-ConferenceandLabsoftheEvaluationForum(évora,Portugal).Ed.byKrisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 440–449. URL: http: //ceur-ws.org/Vol-1609/16090440.pdf.
+<a name="bird-clef-2016">[4]</a> Hervé Goëau et al. "LifeCLEF Bird Identification Task 2016: The arrival of Deep learning". In: _Working Notes of CLEF 2016 - Conference and Labs of the Evaluation Forum_ (Évora, Portugal). Ed. by Krisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 440–449. URL: http://ceur-ws.org/Vol-1609/16090440.pdf.
 
 <!-- bird-clef-2017 -->
 
-<a name="bird-clef-2017">[5]</a> Hervé Goëau et al. “LifeCLEF Bird Identification Task 2017”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–9. URL: http://ceur-ws.org/Vol- 1866/invited%5C_paper%5C_8.pdf.
+<a name="bird-clef-2017">[5]</a> Hervé Goëau et al. "LifeCLEF Bird Identification Task 2017". In: _Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum_ (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–9. URL: http://ceur-ws.org/Vol-1866/invited%5C_paper%5C_8.pdf.
 
 <!-- bird-clef-2018 -->
 
-<a name="bird-clef-2018">[6]</a> Hervé Goëau et al. “Overview of BirdCLEF 2018: Monospecies vs. Sundscape Bird Identification”. In: Working Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–12. URL: http://ceur-ws.org/Vol-2125/invited%5C_paper%5C_9.pdf.
+<a name="bird-clef-2018">[6]</a> Hervé Goëau et al. "Overview of BirdCLEF 2018: Monospecies vs. Sundscape Bird Identification". In: _Working Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum_ (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–12. URL: http://ceur-ws.org/Vol-2125/invited%5C_paper%5C_9.pdf.
 
-<a name="resnet">[7]</a> Kaiming He et al. “Deep Residual Learning for Image Recognition”. In: CoRR 1512.03385 (Dec. 10, 2015). arXiv: 1512.03385. URL: http://arxiv.org/abs/1512.03385.
+<a name="resnet">[7]</a> Kaiming He et al. "Deep Residual Learning for Image Recognition". In: _CoRR_ 1512.03385 (Dec. 10, 2015). arXiv: 1512.03385. URL: http://arxiv.org/abs/1512.03385.
 
 <a name="densenet">[8]</a> Gao Huang, Zhuang Liu, and Kilian Q. Weinberger. “Densely Connected Convolutional Networks”. In: CoRR 1608.06993 (Jan. 28, 2018). arXiv: 1608.06993. URL: http://arxiv.org/abs/1608. 06993.
 
