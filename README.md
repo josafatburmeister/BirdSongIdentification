@@ -435,7 +435,7 @@ First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-d
 Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results, the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
 
 Lastly we also tuned the weight decay. As you can see in the plot below, a weight decay of 0.001 performed the best. The real outlier here is the biggest value with an F<sub>1</sub>-score of only _0.64_, compared to _0.74_. This can be explained by the fact that our model tended to overfit. Smaller weight decay helps with this problem.
-
+ 
 A list of our complete training results can be found in our included Excel file and as csv.
 
 ### 4.3 Additional Data
@@ -445,13 +445,6 @@ In addition to hyperparameter tuning, we also study how quality and size of the 
 </div>
 
 # 5 Results and Discussion
-
-# Outlook
-
-Overall we are pleased with the outcome of our project. We successfully implemented a pipeline for an automated recognition of bird vocalizations in audio files. But there still are lots of things one can try out. For example are there different hyperparameters for the spectrogram creation, like the noise threshold, the spectrogram choice or all the different options for image filtering we did not have the time to test.
-It also would be interesting to do further testing with different transfer learning architectures.
-And one final idea we were interested in, was a model that trained on all our different model outputs. This way you could utilize the ability of different models that perform best on different birds or sound file qualities.
-Luckily, we designed our pipeline in a way, that it is easy to continue our work and using this pipeline as a basis for further experimentation.
 
 ### 5.1 Baseline Setting
 
@@ -465,10 +458,6 @@ On the NIPS4BPlus dataset, the performance of the baseline models was significan
 
 We presume that the poor performance on the NIPS4BPlus dataset is due to the following differences between the training data from Xeno-Canto and the NIPS4BPlus dataset: While the Xeno-Canto training dataset consists mainly of focal recordings directed to the vocalizations of a specific individual, the recordings of the NIPS4BPlus dataset were collected with field recorders that were not directed to a specific bird. Accordingly, some of the bird vocalizations in the NIPS4BPlus dataset are quieter than in the Xeno-Canto training dataset. Additionally, some recordings in the NIPS4BPlus dataset contain stronger background noise, such as wind.
 
-We attribute the poor performance of the baseline models on the NIPS4BPlus dataset to differences between the NIPS4BPlus dataset and the training dataset. While the Xeno-Canto training set consists mostly of focal recordings targeted to the vocalizations of a specific individual, the NIPS4BPlus dataset consists of multidirectional recordings collected with field recorders. Accordingly, some of the bird vocalizations in the NIPS4BPlus dataset are quieter than in the training dataset. In addition, the recordings contain more noise, e.g., due to wind. Since the NIPS4BPlus dataset is time-precisely annotated, we did not perform a noise-filtering step on this dataset. Thus, in the NIPS4BPlus dataset, even quiet and noisy recordings were labeled as bird vocalizations, which would have been labeled as noise in the training data.
-
-![baseline](./plots/baseline.png)
-
 **Figure ..** Average class-wise F1 scores of the three baseline models on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown. The error bars show the standard deviation.
 
 As shown in Figure ..., the F<sub>1</sub>-scores for most classes were very similar for the Xeno-Canto validation and test sets. On both the validation and test sets, "_Phylloscopus collybita_, call" was the class with the highest F<sub>1</sub>-score. On the test set, an average F<sub>1</sub>-score of 0.861 ± 0.002 was obtained for this class. The lowest average F<sub>1</sub>-score on the validation set, 0.645 ± 0.014, was obtained for the class "_Cyanistes caeruleuss_, song". On the test set, "_Fringilla coelebs_, song" was the worst performing class with an average F<sub>1</sub>-score of 0.626 ± 0.008.
@@ -477,20 +466,28 @@ F<sub>1</sub>-scores on the NIPS4BPlus dataset were significantly lower than on 
 
 From our point of view, the differences in performance between classes are mainly related to two factors: the complexity of the sound patterns and the number of training samples. Of the ten sound classes in our dataset, nine classes are bird songs and one class is a call ("_Phylloscopus collybita_, call"). While songs consist of a sequence of different phrases and motives, calls are much less complex. In spectrograms, calls are usually visible as a single pattern, whereas songs are visible as a sequence of patterns. In some cases, these sequences are longer than the 1-second chunks represented by the spectrograms we use. We suspect that the model learns best those calls and songs that consist of simple patterns that can be represented by a single spectrogram. For example, it is noteworthy that on the Xeno-Canto data, the highest classification accuracy is achieved for the call of the common chiffchaff ("_Phylloscopus collybita_, call"), although this is the class with the fewest training samples (Table ...). As can be seen in Figure ... , the call appears as a short, simple pattern in the spectrograms. The second highest accuracy on the Xeno-Canto data is obtained for the song of the common chiffchaff ("_Phylloscopus collybita_, song"), which consists of a uniform sequence of a simple pattern. However, similar high F<sub>1</sub>-scores as for the song of the common chiffchaff are also obtained for the songs of the nightingale ("_Luscinia megarhynchos_, song") and the song thrush ("_Turdus philomelos_, song"). These species have very complex songs, but are also represented by a higher number of spectrograms in our training dataset. Therefore, we believe that the number of training samples has a positive effect on model performance and can support the models to learn even complex patterns.
 
-# 5.2 Hyperparameter Tuning
+### 5.2 Hyperparameter Tuning
 
-First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-dimensional slices in hyperparameter space. For our data we can not see any obvious dependency between batch size and learning rate. But what we find is, that the batch size has no big influence on the outcome, while a learning rate of 0.0001 performs best. Also, at learning rates of 10<sup>-6</sup> the performance drops greatly.
+First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-dimensional slices in hyperparameter space. The goal was partly, to find some linear dependency for these parameters, which would help further hyperparameter tuning. Though, for our data we can not see any obvious dependency between batch size and learning rate. But what we find is, that the batch size has no big influence on the outcome, while a learning rate of 0.0001 performs best. Also, at learning rates of 10<sup>-6</sup> the performance drops greatly.
 
 ![plot](./plots/myplot.png)
-![plot](./plots/lr_batch_mean_cut.png)
+![plot](./plots/myplot.png)
 
-Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results, the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
+Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results (Table...), the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
 
-Lastly we also tuned the weight decay. As you can see in the plot below, a weight decay of 0.001 performed the best. The real outlier here is the biggest value with an F<sub>1</sub>-score of only _0.64_, compared to _0.74_. This can be explained by the fact that our model tended to overfit. Smaller weight decay helps with this problem.
+Next up is our training for the dropout probability. The dropout probability (or dropout rate) is the probability with which we randomly zero some elements of the input tensors. Interestingly a shift in dropout rate did not influence the model's performance, as you can see in Table...
+
+Lastly we also tuned the weight decay. As you can see in Table... below, a weight decay of 0.001 performed the best. The real outlier here is the biggest value with an F<sub>1</sub>-score of only _0.64_, compared to _0.74_. This can be explained by the fact that our model tended to overfit. Smaller weight decay helps with this problem.
 
 A list of our complete training results can be found in our included Excel file and as csv.
 
-# 5.3 Additional Data
+### 5.3 Additional Data
+
+In the preceding chapters we mainly looked at our Resnet18 architecture in combination with our baseline dataset of ten classes of bird songs, each with 100 samples in the best audio quality without any other bird sounds in the background. And as we have seen the baseline performed quite well on the clean and filtered Xeno-Canto data, while the performance on the NISB4Plus set leaves something to be desired. As explained before this might be because our model is not very robust and has problems with background noise and bad quality bird sounds.
+Therefore, we defined two new datasets. Both contain the same ten bird song classes, but the first also includes bad quality audio files and different bird voices in the background, while the other has double the amount of training data. For simplicity, we call them _noisy data_ and _more data_ datasets. 
+The training results for both sets had desired results. As you can see both test sets perform worse on the Xeno-Canto data (Figure...) but show improved success on both the NIPSB4Plus test data sets (Figure... and ...). This strengthens our thesis, that more training data, as well as, training on worse quality files, makes our model more robust on harder test data.
+
+In addition, we also swapped our Resnet18 for Resnet50 and DenseNet121 each and trained them on our baseline data. While both new models reached F<sub>1</sub>-scores of 0.737 and 0.728, they overall performed worse than our Resnet18. It could still be interesting to try out other different CNNs on how they impact the models performance.
 
 ### Final Model
 
