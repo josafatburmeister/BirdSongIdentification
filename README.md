@@ -439,7 +439,7 @@ To establish a baseline for our experiments, we first trained a model with a sta
 
 ### 4.2 Hyperparameter-Tuning
 
-With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, strenth of L<sub>2<sub>-regularization (weight decay), probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch size and learning rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
+With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, strenth of L<sub>2</sub>-regularization (weight decay), probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch size and learning rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
 
 ### 4.3 Additional Data
 
