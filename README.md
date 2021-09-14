@@ -19,7 +19,7 @@ populations. However, labeling the collected audio data requires trained ornitho
 
 <div align="justify">
 
-Estimates of bird populations are an essential element in conservation biology for determining the conservation status of bird species and for planning conservation measures [[21](#monitoring-overview), [18](#audio-monitoring)]. Therefore, monitoring programs exist for many bird species in which the abundance of the target species is regularly surveyed in selected study areas. Conventionally, monitoring is conducted by trained ornithologists who who record observed species and individuals using standardized methods [[21](#monitoring-overview)]. In recent years, monitoring by human observers has been increasingly complemented by passive acoustic monitoring with audio recorders. The use of audio recorders reduces bias caused by human disturbances and allows for data collection on a larger spatial and temporal scale [[18](#audio-monitoring)]. However, labeling and interpreting the collected audio files requires trained ornithologists and is a very time-consuming task. Using machine learning, significant progress has been made in recent years to automate the labeling process. In particular, deep convolutional neural networks that treat audio classification as an image classification problem have emerged as a promising approach [[23](#sprengel-2016), [22](#sevilla-2017), [11](#koh2019)]. However, since the classification of bird vocalizations is associated with various challenges, the problem has not yet been fully solved. One challenge is that audio recordings often contain background noise and overlapping vocalizations of multiple bird species. In addition, the songs of some bird species differ between individuals and regions. Moreover, most publicly available training data is only weakly labeled at file level and do not include temporal annotations [[16](#nips4bplus)].
+Estimates of bird populations are an essential element in conservation biology for determining the conservation status of bird species and for planning conservation measures [[23](#monitoring-overview), [20](#audio-monitoring)]. Therefore, monitoring programs exist for many bird species in which the abundance of the target species is regularly surveyed in selected study areas. Conventionally, monitoring is conducted by trained ornithologists who who record observed species and individuals using standardized methods [[23](#monitoring-overview)]. In recent years, monitoring by human observers has been increasingly complemented by passive acoustic monitoring with audio recorders. The use of audio recorders reduces bias caused by human disturbances and allows for data collection on a larger spatial and temporal scale [[20](#audio-monitoring)]. However, labeling and interpreting the collected audio files requires trained ornithologists and is a very time-consuming task. Using machine learning, significant progress has been made in recent years to automate the labeling process. In particular, deep convolutional neural networks that treat audio classification as an image classification problem have emerged as a promising approach [[25](#sprengel-2016), [24](#sevilla-2017), [13](#koh2019)]. However, since the classification of bird vocalizations is associated with various challenges, the problem has not yet been fully solved. One challenge is that audio recordings often contain background noise and overlapping vocalizations of multiple bird species. In addition, the songs of some bird species differ between individuals and regions. Moreover, most publicly available training data is only weakly labeled at file level and do not include temporal annotations [[18](#nips4bplus)].
 
 Since different monitoring projects focus on different bird species and research questions, individual models are usually required for each monitoring project. To reduce the effort of training and fine-tuning such models, this work aims to implement a fully automated machine-learning pipeline for recognition of bird sounds in audio recordings. In previous work on bird sound recognition, deep convolutional neural networks trained on spectrogram images have emerged as very promising approach. Therefore, we adopt this approach and focus our pipeline design on training such models. To support a wide range of applications, we aim for a flexible pipeline design in terms of the training dataset and model architecture used. To be able to tailor the training settings to the dataset used, the pipeline should also support tuning of model hyperparameters.
 
@@ -29,17 +29,17 @@ Since different monitoring projects focus on different bird species and research
 
 <div align="justify">
 
-An important stimulus for research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [[2](#bird-clef-2014), [3](#bird-clef-2015), [4](#bird-clef-2016), [5](#bird-clef-2017), [6](#bird-clef-2018), [8](#bird-clef-2019), [10](#bird-clef-2020)]. The objective of this challenge is to recognize bird vocalizations in so-called _soundscape_ recordings, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [[4](#bird-clef-2016)]. However, the provided training data in the BirdCLEF challenge consists mainly of so-called _focal_ recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species at a time [[4](#bird-clef-2016)]. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. These recordings are usually a few minutes long and are typically focused on the vocalizations of a single individual. The Xeno-Canto database provides various metadata about the recordings, such as the recording location, recording quality, and the age and sex of the recorded bird [[26](#xeno-canto)].
+An important stimulus for research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [[2](#bird-clef-2014), [3](#bird-clef-2015), [4](#bird-clef-2016), [5](#bird-clef-2017), [6](#bird-clef-2018), [10](#bird-clef-2019), [12](#bird-clef-2020)]. The objective of this challenge is to recognize bird vocalizations in so-called _soundscape_ recordings, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [[4](#bird-clef-2016)]. However, the provided training data in the BirdCLEF challenge consists mainly of so-called _focal_ recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species at a time [[4](#bird-clef-2016)]. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. These recordings are usually a few minutes long and are typically focused on the vocalizations of a single individual. The Xeno-Canto database provides various metadata about the recordings, such as the recording location, recording quality, and the age and sex of the recorded bird [[28](#xeno-canto)].
 
-Besides the Xeno-Canto database, several other datasets that include recordings of bird vocalizations are publicly available. These include the Chernobyl dataset [[9](#chernobyl)], the Warblr dataset [[25](#warblr)], the freefield1010 dataset [[24](#freefield1010)], the PolandNFC dataset [[25](#warblr), [19](#poland-nfc)], the Birdvox-Full-Night dataset [[15](#birdvox)], and the NIPS4B dataset [[16](#nips4bplus)]. While the other datasets mentioned before only include presence-absence tags for bird vocalizations, the NIPS4B dataset also provides species tags [[16](#nips4bplus)]. The NIPS4BPlus dataset provides time-precise annotations of bird vocalizations for a subset of the recordings in the NIPS4B dataset [[16](#nips4bplus)].
+Besides the Xeno-Canto database, several other datasets that include recordings of bird vocalizations are publicly available. These include the Chernobyl dataset [[11](#chernobyl)], the Warblr dataset [[27](#warblr)], the freefield1010 dataset [[24](#freefield1010)], the PolandNFC dataset [[27](#warblr), [21](#poland-nfc)], the Birdvox-Full-Night dataset [[17](#birdvox)], and the NIPS4B dataset [[18](#nips4bplus)]. While the other datasets mentioned before only include presence-absence tags for bird vocalizations, the NIPS4B dataset also provides species tags [[18](#nips4bplus)]. The NIPS4BPlus dataset provides time-precise annotations of bird vocalizations for a subset of the recordings in the NIPS4B dataset [[18](#nips4bplus)].
 
-Over the last years, various approaches to automated bird sound recognition have been investigated. Lassek approached the problem with random forests trained on low-level features of audio files and statistical features of spectrograms [[12](#lasseck2013), [14](#lasseck2014), [13](#lasseck2015)]. Müller and Marti employed recurrent neural networks (RNNs) for bird sound recognition, namely an LSTM architecture [[17](#muller2018)]. However, deep convolutional neural networks (DCNNs) have emerged as the most promising approach. In order to use convolutional neural networks for audio classification, spectrogram images are generated from the audio data, turning the audio classification task into an image classification task. In recent years, this approach has produced very good results in the BirdCLEF challenge [[23](#sprengel-2016), [22](#sevilla-2017), [11](#koh2019)].
+Over the last years, various approaches to automated bird sound recognition have been investigated. Lassek approached the problem with random forests trained on low-level features of audio files and statistical features of spectrograms [[14](#lasseck2013), [16](#lasseck2014), [15](#lasseck2015)]. Müller and Marti employed recurrent neural networks (RNNs) for bird sound recognition, namely an LSTM architecture [[19](#muller2018)]. However, deep convolutional neural networks (DCNNs) have emerged as the most promising approach. In order to use convolutional neural networks for audio classification, spectrogram images are generated from the audio data, turning the audio classification task into an image classification task. In recent years, this approach has produced very good results in the BirdCLEF challenge [[25](#sprengel-2016), [24](#sevilla-2017), [13](#koh2019)].
 
-For example, Sprengel et al. won the BirdCLEF challenge in 2016 by training a CNN with five convolutional layers on fixed-size spectrograms. In order to identify relevant sections of the audio files when generating the spectrograms, Sprengel et al. implemented a noise filtering algorithm. A sequence of image filters such as median thresholding, erosion filtering, and dilation filtering was used to separate noise pixels from signal pixels. To artificially enlarge the training set, Sprengel et al. employed data augmentation techniques such as time shifts, pitch shifts, and background noise [[23](#sprengel-2016)].
+For example, Sprengel et al. won the BirdCLEF challenge in 2016 by training a CNN with five convolutional layers on fixed-size spectrograms. In order to identify relevant sections of the audio files when generating the spectrograms, Sprengel et al. implemented a noise filtering algorithm. A sequence of image filters such as median thresholding, erosion filtering, and dilation filtering was used to separate noise pixels from signal pixels. To artificially enlarge the training set, Sprengel et al. employed data augmentation techniques such as time shifts, pitch shifts, and background noise [[25](#sprengel-2016)].
 
-In their winning submission to the 2017 BirdCLEF challenge, Sevilla and Glotin used an Inception-v4 model. The model was trained using transfer learning and standard augmentation techniques, such as random hue, contrast, brightness, and saturation modifications. To guide the model's focus to relevant spectrogram regions, attention layers were added to Inception-v4 architecture [[22](#sevilla-2017)].
+In their winning submission to the 2017 BirdCLEF challenge, Sevilla and Glotin used an Inception-v4 model. The model was trained using transfer learning and standard augmentation techniques, such as random hue, contrast, brightness, and saturation modifications. To guide the model's focus to relevant spectrogram regions, attention layers were added to Inception-v4 architecture [[24](#sevilla-2017)].
 
-Following a similar approach, Koh et al. achieved second place in the BirdCLEF challenge in 2019. They trained ResNet18 and Inception-v3 models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address class imbalances of the data, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [[11](#koh2019)].
+Following a similar approach, Koh et al. achieved second place in the BirdCLEF challenge in 2019. They trained ResNet18 and Inception-v3 models on Mel-scaled spectrograms. For noise filtering, an image filter-based algorithm was used as in Sprengel et al. To address class imbalances of the data, data augmentation techniques were also used, e.g. brightness adjustments, blurring, slight rotations, crops and background noise [[13](#koh2019)].
 
 </div>
 
@@ -49,9 +49,9 @@ Following a similar approach, Koh et al. achieved second place in the BirdCLEF c
 
 <div align="justify">
 
-Our work aims to implement an end-to-end machine learning pipeline that automates the training of bird sound recognition models. Based on promising results of previous works, we focus on training deep convolutional neural networks (DCNNs) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [[11](#koh2019)]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
+Our work aims to implement an end-to-end machine learning pipeline that automates the training of bird sound recognition models. Based on promising results of previous works, we focus on training deep convolutional neural networks (DCNNs) trained as image classification models on spectrograms. For data preprocessing and spectrogram creation, we largely follow the approach described by Koh et al. [[13](#koh2019)]. With respect to the dataset and model architecture used, we aim for a flexible and extensible pipeline design.
 
-To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database [[26](#xeno-canto)], which is the largest publicly available collection of bird sound recordings. To create input images for the DCNN models, we convert the audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto usually focus on the vocalizations of a single bird species, but may include other bird vocalizations in the background. Since the Xeno-Canto database provides bird species labels only at the file level, but no time-accurate annotations, we only use the focal species as spectrogram label and ignore the background species. In contrast to the recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations and different background noises. To produce models that generalize to such use cases, we train multi-label classification models, even though our training data is single-label data. To evaluate the performance of our models in such a scenario, we use the NIPS4BPlus dataset as an additional test dataset [[16](#nips4bplus)]. In order to obtain time-accurate predictions, we split the audio files into 1-second chunks and create separate spectrograms and thus separate predictions for each chunk.
+To demonstrate and evaluate the capability of our pipeline, we consider the following use case: As the primary data source, we use the Xeno-Canto database [[28](#xeno-canto)], which is the largest publicly available collection of bird sound recordings. To create input images for the DCNN models, we convert the audio files from Xeno-Canto into spectrograms. The audio recordings from Xeno-Canto usually focus on the vocalizations of a single bird species, but may include other bird vocalizations in the background. Since the Xeno-Canto database provides bird species labels only at the file level, but no time-accurate annotations, we only use the focal species as spectrogram label and ignore the background species. In contrast to the recordings in Xeno-Canto, recordings from monitoring projects usually contain multiple overlapping bird vocalizations and different background noises. To produce models that generalize to such use cases, we train multi-label classification models, even though our training data is single-label data. To evaluate the performance of our models in such a scenario, we use the NIPS4BPlus dataset as an additional test dataset [[18](#nips4bplus)]. In order to obtain time-accurate predictions, we split the audio files into 1-second chunks and create separate spectrograms and thus separate predictions for each chunk.
 
 </div>
 
@@ -61,7 +61,9 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 ![figure](./plots/pipeline.jpg)
 
-Conceptually, our machine learning pipeline consists of the following four stages:
+**Figure 1:** Architecture of our machine learning pipeline for bird sound recognition.
+
+Conceptually, our machine learning pipeline consists of the following four stages (Figure 1):
 
 1. Download of audio data and labels
 
@@ -85,7 +87,7 @@ All pipeline steps are implemented by Python classes, which are described in mor
 
 The downloader stage of the pipeline is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format. For this purpose, we provide a generic downloader implementation, based on which downloaders for specific datasets can be implemented.
 
-To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from the above mentioned downloader base class. To download audio files from Xeno-Canto, the public Xeno-Canto API<sup>3</sup> is used. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files (Figure 1). Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API and compiles training, validation, and test sets based on the filter values. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from the above mentioned downloader base class. To download audio files from Xeno-Canto, the public Xeno-Canto API<sup>3</sup> is used. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files (Figure 2). Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API and compiles training, validation, and test sets based on the filter values. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
 
 ```javascript
 [
@@ -115,7 +117,7 @@ To demonstrate the capability of our pipeline, we use audio data from the Xeno-C
 ];
 ```
 
-**Figure 1:** Example result of a search query to the Xeno-Canto API.
+**Figure 2:** Example result of a search query to the Xeno-Canto API.
 
 To speed up the download phase, local caching of files is used in addition to multithreading. This way, successive pipeline runs do not have to download the same files more than once. When the pipeline is run as a Jupyter notebook, a regular directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage<sup>4</sup> bucket is used for file caching.
 
@@ -125,7 +127,7 @@ To speed up the download phase, local caching of files is used in addition to mu
 
 ### Stage 2: Spectrogram Creation
 
-For spectrogram creation, we largely follow the approach described by Kot et al. [[11](#koh2019)]. As in the work of Koh et al, we divide the audio files into non-overlapping 1-second chunks and create one mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_<sup>5</sup>. We choose the parameters of the STFT so that the resulting spectrograms have a size of approximately 224 x 112 pixels. Table 1 provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [[11](#koh2019)]. The spectrogram images are stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
+For spectrogram creation, we largely follow the approach described by Kot et al. [[13](#koh2019)]. As in the work of Koh et al, we divide the audio files into non-overlapping 1-second chunks and create one mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_<sup>5</sup>. We choose the parameters of the STFT so that the resulting spectrograms have a size of approximately 224 x 112 pixels. Table 1 provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [[13](#koh2019)]. The spectrogram images are stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
 
 | Parameter         | Value     |
 | ----------------- | --------- |
@@ -137,7 +139,7 @@ For spectrogram creation, we largely follow the approach described by Kot et al.
 
 Table 1: Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
-Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 (Figure [1b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white (Figure [1c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied (Figures [1d](#fig-noise-filtering-d), Figure [1e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide the option to include noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 (Figure [3b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white (Figure [3c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied (Figures [3d](#fig-noise-filtering-d), [3e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide the option to include noise spectrograms for training as a separate class.
 
 <div style="display: flex; flex-direction: column;">
     <div>
@@ -182,21 +184,21 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
 </div>
 
-**<a name="fig-noise-filtering">Figure 2</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[17](#kahl-2017)] shown by three example spectrograms.
+**<a name="fig-noise-filtering">Figure 3</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[17](#kahl-2017)] shown by three example spectrograms.
 
 <sup>5</sup> https://librosa.org
 
 ### Stage 3: Model Training
 
-The model training stage of our pipeline can be either used to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It was implemented using the Pytorch framework<sup>2</sup> and the Torchvision library<sup>3</sup>. Building on Torchvision conventions, the training component is designed in such a way that the model architecture used can be exchanged easily. For our use case, we mainly use the ResNet18 architecture, as it has been successfully applied to bird sound classification in previous work [[11](#koh2019)]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird calls may occur simultaneously in some recordings.
+The model training stage of our pipeline can be either used to train DCNN models with specified hyperparameters or to tune the model hyperparameters. It is implemented using the Pytorch framework<sup>6</sup> and the Torchvision library<sup>7</sup>. Building on Torchvision conventions, the training component is designed in such a way that the model architecture used can be exchanged easily. For our use case, we mainly use the ResNet18 architecture [[7](#resnet)], as it has been successfully applied to bird sound classification in previous work [[13](#koh2019)]. In addition, we also experiment with the ResNet50 and the DenseNet121 architectures [[7](#resnet), [8](#densenet)]. Our implementation supports training of both single-label and multi-label classification models. However, for our use case, we only use multi-label models since multiple bird vocalizations may occur simultaneously in some recordings.
 
-We train the models using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [[1](#image-net)]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
+The models are trained using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [[1](#image-net)]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from retraining only the fully connected layers to fine-tuning all model layers.
 
 To select the best model from each training run, we use a macro-averaged F<sub>1</sub>-score as performance metric. The macro F<sub>1</sub>-score weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on the frequent classes.
 
-<sup>2</sup> https://pytorch.org
+<sup>6</sup> https://pytorch.org
 
-<sup>3</sup> https://pytorch.org/vision/stable/index.html
+<sup>7</sup> https://pytorch.org/vision/stable/index.html
 
 ### Stage 4: Model Evaluation
 
@@ -473,7 +475,7 @@ Lastly we also tuned the weight decay. As you can see in Table... below, a weigh
 A list of our complete training results can be found in our included Excel file and as csv.
 
 |               | Layer 1 - Fc  | Layer 2 - Fc  | Layer 3 - Fc  | Layer 4 - Fc  |
-|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.755 ± 0.002 | 0.752 ± 0.004 | 0.741 ± 0.004 | 0.703 ± 0.001 |
 | Max F1-Score  | 0.845 ± 0.012 | 0.860 ± 0.002 | 0.859 ± 0.004 | 0.831 ± 0.010 |
 | Min F1-Score  | 0.673 ± 0.010 | 0.668 ± 0.011 | 0.656 ± 0.014 | 0.594 ± 0.005 |
@@ -481,7 +483,7 @@ A list of our complete training results can be found in our included Excel file 
 Table 5: Tuning of Transfer Learning
 
 |               | 0.1           | 0.2           | 0.3           | 0.4           | 0.5           | 0.6           | 0.7           |
-|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.741 ± 0.001 | 0.743 ± 0.002 | 0.742 ± 0.001 | 0.741 ± 0.002 | 0.740 ± 0.003 | 0.741 ± 0.000 | 0.741 ± 0.002 |
 | Max F1-Score  | 0.852 ± 0.006 | 0.859 ± 0.851 | 0.851 ± 0.005 | 0.853 ± 0.009 | 0.850 ± 0.003 | 0.846 ± 0.003 | 0.852 ± 0.007 |
 | Min F1-Score  | 0.648 ± 0.011 | 0.640 ± 0.008 | 0.645 ± 0.008 | 0.641 ± 0.013 | 0.632 ± 0.016 | 0.646 ± 0.010 | 0.650 ± 0.007 |
@@ -489,7 +491,7 @@ Table 5: Tuning of Transfer Learning
 Table 6: Tuning of Dropout Probability
 
 |               | 0.0001        | 0.001         | 0.01          | 0.1           |
-|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.739 ± 0.002 | 0.743 ± 0.003 | 0.722 ± 0.001 | 0.641 ± 0.028 |
 | Max F1-Score  | 0.857 ± 0.003 | 0.853 ± 0.013 | 0.839 ± 0.011 | 0.781 ± 0.021 |
 | Min F1-Score  | 0.631 ± 0.009 | 0.661 ± 0.015 | 0.614 ± 0.022 | 0.449 ± 0.068 |
@@ -499,7 +501,7 @@ Table 7: Tuning of Weight Decay
 ### 5.3 Additional Data
 
 In the preceding chapters we mainly looked at our Resnet18 architecture in combination with our baseline dataset of ten classes of bird songs, each with 100 samples in the best audio quality without any other bird sounds in the background. And as we have seen the baseline performed quite well on the clean and filtered Xeno-Canto data, while the performance on the NISB4Plus set leaves something to be desired. As explained before this might be because our model is not very robust and has problems with background noise and bad quality bird sounds.
-Therefore, we defined two new datasets. Both contain the same ten bird song classes, but the first also includes bad quality audio files and different bird voices in the background, while the other has double the amount of training data. For simplicity, we call them _noisy data_ and _more data_ datasets. 
+Therefore, we defined two new datasets. Both contain the same ten bird song classes, but the first also includes bad quality audio files and different bird voices in the background, while the other has double the amount of training data. For simplicity, we call them _noisy data_ and _more data_ datasets.
 The training results for both sets had desired results. As you can see both test sets perform worse on the Xeno-Canto data (Figure...) but show improved success on both the NIPSB4Plus test data sets (Figure... and ...). This strengthens our thesis, that more training data, as well as, training on worse quality files, makes our model more robust on harder test data.
 
 In addition, we also swapped our Resnet18 for Resnet50 and DenseNet121 each and trained them on our baseline data. While both new models reached F<sub>1</sub>-scores of 0.737 and 0.728, they overall performed worse than our Resnet18. It could still be interesting to try out other different CNNs on how they impact the models performance.
@@ -557,87 +559,91 @@ Luckily, we designed our pipeline in a way, that it is easy to continue our work
 
 <a name="bird-clef-2018">[6]</a> Hervé Goëau et al. “Overview of BirdCLEF 2018: Monospecies vs. Sundscape Bird Identification”. In: Working Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–12. URL: http://ceur-ws.org/Vol-2125/invited%5C_paper%5C_9.pdf.
 
+<a name="resnet">[7]</a> Kaiming He et al. “Deep Residual Learning for Image Recognition”. In: CoRR 1512.03385 (Dec. 10, 2015). arXiv: 1512.03385. URL: http://arxiv.org/abs/1512.03385.
+
+<a name="densenet">[8]</a> Gao Huang, Zhuang Liu, and Kilian Q. Weinberger. “Densely Connected Convolutional Networks”. In: CoRR 1608.06993 (Jan. 28, 2018). arXiv: 1608.06993. URL: http://arxiv.org/abs/1608. 06993.
+
 <!-- kahl-2017 -->
 
-<a name="kahl-2017">[7]</a> Stefan Kahl et al. “Large-Scale Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–14. URL: http://ceur-ws.org/Vol-1866/paper_143.pdff.
+<a name="kahl-2017">[9]</a> Stefan Kahl et al. “Large-Scale Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–14. URL: http://ceur-ws.org/Vol-1866/paper_143.pdff.
 
 <!-- bird-clef-2019 -->
 
-<a name="bird-clef-2019">[8]</a> Stefan Kahl et al. “Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
+<a name="bird-clef-2019">[10]</a> Stefan Kahl et al. “Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
 
 <!-- chernobyl -->
 
-<a name="chernobyl">[9]</a> Paul Kendrick et al. Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone. 2018. DOI: 10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591. URL: https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591.
+<a name="chernobyl">[11]</a> Paul Kendrick et al. Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone. 2018. DOI: 10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591. URL: https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591.
 
 <!-- bird-clef-2020 -->
 
-<a name="bird-clef-2020">[10]</a> Stefan Kahl et al. “Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments”. In: Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper%5C_262.pdf.
+<a name="bird-clef-2020">[12]</a> Stefan Kahl et al. “Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments”. In: Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper%5C_262.pdf.
 
 <!-- koh2019 -->
 
-<a name="koh2019">[11]</a> Chih-Yuan Koh et al. “Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–10. URL: http://ceur-ws.org/Vol-2380/paper_68.pdf.
+<a name="koh2019">[13]</a> Chih-Yuan Koh et al. “Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–10. URL: http://ceur-ws.org/Vol-2380/paper_68.pdf.
 
 <!-- lasseck2013 -->
 
-<a name="lasseck2013">[12]</a> Mario Lasseck. “Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition”. In: Proceedings of the Workshop on Neural Information Processing Scaled for Bioin- formatics (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: http:// sabiod.lis-lab.fr/nips4b/.
+<a name="lasseck2013">[14]</a> Mario Lasseck. “Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition”. In: Proceedings of the Workshop on Neural Information Processing Scaled for Bioin- formatics (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: http:// sabiod.lis-lab.fr/nips4b/.
 
 <!-- lasseck2015 -->
 
-<a name="lasseck2015">[13]</a> Mario Lasseck. “Improved Automatic Bird Identification through Decision Tree based Feature Selection and Bagging”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–12. URL: http://ceur-ws.org/Vol-1391/160-CR.pdff.
+<a name="lasseck2015">[15]</a> Mario Lasseck. “Improved Automatic Bird Identification through Decision Tree based Feature Selection and Bagging”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–12. URL: http://ceur-ws.org/Vol-1391/160-CR.pdff.
 
 <!-- lasseck2014 -->
 
-<a name="lasseck2014">[14]</a> Mario Lasseck. “Large-Scale Identification of Birds in Audio Recordings”. In: Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum (Sheffield, United Kingdom). Ed. by Linda Cap- pellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: http: //ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
+<a name="lasseck2014">[16]</a> Mario Lasseck. “Large-Scale Identification of Birds in Audio Recordings”. In: Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum (Sheffield, United Kingdom). Ed. by Linda Cap- pellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: http: //ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
 
 <!-- birdvox -->
 
-<a name="birdvox">[15]</a> Vincent Lostanlen et al. “Birdvox-Full-Night: A Dataset and Benchmark for Avian Flight Call Detection”. In: International Conference on Acoustics, Speech and Signal Processing - ICASSP 2018 (Calgary, Canada). IEEE Computer Society, 2018, pp. 266–270. ISBN: 978-1-5386-4658-8. DOI: 10. 1109/ICASSP.2018.8461410.
+<a name="birdvox">[17]</a> Vincent Lostanlen et al. “Birdvox-Full-Night: A Dataset and Benchmark for Avian Flight Call Detection”. In: International Conference on Acoustics, Speech and Signal Processing - ICASSP 2018 (Calgary, Canada). IEEE Computer Society, 2018, pp. 266–270. ISBN: 978-1-5386-4658-8. DOI: 10. 1109/ICASSP.2018.8461410.
 
 <!-- nips4bplus -->
 
-<a name="nips4bplus">[16]</a> Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223 (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
+<a name="nips4bplus">[18]</a> Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223 (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
 
 <!-- muller2018 -->
 
-<a name="muller2018">[17]</a> Lukas Müller and Mario Marti. “Bird sound classification using a bidirectional LSTM”. In: Working
+<a name="muller2018">[19]</a> Lukas Müller and Mario Marti. “Bird sound classification using a bidirectional LSTM”. In: Working
 Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–13. URL: http: //ceur-ws.org/Vol-2125/paper_134.pdf.
 
 <!-- audio-monitoring -->
 
-<a name="audio-monitoring">[18]</a> Cristian Pérez-Granados and Juan Traba. “Estimating bird density using passive acoustic monitoring: a review of methods and suggestions for further research”. In: Ibis 163.3 (Feb. 2021), pp. 765–783. ISSN: 1474-919X. DOI: 10.1111/ibi.12944.
+<a name="audio-monitoring">[20]</a> Cristian Pérez-Granados and Juan Traba. “Estimating bird density using passive acoustic monitoring: a review of methods and suggestions for further research”. In: Ibis 163.3 (Feb. 2021), pp. 765–783. ISSN: 1474-919X. DOI: 10.1111/ibi.12944.
 
 <!-- poland-nfc -->
 
-<a name="poland-nfc">[19]</a> Hanna Pamuła et al. “Adaptation of deep learning methods to nocturnal bird audio monitoring”. In: Archives of Acoustics 42.3 (Sept. 30, 2017), p. 550. ISSN: 0137-5075.
+<a name="poland-nfc">[21]</a> Hanna Pamuła et al. “Adaptation of deep learning methods to nocturnal bird audio monitoring”. In: Archives of Acoustics 42.3 (Sept. 30, 2017), p. 550. ISSN: 0137-5075.
 
 <!-- ross -->
 
-<a name="ross">[20]</a> Jesse C. Ross and Paul E. Allen. “Random Forest for improved analysis efficiency in passive acoustic monitoring”. In: Ecological Acoustics 21 (2014), pp. 34–39. ISSN: 1574-9541. DOI: 10.1016/j.ecoinf.2013.12.002.
+<a name="ross">[22]</a> Jesse C. Ross and Paul E. Allen. “Random Forest for improved analysis efficiency in passive acoustic monitoring”. In: Ecological Acoustics 21 (2014), pp. 34–39. ISSN: 1574-9541. DOI: 10.1016/j.ecoinf.2013.12.002.
 
 <!-- monitoring-overview -->
 
-<a name="monitoring-overview">[21]</a> Dirk S. Schmeller et al. “Bird-monitoring in Europe – a first overview of practices, motivations and aims”. In:
+<a name="monitoring-overview">[23]</a> Dirk S. Schmeller et al. “Bird-monitoring in Europe – a first overview of practices, motivations and aims”. In:
 Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ natureconservation.2.3644.
 
 <!-- sevilla-2017 -->
 
-<a name="sevilla-2017">[22]</a> Antoine Sevilla and Hervé Glotin. “Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_ 177.pdf.
+<a name="sevilla-2017">[24]</a> Antoine Sevilla and Hervé Glotin. “Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_ 177.pdf.
 
 <!-- sprengel-2016 -->
 
-<a name="sprengel-2016">[23]</a> Elias Sprengel et al. “Audio Based Bird Species Identification using Deep Learning Techniques”. In: WorkingNotesofCLEF2016-ConferenceandLabsoftheEvaluationForum(évora,Portugal).Ed.by Krisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 547–559. URL: http://ceur-ws.org/Vol-1609/16090547.pdf.
+<a name="sprengel-2016">[25]</a> Elias Sprengel et al. “Audio Based Bird Species Identification using Deep Learning Techniques”. In: WorkingNotesofCLEF2016-ConferenceandLabsoftheEvaluationForum(évora,Portugal).Ed.by Krisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 547–559. URL: http://ceur-ws.org/Vol-1609/16090547.pdf.
 
 <!-- freefield1010” -->
 
-<a name="freefield1010">[24]</a> Dan Stowell and Mark D. Plumbley. “An open dataset for research on audio field recording archives: freefield1010”. In: CoRR 1309.5275 (Sept. 20, 2013), pp. 1–10. URL: http://arxiv.org/abs/ 1309.5275.
+<a name="freefield1010">[26]</a> Dan Stowell and Mark D. Plumbley. “An open dataset for research on audio field recording archives: freefield1010”. In: CoRR 1309.5275 (Sept. 20, 2013), pp. 1–10. URL: http://arxiv.org/abs/ 1309.5275.
 
 <!-- warblr -->
 
-<a name="warblr">[25]</a> Dan Stowell et al. “Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge”. In: Methods in Ecology and Evolution 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: 10.1111/2041-210X.13103.
+<a name="warblr">[27]</a> Dan Stowell et al. “Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge”. In: Methods in Ecology and Evolution 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: 10.1111/2041-210X.13103.
 
 <!-- xeno-canto -->
 
-<a name="xeno-canto">[26]</a> Willem-Pier Vellinga and Robert Planqué. “The Xeno-canto collection and its relation to sound recog- nition and classification”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10. URL: http://ceur-ws.org/Vol-1391/166-CR.pdf.
+<a name="xeno-canto">[28]</a> Willem-Pier Vellinga and Robert Planqué. “The Xeno-canto collection and its relation to sound recog- nition and classification”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10. URL: http://ceur-ws.org/Vol-1391/166-CR.pdf.
 
 </div>
 
