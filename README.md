@@ -61,9 +61,9 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 ![figure](./plots/pipeline.jpg)
 
-**Figure 1:** Architecture of our machine learning pipeline for bird sound recognition.
+**Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
 
-Conceptually, our machine learning pipeline consists of the following four stages (Figure 1):
+Conceptually, our machine learning pipeline consists of the following four stages ([Figure 1](#fig-pipeline)):
 
 1. Download of audio data and labels
 
@@ -271,7 +271,7 @@ Erithacus_rubecula_call
 | 619980 | 619980.mp3 | 0     | 11000  | Erithacus_rubecula_call |
 | 619980 | 619980.mp3 | 11000 | 174000 | Turdus_merula_call      |
 
-[Listing 4](#listing-directory-structure-spectrogram-creation) shows an example of the directory structure that is used to pass data between the spectrogram creation and the model training stage. It is very similar to the directory structure that is used as input of the spectrogram creation stage ([Listing 2](#listing-directory-structure-downloader)). As shown, the output directory of the spectrogram creation stage also has to contain a "categories.txt" file which matches the format shown in [Listing 3](#listing-categories-file). In addition, the spectrogram creation stage has to create a subdirectory named "spectrograms" and a label file "spectrograms.csv" for each dataset. The "spectrograms" subdirectory contains the spectrogram images of the respective dataset. The label file "spectrograms.csv" has to contain one label per spectrogram image. As shown in Table [3](#table-spectrogram-label-file), it must contain at least the columns "id", "file_path" and one column per label class containing binary presence-absence labels.
+[Listing 4](#listing-directory-structure-spectrogram-creation) shows an example of the directory structure that is used to pass data between the spectrogram creation and the model training stage. It is very similar to the directory structure that is used as input of the spectrogram creation stage ([Listing 2](#listing-directory-structure-downloader)). As shown, the output directory of the spectrogram creation stage also has to contain a "categories.txt" file which matches the format shown in [Listing 3](#listing-categories-file). In addition, the spectrogram creation stage has to create a subdirectory named "spectrograms" and a label file "spectrograms.csv" for each dataset. The "spectrograms" subdirectory contains the spectrogram images of the respective dataset. The label file "spectrograms.csv" has to contain one label per spectrogram image. As shown in [Table 3](#table-spectrogram-label-file), it must contain at least the columns "id", "file_path" and one column per label class containing binary presence-absence labels.
 
 ```
 ├── categories.txt
