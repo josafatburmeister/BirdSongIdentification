@@ -214,6 +214,8 @@ In the model evaluation stage, the best models from the training stage are evalu
 
 In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models' performances. As in the training stage, the macro-average F<sub>1</sub>-score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
 
+</div>
+
 ### Data Exchange Between Pipeline Stages
 
 <div align="justify">
@@ -306,6 +308,8 @@ Erithacus_rubecula_call
 </div>
 
 ## 4 Experiments
+
+<div align="justify">
 
 To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird vocalizations. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. Our main dataset was compiled from recordings from Xeno-Canto. For our baseline experiments and hyperparameter tuning, only recordings that do not contain background species, have audio quality "A", and a duration of at most 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in [Table 4](#table-xeno-canto-dataset). The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class. [Figure 3](#fig-example-spectrograms) shows examples of spectrograms of all ten classes.
 
@@ -667,9 +671,9 @@ Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ n
 
 </div>
 
-<div style="text-align: justify">
-
 # Technical Documentation
+
+<div align="justify">
 
 ## Running the Pipeline in a Jupyter Notebook
 
