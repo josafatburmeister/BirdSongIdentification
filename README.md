@@ -479,10 +479,12 @@ From our point of view, the differences in performance between classes are mainl
 
 ### 5.2 Hyperparameter Tuning
 
-First we plot the F<sub>1</sub>-scores for batch size and learning rate as two-dimensional slices in hyperparameter space. The goal was partly, to find some linear dependency for these parameters, which would help further hyperparameter tuning. Though, for our data we can not see any obvious dependency between batch size and learning rate. But what we find is, that the batch size has no big influence on the outcome, while a learning rate of 0.0001 performs best. Also, at learning rates of 10<sup>-6</sup> the performance drops greatly.
+The results of the paired tuning of batch size and learning rate are shown in [Figure 6](#fig-tuning-batch-learning-rate) as a two-dimensional slice of the hyperparameter space. As can be seen there, batch size has little impact on model performance, with lower batch sizes tending to produce slightly better results. Independent of the batch size, a learning rate of 0.0001 yields the highest F<sub>1</sub>-scores. At a learning rate of 10<sup>-6</sup>, performance drops sharply. In contrast to the results of ..., we did not find a strong linear dependency between batch size and learning rate in our case. Possibly, these different results are due to differences in model architecture and dataset. Nevertheless, our results also suggest that exhaustive testing of all combinations of batch size and learning rate is not necessary in hyperparameter tuning: according to our results, batch size and learning rate can be tuned independently, with learning rate having a larger impact on model performance.
 
-![plot](./plots/lr_batrch_mean.png)
-![plot](./plots/lr_batch_mean_cut.png)
+![fig-tuning-batch-learning-rate-1](./plots/lr_batrch_mean.png)
+![fig-tuning-batch-learning-rate-2](./plots/lr_batch_mean_cut.png)
+
+**Figure <a name="fig-tuning-batch-learning-rate">6</a>:** Results of the paired tuning of batch size and learning rate. The left matrix shows the results of all runs. In the right matrix, the training runs for learning rate 10<sup>-6</sup> are omitted to reveal differences between the other runs.
 
 Furthermore, we trained the hyperparameters on the number of layers to unfreeze in our ResNet18. As one can see in the results (Table...), the model performance improves the more layers we unfreeze. Considering that the model is pretrained on different real world images, it makes sense, that a frozen layer is bad at predicting spectrograms.
 
