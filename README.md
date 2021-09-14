@@ -518,9 +518,12 @@ In addition, we also swapped our Resnet18 for Resnet50 and DenseNet121 each and 
 
 ![plot](./plots/xeno_canto_model_comparison.png)
 ![plot](./plots/nips4bplus_data_comparison.png)
+
+Figure X: Model F<sub>1</sub>-score on Xeno-Canto test set &nbsp;&nbsp;&nbsp; Figure X: Model F<sub>1</sub>-score on NIPS4BPlus test data
+
 ![plot](./plots/nips4bplus_cut_data_comparison.png)
 
-Figure X: Model F<sub>1</sub>-score on Xeno-Canto test set. &nbsp;&nbsp;&nbsp; Figure X: Model F<sub>1</sub>-score on NIPS4BPlus test data. &nbsp;&nbsp; Figure X: Model F<sub>1</sub>-score on NIPS4BPlus data with .
+Figure X: Model F<sub>1</sub>-score on NIPS4BPlus data with
 
 ### Final Model
 
@@ -701,7 +704,7 @@ When running the pipeline, make sure that your Jupyter kernel uses the Python in
 
 ### Installation of Dependencies in Google Colab
 
-Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To setup the pipeline in Google Colab, create an empty Colab notebook and clone the repository:
+Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To set up the pipeline in Google Colab, create an empty Colab notebook and clone the repository:
 
 ```bash
 !git clone github.com/josafatburmeister/BirdSongIdentification
@@ -734,7 +737,7 @@ from general import FileManager
 file_manager = FileManager("./data")
 ```
 
-As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure will be created. In this example we use the directory `./data` to store the pipeline's data.As can be seen in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stages have a very similar structure. The directory and file names chosen so that both stages can write their output to the same directory without name conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
+As you can see, the FileManager class is initialized with the path of the parent directory where the pipeline directory structure will be created. In this example we use the directory `./data` to store the pipeline's data. As can be seen in Listing 1 and Listing 3, the output directories of the data download stage and the spectrogram creation stages have a very similar structure. The directory and file names chosen in a way that both stages can write their output to the same directory without name conflicts. Therefore, in our example, we can use the `./data` directory to store the output of both pipeline stages and only need to create a single FileManager object.
 
 ### Setting Up the Logger
 
@@ -750,7 +753,7 @@ logger.setLevel(logging.VERBOSE)
 
 ### Pipeline Stage 1: Data Download
 
-With this, we are ready to run the first pipeline stage that downloads the datasets. For this, we have to create instances of the respective downloader classes. In our example, we download audio data from Xeno-Canto and compile train, validation and test sets from it. To do this, we create an instance of the _XenoCantoDownloader_ class and then call the "create_datasets" method on it. The "create_datasets" method has several parameters that specify what data should be downloaded from Xeno-Canto. Among them is the "species_list" parameter, which specifies which bird species and sound categories should be included in the datasets, and the "maximum_samples_per_class" parameter, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
+With this, we are ready to run the first pipeline stage that downloads the datasets. For this, we have to create instances of the respective downloader classes. In our example, we download audio data from Xeno-Canto and compile train, validation and test sets from it. To do this, we create an instance of the _XenoCantoDownloader_ class and then call the "create_datasets" method on it. The "create_datasets" method has several parameters that specify what data should be downloaded from Xeno-Canto. Among them is the "species_list" parameter, which specifies which bird species and sound categories to include in the datasets, and the "maximum_samples_per_class" parameter, which specifies the maximum number of audio files per class that should be downloaded. A detailed documentation of all parameters can be found in the docstrings of the XenoCantoDownloader class.
 
 Note that the FileManager object we created earlier is passed to the XenoCantoDownloader constructor. This way we ensure that the downloaded data is placed in the `./data` directory.
 
@@ -816,11 +819,11 @@ spectrogram_creator.create_spectrograms_for_datasets(datasets=["nips4bplus", "ni
 Since we want to use the `./data` directory as both input and output directory of the spectrogram creation stage, we pass the same FileManager object to the
 "audio_file_manager" parameter and the "spectrogram_file_manager" parameter of the SpectrogramCreator constructor.
 
-As described in the section ["Stage 2: Spectrogram Creation"](#Stage 2: Spectrogram Creation), our pipeline implements a prefiltering of the spectrograms into "signal" and "noise" spectrograms. The "signal_threshold" and "noise_threshold" parameters of the "create_spectrograms_for_datasets" method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
+As described in the section ["Stage 2: Spectrogram Creation"](#Stage 2: Spectrogram Creation), our pipeline implements a pre-filtering of the spectrograms into "signal" and "noise" spectrograms. The "signal_threshold" and "noise_threshold" parameters of the "create_spectrograms_for_datasets" method control which spectrograms are classified as "signal" spectrograms and which are classified as "noise" filtering. Since the NIPS4BPlus dataset includes time-accurate annotations, we do not need noise filtering there and therefore set the parameters to zero.
 
 ### Pipeline Stage 3: Model Training and Hyperparameter Tuning
 
-Using the spectrograms created in the previous step, we can noew train image classification models. Since we do not yet know which hyperparameter settings are most suitable, we start by tuning the hyperparameters "batch size" and "learning rate". For this, we create an instance of the _HyperparameterTuner_ class and call the "tune_model" method on it:
+Using the spectrograms created in the previous step, we can now train image classification models. Since we do not yet know which hyperparameter settings are most suitable, we start by tuning the hyperparameters "batch size" and "learning rate". For this, we create an instance of the _HyperparameterTuner_ class and call the "tune_model" method on it:
 
 ```python
 from training import hyperparameter_tuner
@@ -886,11 +889,11 @@ trainer = training.ModelTrainer(
 best_average_model, best_minimum_model, best_models_per_class = trainer.train_model()
 ```
 
-The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class. The return value of the "train_model" method is a tuple containing three elements. The first element is the model that achieved the highest macro-averaged F1-score in the validation set. The second element is the model that achieved the highest minimum F1-score of all classes on the validation set. The third element is a dictionary that maps each class name to the model that achieved the highest F1-score for that class on the validation set.
+The constructor parameters of the ModelTrainer class are mostly the same as in the HyperparameterTuner class. Again, a detailed documentation of all parameters can be found in the docstrings of the class. The return value of the "train_model" method is a tuple containing three elements. The first element is the model that achieved the highest macro-averaged F<sub>1</sub>-score in the validation set. The second element is the model that achieved the highest minimum F<sub>1</sub>-score of all classes on the validation set. The third element is a dictionary that maps each class name to the model that achieved the highest F1-score for that class on the validation set.
 
 ### Pipeline Stage 4: Model Evaluation
 
-Finally, we evaluate the model that achieved the highest macro-averaged F1-score on the validation set, both on the Xeno-Canto test set and on the NIPS4BPlus dataset. To do this, we create an instance of the _ModelEvaluator_ class and call its "evaluate_model" method. Since the model's confidence on unseen data may be lower than on the training set, we run the model evaluation with multiple confidence thresholds:
+Finally, we evaluate the model that achieved the highest macro-averaged F<sub>1</sub>-score on the validation set, both on the Xeno-Canto test set and on the NIPS4BPlus dataset. To do this, we create an instance of the _ModelEvaluator_ class and call its "evaluate_model" method. Since the model's confidence on unseen data may be lower than on the training set, we run the model evaluation with multiple confidence thresholds:
 
 ```python
 from training import model_evaluator
@@ -931,7 +934,7 @@ If there are GPU nodes available in your cluster, you can run the following comm
 python3 kubeflow_pipeline/compile_pipeline.py --docker_registry <name of your Docker registry> compile_pipeline --use_gpu True
 ```
 
-Both compilation commands will produce a pipeline defintion file named `birdsong_pipeline.yaml`.
+Both compilation commands will produce a pipeline definition file named `birdsong_pipeline.yaml`.
 
 Next, build and push the pipeline's Docker image to the Docker registry of your cluster:
 
@@ -959,7 +962,7 @@ To apply our machine learning pipeline to another dataset than Xeno-Canto or NIP
 
 (3) A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in Table 2.
 
-To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object has to be must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
+To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
 
 By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
 
@@ -967,15 +970,15 @@ By deriving custom downloader classes from the Downloader class, the following u
 
 (2) Within the Downloader class, the FileManager object can be accessed using `self.path`. The FileManager object provides several methods that facilitate the handling and manipulation of file paths. For example, `self.path.data_folder(<dataset name>, "audio")` can be used to obtain the absolute path of the directory where the audio files must be placed.
 
-(3) The Downloader class implements a method `save_label_file(labels: pandas.Dataframe, dataset_name: str)`. This method takes a Pandas dataframe and creates a audio label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
+(3) The Downloader class implements a method `save_label_file(labels: pandas.Dataframe, dataset_name: str)`. This method takes a Pandas dataframe and creates an audio label file from it. The provided dataframe must contain at least the columns "id", "file_path", "label", "start", "end".
 
 ### Implementing Custom Spectrogram Creation Methods
 
-To implement custom spectrogram creation methods, we recommend to create a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
+To implement custom spectrogram creation methods, we recommend creating a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectrogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
 
 ### Implementing Custom Model Architectures
 
-To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fullfil the following requirements:
+To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fulfil the following requirements:
 
 (1) The model needs to be implemented in Pytorch and should be derived from the `torch.nn.Module` class.
 
@@ -992,6 +995,6 @@ __init__(self,
 
 The purpose of each parameter is documented in the docstrings of the `setup_model` method of the _ModelRunner_ class.
 
-(3) The model's `forward` method receives an three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the `num_classes` constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
+(3) The model's `forward` method receives a three-dimensional Pytorch tensor containing the spectrogram image as input. It has to return a one-dimensional tensor with the `num_classes` constructor parameter being the number of entries. The result tensor must contain the log-odds of the classes.
 
 </div>
