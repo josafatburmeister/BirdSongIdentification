@@ -177,39 +177,39 @@ def visualize_additionl_data():
 
     ind = np.arange(9) * 1.5
     width = 0.35
-    plt.bar(ind - width, baseline, width, label='Baseline')
-    plt.bar(ind, noisy, width, label='Noisy Data')
-    plt.bar(ind + width, more_data, width, label='More Data')
-    plt.ylabel('F1-Score')
+    plt.barh(ind - width, baseline, width, label='Baseline')
+    plt.barh(ind, noisy, width, label='Noisy Data')
+    plt.barh(ind + width, more_data, width, label='More Data')
+    plt.xlabel('F1-Score')
     plt.title('Xeno Canto')
-    plt.yticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
-    plt.xticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+    plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
+    plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
     plt.show()
 
     plt.clf()
 
     # NIPS4BPlus
-    plt.bar(ind - width, baseline_nips4bplus, width, label='Baseline')
-    plt.bar(ind, noisy_nips4bplus, width, label='Noisy Data')
-    plt.bar(ind + width, more_data_nips4bplus, width, label='More Data')
-    plt.ylabel('F1-Score')
+    plt.barh(ind - width, baseline_nips4bplus, width, label='Baseline')
+    plt.barh(ind, noisy_nips4bplus, width, label='Noisy Data')
+    plt.barh(ind + width, more_data_nips4bplus, width, label='More Data')
+    plt.xlabel('F1-Score')
     plt.title('nips4BPlus')
-    plt.yticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
-    plt.xticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+    plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
+    plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
     plt.show()
 
     plt.clf()
 
     # NIPS4BPlus Cut
-    plt.bar(ind - width, baseline_nips4bplus_cut, width, label='Baseline')
-    plt.bar(ind, noisy_nips4bplus_cut, width, label='Noisy Data')
-    plt.bar(ind + width, more_data_nips4bplus_cut, width, label='More Data')
-    plt.ylabel('F1-Score')
+    plt.barh(ind - width, baseline_nips4bplus_cut, width, label='Baseline')
+    plt.barh(ind, noisy_nips4bplus_cut, width, label='Noisy Data')
+    plt.barh(ind + width, more_data_nips4bplus_cut, width, label='More Data')
+    plt.xlabel('F1-Score')
     plt.title('nips4BPlus cut')
-    plt.yticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
-    plt.xticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+    plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
+    plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
     plt.show()
 
