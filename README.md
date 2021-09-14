@@ -307,9 +307,11 @@ Erithacus_rubecula_call
 
 ## 4 Experiments
 
-To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird songs. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. The dataset was compiled from recordings from Xeno-Canto. Only recordings that do not contain background species, have audio quality "A", and a duration of at most 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in Table 2. The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class.
+To evaluate the performance of our pipeline, we use a sample dataset with ten classes of bird vocalizations. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto. Our main dataset was compiled from recordings from Xeno-Canto. For our baseline experiments and hyperparameter tuning, only recordings that do not contain background species, have audio quality "A", and a duration of at most 180 seconds were used. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all data splits is shown in [Table 4](#table-xeno-canto-dataset). The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set. To avoid strong imbalances, the number of noise spectrograms included in the data splits was limited to the number of spectrograms of the most common bird vocalization class. [Figure 3](#fig-example-spectrograms) shows examples of spectrograms of all ten classes.
 
-For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in Table 3.
+For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in [Table 5](#table-nips4bplus-dataset).
+
+Table <a name="table-xeno-canto-dataset">4</a>: Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters
 
 | Class name                    | No. recordings in training set | No. spectrograms in training set | No. recordings in validation set | No. spectrograms in validation set | No. recordings in test set | No. spectrograms in test set |
 | ----------------------------- | ------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------- | -------------------------- | ---------------------------- |
@@ -326,7 +328,7 @@ For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-C
 | Noise                         | -                              | 22,291                           | -                                | 6,901                              | -                          | 6,995                        |
 | **Total**                     | **2,762**                      | **145,548**                      | **921**                          | **46,444**                         | **923**                    | **47,506**                   |
 
-Table 2: Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters
+Table <a name="table-nips4bplus-dataset">5</a>>: Class distribution of the NIPS4BPlus dataset used for model evaluation
 
 | Class name                                   | No. recordings in NIPS4BPlus dataset | No. spectrograms in NIPS4BPlus dataset |
 | -------------------------------------------- | ------------------------------------ | -------------------------------------- |
@@ -343,8 +345,6 @@ Table 2: Class distribution of the Xeno-Canto dataset used for training the base
 | Noise (whole NIPS4BPlus dataset)             | 549                                  | 2147                                   |
 | Noise (filtered NIPS4BPlus dataset)          | 87                                   | 333                                    |
 | **Total (filtered NIPS4BPlus / NIPS4BPlus)** | **107 / 569**                        | **486 / 2,300**                        |
-
-Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
 
 <div style="display: flex; flex-direction: column;">
     <div>
@@ -419,11 +419,13 @@ Table 3: Class distribution of the NIPS4BPlus dataset used for model evaluation
     </div>
 </div>
 
-**Figure ...**: Examples of spectrograms of the ten classes of our data set.
+**Figure <a name="fig-example-spectrograms">3</a>**: Examples of spectrograms of the ten classes of our data set.
 
 ### 4.1 Baseline Setting
 
-To establish a baseline for our experiments, we first train a model with a standard setting (Table 4). We train the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we perform three training runs. From each run, we select the model with the highest macro-average F<sub>1</sub>-score and report the average of the F<sub>1</sub>-scores of these best models.
+To establish a baseline for our experiments, we first trained a model with a standard setting ([Table 6](#table-baseline-setting)). We trained the model as a multi-label classification model with a confidence threshold of 0.5. To account for noise factors such as data shuffling and random weight initialization, we performed three training runs. From each of the three runs, we selected the model with the highest macro-average F<sub>1</sub>-score and report the average of the macro F<sub>1</sub>-scores of these best models.
+
+**Table <a name="table-baseline-setting">6</a>**: Training setting of our baseline model
 
 | Parameter               | Baseline Setting                                                  |
 | ----------------------- | ----------------------------------------------------------------- |
@@ -435,15 +437,13 @@ To establish a baseline for our experiments, we first train a model with a stand
 | Batch size              | 1024                                                              |
 | Loss function           | Cross-entropy loss                                                |
 
-Table 4: Training setting of our baseline model
-
 ### 4.2 Hyperparameter-Tuning
 
-With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, regularization, probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch size and learning rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
+With the goal of improving the performance of our baseline models, we tuned several model hyperparameters. The tuned hyperparameters are batch size, learning rate, strenth of L<sub>2<sub>-regularization (weight decay), probability of dropout, and the number of layers fine-tuned during transfer learning. Since related work has reported a linear dependence between batch size and learning rate, we have tuned these parameters in a paired fashion. All other hyperparameters were tuned independently, assuming that there are no dependencies between them.
 
 ### 4.3 Additional Data
 
-In addition to hyperparameter tuning, we also study how quality and size of the training dataset affect model performance. For this purpose, we compare the performance of our baseline model with the performance of models trained on two modified training datasets: In the first case, we used a training dataset with lower audio quality. For this, we set the minimum aud, and we used a maximum of 500 audio samples per sound class. In the second case, we used the same quality settings (minimum quality "E", up to ten background species) but increased the maximum number of audio files per class to 1000.
+In addition to hyperparameter tuning, we also studied how quality and size of the training dataset affect model performance. For this purpose, we compared the performance of our baseline model with the performance of models trained on two modified training datasets: In the first case, we used a training dataset with with Xeno-Canto recordings of lower audio quality. For this, we set the minimum audio quality to "E" and used a maximum of 500 audio samples per sound class. In the second case, we used the same quality settings (minimum quality "E", up to ten background species) but increased the maximum number of audio files per class to 1000.
 
 </div>
 
