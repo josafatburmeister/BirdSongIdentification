@@ -194,7 +194,7 @@ The model training stage of our pipeline can be either used to train DCNN models
 
 The models are trained using a transfer learning approach. For this, we use models from the Torchvision Library that were pre-trained on the ImageNet dataset [[1](#image-net)]. We replace the fully-connected layers of the pre-trained models with classifiers suited to our classification tasks and then fine-tune some of the model's layers on our data. Our implementation supports various degrees of transfer learning, which range from re-training only the fully connected layer to fine-tuning all model layers.
 
-To select the best model from each training run, we use the macro-averaged F<sub>1</sub>-score (macro F<sub>1</sub>-score) as primary performance metric. The macro F<sub>1</sub>-score is the unweighted average of the F<sub>1</sub>-scores of all classes. Thus, it weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on frequent classes. In addition to the macro F<sub>1</sub>-score, we also monitor the minimum and maximum class-wise F1-score as additional performance indicators. To track and visualize the performance metrics, we use the _Weights and Biases_ platform<sup>8</sup>.
+To select the best model from each training run, we use the macro-averaged F<sub>1</sub>-score (macro F<sub>1</sub>-score) as primary performance metric. The macro F<sub>1</sub>-score is the unweighted average of the F<sub>1</sub>-scores of all classes. Thus, it weights all classes equally and is therefore suitable for our use case, where model performance on rare classes is as important as performance on frequent classes. In addition to the macro F<sub>1</sub>-score, we also monitor the performance metrics (F<sub>1</sub>-score, precision, recall) of each class as well as the minimum of the class-wise F<sub>1</sub>-scores as additional performance indicators. To track and visualize the performance metrics, we use the _Weights and Biases_ platform.<sup>8</sup>
 
 <sup>6</sup> https://pytorch.org
 
@@ -204,7 +204,15 @@ To select the best model from each training run, we use the macro-averaged F<sub
 
 ### Stage 4: Model Evaluation
 
-In the model evaluation stage, the best model from the training stage is evaluated on test datasets that have not been used for model training or validation. In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models' performances. As in the training stage, the macro-average F<sub>1</sub> score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
+In the model evaluation stage, the best models from the training stage are evaluated on test datasets that have not been used for model training or validation. Specifically, the following models are selected for evaluation:
+
+1. Model with the highest macro F<sub>1</sub>-score
+
+2. Model with the highest minimum class-wise F<sub>1</sub>-score
+
+3. Models with the highest F<sub>1</sub>-scores for a each class
+
+In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models' performances. As in the training stage, the macro-average F<sub>1</sub>-score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
 
 ### Data Exchange Between Pipeline Components
 
