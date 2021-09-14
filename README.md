@@ -557,6 +557,7 @@ And one final idea we were interested in, was a model that trained on all our di
 Luckily, we designed our pipeline in a way, that it is easy to continue our work and using this pipeline as a basis for further experimentation.
 
 </div>
+
 # References
 
 <div align="justify">
