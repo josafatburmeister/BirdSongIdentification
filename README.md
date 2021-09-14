@@ -356,70 +356,70 @@ Table <a name="table-nips4bplus-dataset">5</a>>: Class distribution of the NIPS4
         <img src="https://drive.google.com/uc?id=1VSnSiRpylTvqmGD1g2nO4liBGcb0fOQH" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1ydpr_RxlND9nClHLYUDWIXfMZn9geLsE" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Cyanistes caeruleus</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-a">(a)</a> <i>Cyanistes caeruleus</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1UR402ZN_LwFAQOvxtIg8aj_ttRNQ0R81" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1IhhU-oed-5ELCyl0KGCc4B1bJ9mZ-Dun" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Erithacus rubecula</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-b">(b)</a> <i>Erithacus rubecula</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1epw7tlJPZIH6l15seimgwfWEybLRUvuM" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1UEFjhiM8uYrCB_u1Ec0ZjPZs7VWc0isj" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Fringilla coelebs</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-c">(c)</a> <i>Fringilla coelebs</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1r3FSk1na1Llk5uYZ_Fnsu1Dh29R0Zow3" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1Q6UQ8t5VRuxa3JOEkJhLi98bJo2S-a92" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Luscinia megarhynchos</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-d">(d)</a> <i>Luscinia megarhynchos</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1YdW7FaWsJbnXo21Svj0MEr1uDnYtj_k8" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1aXEXf44HTnHyJXP_LNrbqOq3ejOq7wlO" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Parus major</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-e">(e)</a> <i>Parus major</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1ZRylQHpivA8q3CACIOw2_l3-Swym-LC4" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1s0oXh9pUzQPokoxcAogLOfoEi6hAvvbe" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Phylloscopus collybita</i>, call.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-f">(f)</a> <i>Phylloscopus collybita</i>, call.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1ueqA3IRdZATVrlAr_nKPWrK2PIw4ymzp" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1-eHr6rmaWiWAnNpngyM_mp1gQ7EW4Qik" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Phylloscopus collybita</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-g">(g)</a> <i>Phylloscopus collybita</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1OouGhMC96kqVz-a8kq-4A6BPBjfNP_T-" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1PphCul0l4qFOSOc3X9jpQwp2IlHJD-uh" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Sylvia atricapilla</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-h">(h)</a> <i>Sylvia atricapilla</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1ErJJ6rkVcVO_k6s6VBqW8gR5xagJh9Q6" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=18WBSFopg7uzybfTw3jMt2K7DhkBIAbFl" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Troglodytes troglodytes</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-i">(i)</a> <i>Troglodytes troglodytes</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="https://drive.google.com/uc?id=1DDzmx8-mH57tnYW6rIxQ4kdAecl02mjl" width="200" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1X-Qav5m5v5Rw8yY7BngK5J0sfhJ3RKtx" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
-        <p style="text-align: center; margin: 10px 0px;">(a) <i>Turdus philomelos</i>, song.</p>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-j">(j)</a> <i>Turdus philomelos</i>, song.</p>
     </div>
 </div>
 
@@ -459,21 +459,23 @@ In addition to hyperparameter tuning, we also studied how quality and size of th
 
 On the Xeno-Canto validation set, our three baseline runs achieved an average macro F<sub>1</sub>-score of 0.741 ± 0.003 (at a confidence threshold of 0.5). The performance on the Xeno-Canto test set was very similar, with an average macro F<sub>1</sub>-score of 0,736 ± 0,001 (at a confidence threshold of 0.5). The training of our baseline models was characterized by overfitting, with all models reaching a training F<sub>1</sub>-score close to one after 15-20 epochs. The best performance on the validation set was achieved between the fourth and sixth training epoch in all baseline runs.
 
-![baseline-confidence-thresholding](./plots/baseline-confidence-thresholding.png)
+![fig-baseline-confidence](./plots/baseline-confidence-thresholding.png)
 
-**Figure <a name="fig-baseline-confidence">4</a>**: Average macro F<sub>1</sub>-score of the baseline models at different confidence thresholds.
+**Figure <a name="fig-baseline-confidence">4</a>:** Average macro F<sub>1</sub>-score of the baseline models at different confidence thresholds.
 
-On the NIPS4BPlus dataset, the performance of the baseline models was significantly worse than on the Xeno-Canto data. As can be seen in Figure [4](#fig-baseline-confidence), the confidence of the baseline models on the NIPS4BPlus dataset was significantly lower than on the Xeno-Canto test set. We therefore experimented with multiple confidence thresholds and found that for the NIPS4BPlus dataset, the best classification results are obtained at a low confidence threshold of 0.1: At this threshold, the average macro F<sub>1</sub>-score was 0.258 ± 0.009, and at a confidence threshold of 0.5, it was only 0.139 ± 0.007. On the filtered NIPS4BPlus dataset, the performance was similar, with a macro F<sub>1</sub> score of 0.266 ± 0.012 at a confidence threshold of 0.1 and of 0.139 ± 0.003 at a confidence threshold of 0.5.
+On the NIPS4BPlus dataset, the performance of the baseline models was significantly worse than on the Xeno-Canto data. As can be seen in [Figure 4](#fig-baseline-confidence), the confidence of the baseline models on the NIPS4BPlus dataset was significantly lower than on the Xeno-Canto test set. We therefore experimented with multiple confidence thresholds and found that for the NIPS4BPlus dataset, the best classification results are obtained at a low confidence threshold of 0.1: At this threshold, the average macro F<sub>1</sub>-score was 0.258 ± 0.009, and at a confidence threshold of 0.5, it was only 0.139 ± 0.007. On the filtered NIPS4BPlus dataset, the performance was similar, with a macro F<sub>1</sub> score of 0.266 ± 0.012 at a confidence threshold of 0.1 and of 0.139 ± 0.003 at a confidence threshold of 0.5.
 
 We presume that the poor performance on the NIPS4BPlus dataset is due to the following differences between the training data from Xeno-Canto and the NIPS4BPlus dataset: While the Xeno-Canto training dataset consists mainly of focal recordings directed to the vocalizations of a specific individual, the recordings of the NIPS4BPlus dataset were collected with field recorders that were not directed to a specific individual. Accordingly, some bird vocalizations in the NIPS4BPlus dataset are quieter than in the Xeno-Canto training dataset. Additionally, some recordings in the NIPS4BPlus dataset contain stronger background noise, such as wind.
 
-**Figure <a name="fig-baseline-class-scores">5</a>** Average class-wise F<sub>1</sub>-scores of the three baseline models on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown. The error bars show the standard deviation.
+![fig-baseline-class-scores](./plots/baseline.png)
 
-As shown in Figure [5](#fig-baseline-class-scores), the F<sub>1</sub>-scores for most classes were very similar for the Xeno-Canto validation and test sets. On both the validation and test sets, "_Phylloscopus collybita_, call" was the class with the highest F<sub>1</sub>-score. On the test set, an average F<sub>1</sub>-score of 0.861 ± 0.002 was obtained for this class. The lowest average F<sub>1</sub>-score on the validation set, 0.645 ± 0.014, was obtained for the class "_Cyanistes caeruleus_, song". On the test set, "_Fringilla coelebs_, song" was the worst performing class with an average F<sub>1</sub>-score of 0.626 ± 0.008.
+**Figure <a name="fig-baseline-class-scores">5</a>:** Average class-wise F<sub>1</sub>-scores of the three baseline models on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown. The error bars show the standard deviation.
 
-F<sub>1</sub>-scores on the NIPS4BPlus dataset were significantly lower than on the Xeno-Canto data for most classes. Some classes for which high classification accuracies were achieved on the Xeno-Canto data had very low F<sub>1</sub>-scores on the NIPS4BPlus dataset. For example, the class "_Phylloscopus collybita_, call", which performed best on the Xeno-Canto data, had an F<sub>1</sub>-score of 0. The highest F<sub>1</sub>-scores on the NIPS4BPlus dataset were obtained for the classes "_Erithacus rubecula_, song" (0.659 ± 0.020) and "_Troglodytes troglodytes_, song" (0.624 ± 0.002).
+As shown in [Figure 5](#fig-baseline-class-scores), the F<sub>1</sub>-scores for most classes were very similar for the Xeno-Canto validation and test sets. On both the validation and test sets, "_Phylloscopus collybita_, call" was the class with the highest F<sub>1</sub>-score. On the test set, an average F<sub>1</sub>-score of 0.861 ± 0.002 was obtained for this class. The lowest average F<sub>1</sub>-score on the validation set, 0.645 ± 0.014, was obtained for the class "_Cyanistes caeruleus_, song". On the test set, "_Fringilla coelebs_, song" was the worst performing class with an average F<sub>1</sub>-score of 0.626 ± 0.008.
 
-From our point of view, the differences in performance between classes are mainly related to two factors: the complexity of the sound patterns and the number of training samples. Of the ten sound classes in our dataset, nine classes are bird songs and one class is a call ("_Phylloscopus collybita_, call"). While songs consist of a sequence of different phrases and motives, calls are much less complex. In spectrograms, calls are usually visible as a single pattern, whereas songs are visible as a sequence of patterns. In some cases, these sequences are longer than the 1-second chunks represented by the spectrograms we use. We suspect that the model learns best those calls and songs that consist of simple patterns that can be represented by a single spectrogram. For example, it is noteworthy that on the Xeno-Canto data, the highest classification accuracy is achieved for the call of the common chiffchaff ("_Phylloscopus collybita_, call"), although this is the class with the fewest training samples (Table ...). As can be seen in Figure ... , the call appears as a short, simple pattern in the spectrograms. The second highest accuracy on the Xeno-Canto data is obtained for the song of the common chiffchaff ("_Phylloscopus collybita_, song"), which consists of a uniform sequence of a simple pattern. However, similar high F<sub>1</sub>-scores as for the song of the common chiffchaff are also obtained for the songs of the nightingale ("_Luscinia megarhynchos_, song") and the song thrush ("_Turdus philomelos_, song"). These species have very complex songs, but are also represented by a higher number of spectrograms in our training dataset. Therefore, we believe that the number of training samples has a positive effect on model performance and can support the models to learn even complex patterns.
+F<sub>1</sub>-scores on the NIPS4BPlus dataset were significantly lower than on the Xeno-Canto data for most classes. Some classes for which high classification accuracies were achieved on the Xeno-Canto data had very low F<sub>1</sub>-scores on the NIPS4BPlus dataset. For example, the class "_Phylloscopus collybita_, call", which performed best on the Xeno-Canto data, had an F<sub>1</sub>-score of 0 on the NIPS4BPlus dataset. The highest F<sub>1</sub>-scores on the NIPS4BPlus dataset were obtained for the classes "_Erithacus rubecula_, song" (0.659 ± 0.020) and "_Troglodytes troglodytes_, song" (0.624 ± 0.002).
+
+From our point of view, the differences in performance between classes are mainly related to two factors: the complexity of the sound patterns and the number of training samples. Of the ten sound classes in our dataset, nine classes are bird songs and one class is a call ("_Phylloscopus collybita_, call"). While songs consist of a sequence of different phrases and motives, calls are much less complex. In spectrograms, calls are usually visible as a single pattern, whereas songs are visible as a sequence of patterns ([Figure 3](#fig-example-spectrograms)). In some cases, these sequences are longer than the 1-second chunks represented by the spectrograms we use. We suspect that the model learns best those calls and songs that consist of simple patterns that can be represented by a single spectrogram. For example, on the Xeno-Canto data, the highest classification accuracy is achieved for the call of the common chiffchaff ("_Phylloscopus collybita_, call"), although this is the class with the fewest training samples ([Table 4](#table-xeno-canto-dataset)). As can be seen in [Figure 3f](#fig-example-spectrograms-f), the call appears as a short, simple pattern in the spectrograms. The second highest accuracy on the Xeno-Canto data is obtained for the song of the common chiffchaff ("_Phylloscopus collybita_, song"), which consists of a uniform sequence of a simple pattern ([Figure 3g](#fig-example-spectrograms-g)). However, similar high F<sub>1</sub>-scores as for the song of the common chiffchaff are also obtained for the songs of the nightingale ("_Luscinia megarhynchos_, song") and the song thrush ("_Turdus philomelos_, song"). These species have very complex songs, but are also represented by a higher number of spectrograms in our training dataset. Therefore, we believe that the number of training samples has a positive effect on model performance and can support the models to learn even complex patterns.
 
 ### 5.2 Hyperparameter Tuning
 
