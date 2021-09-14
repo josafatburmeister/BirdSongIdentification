@@ -61,7 +61,9 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 ![figure](./plots/pipeline.jpg)
 
-Conceptually, our machine learning pipeline consists of the following four stages:
+**Figure 1:** Architecture of our machine learning pipeline for bird sound recognition.
+
+Conceptually, our machine learning pipeline consists of the following four stages (Figure 1):
 
 1. Download of audio data and labels
 
@@ -85,7 +87,7 @@ All pipeline steps are implemented by Python classes, which are described in mor
 
 The downloader stage of the pipeline is responsible for downloading the audio files and labels needed for model training and evaluation, and converting them into a consistent format. For this purpose, we provide a generic downloader implementation, based on which downloaders for specific datasets can be implemented.
 
-To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from the above mentioned downloader base class. To download audio files from Xeno-Canto, the public Xeno-Canto API<sup>3</sup> is used. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files (Figure 1). Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API and compiles training, validation, and test sets based on the filter values. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
+To demonstrate the capability of our pipeline, we use audio data from the Xeno-Canto database (for model training, validation and testing), as well as the NIPS4BPlus dataset (for model testing). The download of both datasets is implemented by separate downloader classes that inherit from the above mentioned downloader base class. To download audio files from Xeno-Canto, the public Xeno-Canto API<sup>3</sup> is used. The Xeno-Canto API allows searching for audio files based on a set of filter criteria (e.g., bird species, recording location, recording quality, and recording duration). The search returns the metadata of the matching audio files in JSON format, including download links for the audio files (Figure 2). Our Xeno-Canto downloader implementation supports most of the filter criteria of the Xeno-Canto API and compiles training, validation, and test sets based on the filter values. Our NIPS4BPlus downloader, on the other hand, only supports filtering by bird species and sound category, since no other metadata is available for the NIPS4Bplus dataset.
 
 ```javascript
 [
@@ -115,7 +117,7 @@ To demonstrate the capability of our pipeline, we use audio data from the Xeno-C
 ];
 ```
 
-**Figure 1:** Example result of a search query to the Xeno-Canto API.
+**Figure 2:** Example result of a search query to the Xeno-Canto API.
 
 To speed up the download phase, local caching of files is used in addition to multithreading. This way, successive pipeline runs do not have to download the same files more than once. When the pipeline is run as a Jupyter notebook, a regular directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a Google Cloud Storage<sup>4</sup> bucket is used for file caching.
 
@@ -137,7 +139,7 @@ For spectrogram creation, we largely follow the approach described by Kot et al.
 
 Table 1: Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
-Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 (Figure [1b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white (Figure [1c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied (Figures [1d](#fig-noise-filtering-d), [1e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide the option to include noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we implement noise filtering. For this purpose, we employ the noise filtering algorithm presented by Kahl et al. [[17](#kahl-2017)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 (Figure [3b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this process, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white (Figure [3c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied (Figures [3d](#fig-noise-filtering-d), [3e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide the option to include noise spectrograms for training as a separate class.
 
 <div style="display: flex; flex-direction: column;">
     <div>
@@ -182,7 +184,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
 </div>
 
-**<a name="fig-noise-filtering">Figure 2</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[17](#kahl-2017)] shown by three example spectrograms.
+**<a name="fig-noise-filtering">Figure 3</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[17](#kahl-2017)] shown by three example spectrograms.
 
 <sup>5</sup> https://librosa.org
 
@@ -473,7 +475,7 @@ Lastly we also tuned the weight decay. As you can see in Table... below, a weigh
 A list of our complete training results can be found in our included Excel file and as csv.
 
 |               | Layer 1 - Fc  | Layer 2 - Fc  | Layer 3 - Fc  | Layer 4 - Fc  |
-|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.755 ± 0.002 | 0.752 ± 0.004 | 0.741 ± 0.004 | 0.703 ± 0.001 |
 | Max F1-Score  | 0.845 ± 0.012 | 0.860 ± 0.002 | 0.859 ± 0.004 | 0.831 ± 0.010 |
 | Min F1-Score  | 0.673 ± 0.010 | 0.668 ± 0.011 | 0.656 ± 0.014 | 0.594 ± 0.005 |
@@ -481,7 +483,7 @@ A list of our complete training results can be found in our included Excel file 
 Table 5: Tuning of Transfer Learning
 
 |               | 0.1           | 0.2           | 0.3           | 0.4           | 0.5           | 0.6           | 0.7           |
-|---------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.741 ± 0.001 | 0.743 ± 0.002 | 0.742 ± 0.001 | 0.741 ± 0.002 | 0.740 ± 0.003 | 0.741 ± 0.000 | 0.741 ± 0.002 |
 | Max F1-Score  | 0.852 ± 0.006 | 0.859 ± 0.851 | 0.851 ± 0.005 | 0.853 ± 0.009 | 0.850 ± 0.003 | 0.846 ± 0.003 | 0.852 ± 0.007 |
 | Min F1-Score  | 0.648 ± 0.011 | 0.640 ± 0.008 | 0.645 ± 0.008 | 0.641 ± 0.013 | 0.632 ± 0.016 | 0.646 ± 0.010 | 0.650 ± 0.007 |
@@ -489,7 +491,7 @@ Table 5: Tuning of Transfer Learning
 Table 6: Tuning of Dropout Probability
 
 |               | 0.0001        | 0.001         | 0.01          | 0.1           |
-|---------------|---------------|---------------|---------------|---------------|
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | Mean F1-Score | 0.739 ± 0.002 | 0.743 ± 0.003 | 0.722 ± 0.001 | 0.641 ± 0.028 |
 | Max F1-Score  | 0.857 ± 0.003 | 0.853 ± 0.013 | 0.839 ± 0.011 | 0.781 ± 0.021 |
 | Min F1-Score  | 0.631 ± 0.009 | 0.661 ± 0.015 | 0.614 ± 0.022 | 0.449 ± 0.068 |
@@ -499,7 +501,7 @@ Table 7: Tuning of Weight Decay
 ### 5.3 Additional Data
 
 In the preceding chapters we mainly looked at our Resnet18 architecture in combination with our baseline dataset of ten classes of bird songs, each with 100 samples in the best audio quality without any other bird sounds in the background. And as we have seen the baseline performed quite well on the clean and filtered Xeno-Canto data, while the performance on the NISB4Plus set leaves something to be desired. As explained before this might be because our model is not very robust and has problems with background noise and bad quality bird sounds.
-Therefore, we defined two new datasets. Both contain the same ten bird song classes, but the first also includes bad quality audio files and different bird voices in the background, while the other has double the amount of training data. For simplicity, we call them _noisy data_ and _more data_ datasets. 
+Therefore, we defined two new datasets. Both contain the same ten bird song classes, but the first also includes bad quality audio files and different bird voices in the background, while the other has double the amount of training data. For simplicity, we call them _noisy data_ and _more data_ datasets.
 The training results for both sets had desired results. As you can see both test sets perform worse on the Xeno-Canto data (Figure...) but show improved success on both the NIPSB4Plus test data sets (Figure... and ...). This strengthens our thesis, that more training data, as well as, training on worse quality files, makes our model more robust on harder test data.
 
 In addition, we also swapped our Resnet18 for Resnet50 and DenseNet121 each and trained them on our baseline data. While both new models reached F<sub>1</sub>-scores of 0.737 and 0.728, they overall performed worse than our Resnet18. It could still be interesting to try out other different CNNs on how they impact the models performance.
