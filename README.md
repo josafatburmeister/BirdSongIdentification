@@ -449,6 +449,8 @@ In addition to hyperparameter tuning, we also studied how quality and size of th
 
 # 5 Results and Discussion
 
+<div align="justify">
+
 ### 5.1 Baseline Setting
 
 On the Xeno-Canto validation set, the three baseline runs achieved an average macro F<sub>1</sub>-score of 0,741 ± 0,003 (at a confidence threshold of 0.5). The performance on the Xeno-Canto test set was very similar, with an average macro F<sub>1</sub>-score of 0,736 ± 0,001 (at a confidence threshold of 0.5). The training of our baseline models was characterized by overfitting, with all models reaching a training F<sub>1</sub>-score close to one after 15-20 epochs. The best performance on the validation set was achieved between the fourth and sixth training epoch in all runs.
@@ -537,16 +539,21 @@ On the Xeno-Canto validation set, the final model achieved a macro F<sub>1</sub>
 
 For the Xeno-Canto data, the final model did not improve over the baseline models. However, for the NIPS4BPlus dataset, the final model performs significantly than the baseline models and also better than the models form the "More Data" experiment. This shows that both the quality and size of the training data and the tuning of the hyperparameters have a substantial impact on the performance and generalizability of the models.
 
+</div>
+
 # 6 Outlook
+
+<div align="justify">
 
 Overall we are pleased with the outcome of our project. We successfully implemented a pipeline for an automated recognition of bird vocalizations in audio files. But there still are lots of things one can try out. For example are there different hyperparameters for the spectrogram creation, like the noise threshold, the spectrogram choice or all the different options for image filtering we did not have the time to test.
 It also would be interesting to do further testing with different transfer learning architectures.
 And one final idea we were interested in, was a model that trained on all our different model outputs. This way you could utilize the ability of different models that perform best on different birds or sound file qualities.
 Luckily, we designed our pipeline in a way, that it is easy to continue our work and using this pipeline as a basis for further experimentation.
 
+</div>
 # References
 
-<div style="text-align: justify">
+<div align="justify">
 
 <!-- image-net -->
 
