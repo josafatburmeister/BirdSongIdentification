@@ -59,6 +59,8 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 <div align="justify">
 
+![figure](./plots/pipeline.jpg)
+
 Conceptually, our machine learning pipeline consists of the following four stages:
 
 1. Download of audio data and labels
