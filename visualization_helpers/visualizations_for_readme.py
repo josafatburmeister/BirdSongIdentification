@@ -16,7 +16,7 @@ def visualize_matrix():
                                   [0.700, 0.718, 0.726, 0.739, 0.718, 0.302]])  # batch size 1024
 
     plots.append({
-        'title': "F1-Score Mean",
+        'title': "Average Macro F1-Score",
         'matrix': lr_batchsize_mean,
         'y_labels': [64, 128, 256, 512, 1024],
         'x_labels': [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001]
@@ -58,7 +58,7 @@ def visualize_matrix():
                                       [0.700, 0.718, 0.726, 0.739, 0.718]])  # batch size 1024
 
     plots.append({
-        'title': "F1-Score Mean (cut)",
+        'title': "Average Macro F1-Score (cutout)",
         'matrix': lr_batchsize_mean_cut,
         'y_labels': [64, 128, 256, 512, 1024],
         'x_labels': [0.1, 0.01, 0.001, 0.0001, 0.00001]
@@ -184,7 +184,7 @@ def visualize_additional_data():
     plt.barh(ind + width, more_data, width, label='More Data')
     plt.xlabel('F1-Score')
     plt.ylabel('Confidence Threshold')
-    plt.title('Xeno Canto')
+    plt.title('Xeno-Canto')
     plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
     plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
