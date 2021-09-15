@@ -350,6 +350,11 @@ Table <a name="table-nips4bplus-dataset">5</a>>: Class distribution of the NIPS4
 | Noise (filtered NIPS4BPlus dataset)          | 87                                   | 333                                    |
 | **Total (filtered NIPS4BPlus / NIPS4BPlus)** | **107 / 569**                        | **486 / 2,300**                        |
 
+![plot](./plots/class_distribution_spectrograms.png)
+![plot](./plots/class_distribution_recordings.png)
+
+**Figure..** Class distribution for Spectrograms **Figure..** Class distribution for Recordings
+
 <div style="display: flex; flex-direction: column;">
     <div>
         <div style="display: flex;">
@@ -531,7 +536,7 @@ In addition, we also swapped our Resnet18 for Resnet50 and DenseNet121 each and 
 
 Figure X: Model F<sub>1</sub>-score on Xeno-Canto test set &nbsp;&nbsp;&nbsp; Figure X: Model F<sub>1</sub>-score on NIPS4BPlus test data
 
-![plot](./plots/nips4bplus_cut_data_comparison.png)
+![plot](./plots/nips4bplus_filtered_data_comparison.png)
 
 Figure X: Model F<sub>1</sub>-score on NIPS4BPlus data with
 
