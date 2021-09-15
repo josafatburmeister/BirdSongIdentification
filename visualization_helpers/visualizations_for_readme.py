@@ -235,7 +235,7 @@ def visualize_class_distributions():
         'xeno_tr': xeno_training_spectrograms,
         'xeno_va': xeno_validation_spectrograms,
         'xeno_te': xeno_test_spectrograms,
-        'title': 'Class distribution Spectrograms',
+        'title': 'Class Distribution (Spectrograms)',
         'x-title': 'Number of Spectrograms',
         'labels': ('Cyanistes caeruleus, song', 'Erithacus rubecula, song', 'Fringilla coelebs, song',
                    'Luscinia megarhynchos, song', 'Parus major, song', 'Phylloscopus collybita, call',
@@ -257,7 +257,7 @@ def visualize_class_distributions():
         'xeno_tr': xeno_training_recordings,
         'xeno_va': xeno_validation_recordings,
         'xeno_te': xeno_test_recordings,
-        'title': 'Class distribution Recordings',
+        'title': 'Class Distribution (Recordings)',
         'x-title': 'Number of Recordings',
         'labels': ('Cyanistes caeruleus, song', 'Erithacus rubecula, song', 'Fringilla coelebs, song',
                    'Luscinia megarhynchos, song', 'Parus major, song', 'Phylloscopus collybita, call',
@@ -268,9 +268,9 @@ def visualize_class_distributions():
     for plot in plots:
         ind = np.arange(len(plot['labels'])) * 2
         width = 0.35
-        plt.barh(ind - 0.5 * width, plot['xeno_tr'], width, label='Xeno-Train')
-        plt.barh(ind + 0.5 * width, plot['xeno_va'], width, label='Xeno-Val')
-        plt.barh(ind + 1.5 * width, plot['xeno_te'], width, label='Xeno-Test')
+        plt.barh(ind - 0.5 * width, plot['xeno_tr'], width, label='Training')
+        plt.barh(ind + 0.5 * width, plot['xeno_va'], width, label='Validation')
+        plt.barh(ind + 1.5 * width, plot['xeno_te'], width, label='Test')
         plt.xlabel(plot['x-title'])
         plt.title(plot['title'])
         plt.yticks(ind + width / 2, plot['labels'])
