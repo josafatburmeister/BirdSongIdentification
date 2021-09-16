@@ -597,93 +597,93 @@ Luckily, we designed our pipeline in a way, that it is easy to continue our work
 
 <a name="resnet">[7]</a> Kaiming He et al. "Deep Residual Learning for Image Recognition". In: _CoRR_ 1512.03385 (Dec. 10, 2015). arXiv: 1512.03385. URL: http://arxiv.org/abs/1512.03385.
 
-<a name="densenet">[8]</a> Gao Huang, Zhuang Liu, and Kilian Q. Weinberger. “Densely Connected Convolutional Networks”. In: _CoRR_ 1608.06993 (Jan. 28, 2018). arXiv: 1608.06993. URL: http://arxiv.org/abs/1608.06993.
+<a name="densenet">[8]</a> Gao Huang, Zhuang Liu, and Kilian Q. Weinberger. "Densely Connected Convolutional Networks". In: _CoRR_ 1608.06993 (Jan. 28, 2018). arXiv: 1608.06993. URL: http://arxiv.org/abs/1608.06993.
 
 <!-- kahl-2017 -->
 
-<a name="kahl-2017">[9]</a> Stefan Kahl et al. “Large-Scale Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–14. URL: http://ceur-ws.org/Vol-1866/paper_143.pdff.
+<a name="kahl-2017">[9]</a> Stefan Kahl et al. "Large-Scale Bird Sound Classification using Convolutional Neural Networks". In: _Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum_ (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–14. URL: http://ceur-ws.org/Vol-1866/paper_143.pdff.
 
 <!-- bird-clef-2019 -->
 
-<a name="bird-clef-2019">[10]</a> Stefan Kahl et al. “Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
+<a name="bird-clef-2019">[10]</a> Stefan Kahl et al. "Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes". In: _Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum_ (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
 
 <!-- chernobyl -->
 
-<a name="chernobyl">[11]</a> Paul Kendrick et al. Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone. 2018. DOI: 10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591. URL: https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591.
+<a name="chernobyl">[11]</a> Paul Kendrick et al. _Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone_. 2018. DOI: [10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591](https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591).
 
 <!-- bird-clef-2020 -->
 
-<a name="bird-clef-2020">[12]</a> Stefan Kahl et al. “Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments”. In: Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper%5C_262.pdf.
+<a name="bird-clef-2020">[12]</a> Stefan Kahl et al. "Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments". In: _Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum_ (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper_262.pdf.
 
 <!-- koh2019 -->
 
-<a name="koh2019">[13]</a> Chih-Yuan Koh et al. “Bird Sound Classification using Convolutional Neural Networks”. In: Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–10. URL: http://ceur-ws.org/Vol-2380/paper_68.pdf.
+<a name="koh2019">[13]</a> Chih-Yuan Koh et al. "Bird Sound Classification using Convolutional Neural Networks". In: _Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum_ (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–10. URL: http://ceur-ws.org/Vol-2380/paper_68.pdf.
 
 <!-- lasseck2013 -->
 
-<a name="lasseck2013">[14]</a> Mario Lasseck. “Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition”. In: Proceedings of the Workshop on Neural Information Processing Scaled for Bioin- formatics (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: http:// sabiod.lis-lab.fr/nips4b/.
+<a name="lasseck2013">[14]</a> Mario Lasseck. "Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition". In: _Proceedings of the Workshop on Neural Information Processing Scaled for Bioinformatics_ (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: http://sabiod.lis-lab.fr/nips4b/.
 
 <!-- lasseck2015 -->
 
-<a name="lasseck2015">[15]</a> Mario Lasseck. “Improved Automatic Bird Identification through Decision Tree based Feature Selection and Bagging”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–12. URL: http://ceur-ws.org/Vol-1391/160-CR.pdff.
+<a name="lasseck2015">[15]</a> Mario Lasseck. "Improved Automatic Bird Identification through Decision Tree based Feature Selection and Bagging". In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–12. URL: http://ceur-ws.org/Vol-1391/160-CR.pdf.
 
 <!-- lasseck2014 -->
 
-<a name="lasseck2014">[16]</a> Mario Lasseck. “Large-Scale Identification of Birds in Audio Recordings”. In: Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum (Sheffield, United Kingdom). Ed. by Linda Cap- pellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: http: //ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
+<a name="lasseck2014">[16]</a> Mario Lasseck. "Large-Scale Identification of Birds in Audio Recordings". In: _Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum_ (Sheffield, United Kingdom). Ed. by Linda Cap- pellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: http://ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
 
 <!-- birdvox -->
 
-<a name="birdvox">[17]</a> Vincent Lostanlen et al. “Birdvox-Full-Night: A Dataset and Benchmark for Avian Flight Call Detection”. In: International Conference on Acoustics, Speech and Signal Processing - ICASSP 2018 (Calgary, Canada). IEEE Computer Society, 2018, pp. 266–270. ISBN: 978-1-5386-4658-8. DOI: 10. 1109/ICASSP.2018.8461410.
+<a name="birdvox">[17]</a> Vincent Lostanlen et al. "Birdvox-Full-Night: A Dataset and Benchmark for Avian Flight Call Detection". In: _International Conference on Acoustics, Speech and Signal Processing - ICASSP 2018_ (Calgary, Canada). IEEE Computer Society, 2018, pp. 266–270. ISBN: 978-1-5386-4658-8. DOI: [10.1109/ICASSP.2018.8461410](https://doi.org/10.1109/ICASSP.2018.8461410).
 
 <!-- nips4bplus -->
 
-<a name="nips4bplus">[18]</a> Veronica Morfi et al. “NIPS4Bplus: a richly annotated birdsong audio dataset.” In: PeerJ Computer Science 5.e223 (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: 10.7717/peerj-cs.223.
+<a name="nips4bplus">[18]</a> Veronica Morfi et al. "NIPS4Bplus: a richly annotated birdsong audio dataset." In: PeerJ Computer Science 5.e223 (Oct. 7, 2019), pp. 1–12. ISSN: 2376-5992. DOI: [10.7717/peerj-cs.223](https://doi.org/10.7717/peerj-cs.223).
 
 <!-- muller2018 -->
 
-<a name="muller2018">[19]</a> Lukas Müller and Mario Marti. “Bird sound classification using a bidirectional LSTM”. In: Working
-Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–13. URL: http: //ceur-ws.org/Vol-2125/paper_134.pdf.
+<a name="muller2018">[19]</a> Lukas Müller and Mario Marti. "Bird sound classification using a bidirectional LSTM". In: _Working
+Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum_ (Avignon, France). Ed. by Linda Cappellato et al. Vol. 2125. CEUR Workshop Proceedings. CEUR, Sept. 2018, pp. 1–13. URL: http://ceur-ws.org/Vol-2125/paper_134.pdf.
 
 <!-- audio-monitoring -->
 
-<a name="audio-monitoring">[20]</a> Cristian Pérez-Granados and Juan Traba. “Estimating bird density using passive acoustic monitoring: a review of methods and suggestions for further research”. In: Ibis 163.3 (Feb. 2021), pp. 765–783. ISSN: 1474-919X. DOI: 10.1111/ibi.12944.
+<a name="audio-monitoring">[20]</a> Cristian Pérez-Granados and Juan Traba. "Estimating bird density using passive acoustic monitoring: a review of methods and suggestions for further research". In: _Ibis_ 163.3 (Feb. 2021), pp. 765–783. ISSN: 1474-919X. DOI: [10.1111/ibi.12944](https://doi.org/10.1111/ibi.12944).
 
 <!-- poland-nfc -->
 
-<a name="poland-nfc">[21]</a> Hanna Pamuła et al. “Adaptation of deep learning methods to nocturnal bird audio monitoring”. In: Archives of Acoustics 42.3 (Sept. 30, 2017), p. 550. ISSN: 0137-5075.
+<a name="poland-nfc">[21]</a> Hanna Pamuła et al. "Adaptation of deep learning methods to nocturnal bird audio monitoring". In: _Archives of Acoustics_ 42.3 (Sept. 30, 2017), p. 550. ISSN: 0137-5075.
 
 <!-- ross -->
 
-<a name="ross">[22]</a> Jesse C. Ross and Paul E. Allen. “Random Forest for improved analysis efficiency in passive acoustic monitoring”. In: Ecological Acoustics 21 (2014), pp. 34–39. ISSN: 1574-9541. DOI: 10.1016/j.ecoinf.2013.12.002.
+<a name="ross">[22]</a> Jesse C. Ross and Paul E. Allen. "Random Forest for improved analysis efficiency in passive acoustic monitoring". In: _Ecological Acoustics_ 21 (2014), pp. 34–39. ISSN: 1574-9541. DOI: [10.1016/j.ecoinf.2013.12.002](https://doi.org/10.1016/j.ecoinf.2013.12.002).
 
 <!-- monitoring-overview -->
 
-<a name="monitoring-overview">[23]</a> Dirk S. Schmeller et al. “Bird-monitoring in Europe – a first overview of practices, motivations and aims”. In:
-Nature Conservation 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: 10.3897/ natureconservation.2.3644.
+<a name="monitoring-overview">[23]</a> Dirk S. Schmeller et al. "Bird-monitoring in Europe – a first overview of practices, motivations and aims". In:
+_Nature Conservation_ 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: [10.3897/ natureconservation.2.3644](https://doi.org/10.3897/natureconservation.2.3644).
 
 <!-- sevilla-2017 -->
 
-<a name="sevilla-2017">[24]</a> Antoine Sevilla and Hervé Glotin. “Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms”. In: Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_ 177.pdf.
+<a name="sevilla-2017">[24]</a> Antoine Sevilla and Hervé Glotin. "Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms". In: \*Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum\* (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_177.pdf.
 
 <!-- sprengel-2016 -->
 
-<a name="sprengel-2016">[25]</a> Elias Sprengel et al. “Audio Based Bird Species Identification using Deep Learning Techniques”. In: WorkingNotesofCLEF2016-ConferenceandLabsoftheEvaluationForum(évora,Portugal).Ed.by Krisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 547–559. URL: http://ceur-ws.org/Vol-1609/16090547.pdf.
+<a name="sprengel-2016">[25]</a> Elias Sprengel et al. "Audio Based Bird Species Identification using Deep Learning Techniques". In: _Working Notes of CLEF 2016 - Conference and Labs of the Evaluation Forum_ (Évora,Portugal).Ed.by Krisztian Balog et al. Vol. 1609. CEUR Workshop Proceedings. CEUR, Sept. 2016, pp. 547–559. URL: http://ceur-ws.org/Vol-1609/16090547.pdf.
 
 <!-- dropout -->
 
-<a name="dropout">[26]</a> Nitish Srivastava et al. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting". In: _Journal of Machine Learning Research_ 15.1 (Jan. 2014), pp. 1929–1958. ISSN: 1533-7928. URL: http: //jmlr.org/papers/v15/srivastava14a.html.
+<a name="dropout">[26]</a> Nitish Srivastava et al. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting". In: _Journal of Machine Learning Research_ 15.1 (Jan. 2014), pp. 1929–1958. ISSN: 1533-7928. URL: http://jmlr.org/papers/v15/srivastava14a.html.
 
 <!-- freefield1010” -->
 
-<a name="freefield1010">[27]</a> Dan Stowell and Mark D. Plumbley. “An open dataset for research on audio field recording archives: freefield1010”. In: CoRR 1309.5275 (Sept. 20, 2013), pp. 1–10. URL: http://arxiv.org/abs/ 1309.5275.
+<a name="freefield1010">[27]</a> Dan Stowell and Mark D. Plumbley. "An open dataset for research on audio field recording archives: freefield1010". In: _CoRR_ 1309.5275 (Sept. 20, 2013), pp. 1–10. URL: http://arxiv.org/abs/1309.5275.
 
 <!-- warblr -->
 
-<a name="warblr">[28]</a> Dan Stowell et al. “Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge”. In: Methods in Ecology and Evolution 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: 10.1111/2041-210X.13103.
+<a name="warblr">[28]</a> Dan Stowell et al. "Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge". In: _Methods in Ecology and Evolution_ 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: [10.1111/2041-210X.13103](10.1111/2041-210X.13103).
 
 <!-- xeno-canto -->
 
-<a name="xeno-canto">[29]</a> Willem-Pier Vellinga and Robert Planqué. “The Xeno-canto collection and its relation to sound recog- nition and classification”. In: Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10. URL: http://ceur-ws.org/Vol-1391/166-CR.pdf.
+<a name="xeno-canto">[29]</a> Willem-Pier Vellinga and Robert Planqué. "The Xeno-canto collection and its relation to sound recognition and classification". In: _Working Notes of CLEF 2015 - Conference and Labs of the Evaluation Forum_ (Toulouse, France). Ed. by Linda Cappellato et al. Vol. 1391. CEUR Workshop Proceedings. CEUR, Sept. 2015, pp. 1–10. URL: http://ceur-ws.org/Vol-1391/166-CR.pdf.
 
 </div>
 
