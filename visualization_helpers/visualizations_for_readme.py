@@ -16,7 +16,7 @@ def visualize_matrix():
                                   [0.700, 0.718, 0.726, 0.739, 0.718, 0.302]])  # batch size 1024
 
     plots.append({
-        'title': "F1-Score Mean",
+        'title': "Average Macro F1-Score",
         'matrix': lr_batchsize_mean,
         'y_labels': [64, 128, 256, 512, 1024],
         'x_labels': [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001]
@@ -58,7 +58,7 @@ def visualize_matrix():
                                       [0.700, 0.718, 0.726, 0.739, 0.718]])  # batch size 1024
 
     plots.append({
-        'title': "F1-Score Mean (cut)",
+        'title': "Average Macro F1-Score (cutout)",
         'matrix': lr_batchsize_mean_cut,
         'y_labels': [64, 128, 256, 512, 1024],
         'x_labels': [0.1, 0.01, 0.001, 0.0001, 0.00001]
@@ -86,7 +86,7 @@ def visualize_matrix():
                                      [0.596, 0.600, 0.589, 0.632, 0.586]])  # batch size 1024
 
     plots.append({
-        'title': "F1-Score Min (cut)",
+        'title': "F1-Score Min (architectures)",
         'matrix': lr_batchsize_min_cut,
         'y_labels': [64, 128, 256, 512, 1024],
         'x_labels': [0.1, 0.01, 0.001, 0.0001, 0.00001]
@@ -137,11 +137,11 @@ def visualize_hyperparameter_bars():
         'rotate': 0
     })
 
-    architechtures = np.array([0.741, 0.698, 0.710, 0.737, 0.728])
+    architectures = np.array([0.741, 0.698, 0.710, 0.737, 0.728])
 
     plots.append({
         'title': 'Performance Comparison',
-        'array': architechtures,
+        'array': architectures,
         'labels': ['Resnet-18', 'Res18 noisy', 'Res18 more data', 'Resnet-50', 'Resnet-121'],
         'x-label': '',
         'rotate': 15
@@ -162,7 +162,7 @@ def visualize_hyperparameter_bars():
         plt.clf()
 
 
-def visualize_additionl_data():
+def visualize_additional_data():
     baseline = np.array([0.639, 0.720, 0.740, 0.742, 0.736, 0.726, 0.708, 0.680, 0.627])
     baseline_nips4bplus = np.array([0.258, 0.239, 0.213, 0.175, 0.139, 0.122, 0.098, 0.074, 0.045])
     baseline_nips4bplus_cut = np.array([0.266, 0.247, 0.218, 0.178, 0.139, 0.120, 0.093, 0.072, 0.044])
@@ -177,11 +177,14 @@ def visualize_additionl_data():
 
     ind = np.arange(9) * 1.5
     width = 0.35
+
+    #Xeno-Canto
     plt.barh(ind - width, baseline, width, label='Baseline')
     plt.barh(ind, noisy, width, label='Noisy Data')
     plt.barh(ind + width, more_data, width, label='More Data')
     plt.xlabel('F1-Score')
-    plt.title('Xeno Canto')
+    plt.ylabel('Confidence Threshold')
+    plt.title('Xeno-Canto')
     plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
     plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
@@ -194,7 +197,8 @@ def visualize_additionl_data():
     plt.barh(ind, noisy_nips4bplus, width, label='Noisy Data')
     plt.barh(ind + width, more_data_nips4bplus, width, label='More Data')
     plt.xlabel('F1-Score')
-    plt.title('nips4BPlus')
+    plt.ylabel('Confidence Threshold')
+    plt.title('NIPS4BPlus')
     plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
     plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
@@ -202,19 +206,83 @@ def visualize_additionl_data():
 
     plt.clf()
 
-    # NIPS4BPlus Cut
+    # NIPS4BPlus Filtered
     plt.barh(ind - width, baseline_nips4bplus_cut, width, label='Baseline')
     plt.barh(ind, noisy_nips4bplus_cut, width, label='Noisy Data')
     plt.barh(ind + width, more_data_nips4bplus_cut, width, label='More Data')
     plt.xlabel('F1-Score')
-    plt.title('nips4BPlus cut')
+    plt.ylabel('Confidence Threshold')
+    plt.title('NIPS4BPlus, filtered')
     plt.xticks((0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1), (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))
     plt.yticks(ind + width / 2, (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
     plt.legend(loc='best')
     plt.show()
 
 
+def visualize_class_distributions():
+    plots = []
+
+    xeno_training_spectrograms = np.array(
+        [5_374, 13_374, 9_890, 18_156, 11_026, 4_990, 12_474, 14_786, 11_001, 22_291, 22_291])
+    xeno_validation_spectrograms = np.array(
+        [1_426, 4_668, 3_145, 5_817, 3_721, 1_352, 4_219, 5_304, 2_990, 6_901, 6_901])
+    xeno_test_spectrograms = np.array(
+        [1_407, 5_027, 3_260, 6_472, 3_552, 1_599, 4_006, 4_968, 3_225, 6_995, 6_995])
+    nips4bplus_test_spectrograms = np.array(
+        [30, 47, 24, 38, 40, 12, 31, 17, 31, 55, 333])
+
+    plots.append({
+        'xeno_tr': xeno_training_spectrograms,
+        'xeno_va': xeno_validation_spectrograms,
+        'xeno_te': xeno_test_spectrograms,
+        'title': 'Class Distribution (Spectrograms)',
+        'x-title': 'Number of Spectrograms',
+        'labels': ('Cyanistes caeruleus, song', 'Erithacus rubecula, song', 'Fringilla coelebs, song',
+                   'Luscinia megarhynchos, song', 'Parus major, song', 'Phylloscopus collybita, call',
+                   'Phylloscopus collybita, song', 'Sylvia atricapilla, song', 'Troglodytes troglodytes, song',
+                   'Turdus philomelos, song', 'Noise')
+    })
+
+    xeno_training_recordings = np.array(
+        [163, 300, 300, 298, 300, 201, 300, 300, 300, 300]
+    )
+    xeno_validation_recordings = np.array(
+        [55, 100, 100, 99, 100, 67, 100, 100, 100, 100]
+    )
+    xeno_test_recordings = np.array(
+        [55, 100, 100, 100, 100, 68, 100, 100, 100, 100]
+    )
+
+    plots.append({
+        'xeno_tr': xeno_training_recordings,
+        'xeno_va': xeno_validation_recordings,
+        'xeno_te': xeno_test_recordings,
+        'title': 'Class Distribution (Recordings)',
+        'x-title': 'Number of Recordings',
+        'labels': ('Cyanistes caeruleus, song', 'Erithacus rubecula, song', 'Fringilla coelebs, song',
+                   'Luscinia megarhynchos, song', 'Parus major, song', 'Phylloscopus collybita, call',
+                   'Phylloscopus collybita, song', 'Sylvia atricapilla, song', 'Troglodytes troglodytes, song',
+                   'Turdus philomelos, song')
+    })
+
+    for plot in plots:
+        ind = np.arange(len(plot['labels'])) * 2
+        width = 0.35
+        plt.barh(ind - 0.5 * width, plot['xeno_tr'], width, label='Training')
+        plt.barh(ind + 0.5 * width, plot['xeno_va'], width, label='Validation')
+        plt.barh(ind + 1.5 * width, plot['xeno_te'], width, label='Test')
+        plt.xlabel(plot['x-title'])
+        plt.title(plot['title'])
+        plt.yticks(ind + width / 2, plot['labels'])
+        plt.legend(loc='best')
+        plt.tight_layout()
+        plt.show()
+
+        plt.clf()
+
+
 if __name__ == 'main':
     visualize_matrix()
     visualize_hyperparameter_bars()
-    visualize_additionl_data()
+    visualize_additional_data()
+    visualize_class_distributions()
