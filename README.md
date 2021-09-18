@@ -497,33 +497,31 @@ In Table ..., the results of tuning the weight decay are shown. As can be seen t
 
 Tuning the dropout rate gave a different result: As shown in Table ..., all tested dropout rates led to similar model performances. Even with a high dropout rate of 0.7, similar F<sub>1</sub>-scores were obtained as for the models trained with low dropout rates. This suggests that the inputs of the fully connected layer to which dropout was applied in our implementation are highly redundant. Compared to classification tasks on images of natural scenes for which ResNet18 was designed, the target features of our classification task are much less complex. We therefore hypothetize that the back layers of the ResNet18 architecture are more complex than would be needed to learn our classification.
 
-When comparing different degrees of transfer learning, we observed that model performanced increased as more model layers were unfrozen for fine-tuning (Table ...). Fine-tuning all convolutional layers led to the highest F<sub>1</sub>-scores. Considering that the models were pretrained on real world images, this supports our hypothesis that low-level features are particularly important for our classification task
+When comparing different degrees of transfer learning, we observed that model performanced increased as more model layers were unfrozen for fine-tuning (Table ...). Fine-tuning all convolutional layers led to the highest F<sub>1</sub>-scores. Considering that the first model layers typically learn rather low-level features, this shows that the low-level features of our dataset differ substantially from the low-level features of the real images on which the models were pre-trained. Since low-level features are of high importance for spectorgram classification, the front model layers should be fine-tuned accordingly. Compared to the ResNet18 architecture, deeper model architectures such as ResNet50 and DenseNet121 did not improve performance. This is consistent with our observation that the ResNet18 architecture is already more complex than our dataset requires and overfits accordingly.
 
-A list of our complete training results can be found in our included Excel file and as csv.
+Table ...: Performance of ResNet18, ResNet50 and DenseNet121 models trained with different transfer learning approaches. The table shows the average F<sub>1</sub>-scores obtained on the Xeno-Canto validation set.
 
-|               | Layer 1 - Fc  | Layer 2 - Fc  | Layer 3 - Fc  | Layer 4 - Fc  |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| Mean F1-Score | 0.755 ± 0.002 | 0.752 ± 0.004 | 0.741 ± 0.004 | 0.703 ± 0.001 |
-| Max F1-Score  | 0.845 ± 0.012 | 0.860 ± 0.002 | 0.859 ± 0.004 | 0.831 ± 0.010 |
-| Min F1-Score  | 0.673 ± 0.010 | 0.668 ± 0.011 | 0.656 ± 0.014 | 0.594 ± 0.005 |
+|                                        | ResNet18, conv. layer 1 - 4, fc. | ResNet18, conv. layer 2 -4, fc. | ResNet18, conv. layer 3 -4, fc. | ResNet18, conv. layer 4, fc. | ResNet50, conv. layer 3 -4, fc. | DenseNet121, denseblock 3-4, fc. |
+| -------------------------------------- | -------------------------------- | ------------------------------- | ------------------------------- | ---------------------------- | ------------------------------- | -------------------------------- |
+| Average macro F<sub>1</sub>-score      | 0.755 ± 0.002                    | 0.752 ± 0.004                   | 0.741 ± 0.004                   | 0.703 ± 0.001                | 0.737 ± 0.003                   | 0.728 ± 0.001                    |
+| Maximum class-wise F<sub>1</sub>-score | 0.845 ± 0.012                    | 0.860 ± 0.002                   | 0.859 ± 0.004                   | 0.831 ± 0.010                | 0.846 ± 0.001                   | 0.845 ± 0.000                    |
+| Minimum class-wise F<sub>1</sub>-score | 0.673 ± 0.010                    | 0.668 ± 0.011                   | 0.656 ± 0.014                   | 0.594 ± 0.005                | 0.646 ± 0.004                   | 0.633 ± 0.010                    |
 
-Table 5: Tuning of Transfer Learning
+Table 5: Performance of ResNet18 models trained with different dropout rates. The table shows the average F<sub>1</sub>-scores obtained on the Xeno-Canto validation set.
 
-|               | 0.1           | 0.2           | 0.3           | 0.4           | 0.5           | 0.6           | 0.7           |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| Mean F1-Score | 0.741 ± 0.001 | 0.743 ± 0.002 | 0.742 ± 0.001 | 0.741 ± 0.002 | 0.740 ± 0.003 | 0.741 ± 0.000 | 0.741 ± 0.002 |
-| Max F1-Score  | 0.852 ± 0.006 | 0.859 ± 0.851 | 0.851 ± 0.005 | 0.853 ± 0.009 | 0.850 ± 0.003 | 0.846 ± 0.003 | 0.852 ± 0.007 |
-| Min F1-Score  | 0.648 ± 0.011 | 0.640 ± 0.008 | 0.645 ± 0.008 | 0.641 ± 0.013 | 0.632 ± 0.016 | 0.646 ± 0.010 | 0.650 ± 0.007 |
+|                                        | 0.1           | 0.2           | 0.3           | 0.4           | 0.5           | 0.6           | 0.7           |
+| -------------------------------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Average macro F<sub>1</sub>-score      | 0.741 ± 0.001 | 0.743 ± 0.002 | 0.742 ± 0.001 | 0.741 ± 0.002 | 0.740 ± 0.003 | 0.741 ± 0.000 | 0.741 ± 0.002 |
+| Maximum class-wise F<sub>1</sub>-score | 0.852 ± 0.006 | 0.859 ± 0.851 | 0.851 ± 0.005 | 0.853 ± 0.009 | 0.850 ± 0.003 | 0.846 ± 0.003 | 0.852 ± 0.007 |
+| Minimum class-wise F<sub>1</sub>-score | 0.648 ± 0.011 | 0.640 ± 0.008 | 0.645 ± 0.008 | 0.641 ± 0.013 | 0.632 ± 0.016 | 0.646 ± 0.010 | 0.650 ± 0.007 |
 
-Table 6: Tuning of Dropout Probability
+Table ...: Performance of ResNet18 models trained with different degrees of L<sub>2</sub>-regularization. The table shows the average F<sub>1</sub>-scores obtained on the Xeno-Canto validation set.
 
-|               | 0.0001        | 0.001         | 0.01          | 0.1           |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| Mean F1-Score | 0.739 ± 0.002 | 0.743 ± 0.003 | 0.722 ± 0.001 | 0.641 ± 0.028 |
-| Max F1-Score  | 0.857 ± 0.003 | 0.853 ± 0.013 | 0.839 ± 0.011 | 0.781 ± 0.021 |
-| Min F1-Score  | 0.631 ± 0.009 | 0.661 ± 0.015 | 0.614 ± 0.022 | 0.449 ± 0.068 |
-
-Table 7: Tuning of Weight Decay
+|                                        | 0.0001        | 0.001         | 0.01          | 0.1           |
+| -------------------------------------- | ------------- | ------------- | ------------- | ------------- |
+| Average macro F<sub>1</sub>-score      | 0.739 ± 0.002 | 0.743 ± 0.003 | 0.722 ± 0.001 | 0.641 ± 0.028 |
+| Maximum class-wise F<sub>1</sub>-score | 0.857 ± 0.003 | 0.853 ± 0.013 | 0.839 ± 0.011 | 0.781 ± 0.021 |
+| Minimum class-wise F<sub>1</sub>-score | 0.631 ± 0.009 | 0.661 ± 0.015 | 0.614 ± 0.022 | 0.449 ± 0.068 |
 
 ### 5.3 Additional Data
 
