@@ -488,7 +488,25 @@ The F<sub>1</sub>-scores on the NIPS4BPlus dataset were significantly lower than
 
 From our point of view, the differences in performance between classes are mainly related to two factors: the complexity of the sound patterns and the number of training samples. Of the ten sound classes in our dataset, nine classes are bird songs and one class is a call ("_Phylloscopus collybita_, call"). While songs consist of a sequence of different phrases and motives, calls are much less complex. In spectrograms, calls are usually visible as a single pattern, whereas songs are visible as a sequence of patterns ([Figure 3](#fig-example-spectrograms)). In some cases, these sequences are longer than the 1-second chunks represented by the spectrograms we use. We suspect that the models learned best those calls and songs that consist of simple patterns that can be represented by a single spectrogram. For example, on the Xeno-Canto data, the highest classification accuracy was achieved for the call of the common chiffchaff ("_Phylloscopus collybita_, call"), although this is the class with the fewest training samples ([Table 4](#table-xeno-canto-dataset)). As can be seen in [Figure 3f](#fig-example-spectrograms-f), the call of the common chiffchaff appears as a short, simple pattern in the spectrograms. The second highest F<sub>1</sub>-score on the Xeno-Canto data was obtained for the song of the common chiffchaff ("_Phylloscopus collybita_, song"), which consists of a uniform sequence of a simple pattern ([Figure 3g](#fig-example-spectrograms-g)). Similar high F<sub>1</sub>-scores as for the song of the common chiffchaff were obtained for the songs of the nightingale ("_Luscinia megarhynchos_, song") and the song thrush ("_Turdus philomelos_, song"), although these species have very complex songs. However, these species are also represented by a higher number of spectrograms in our training dataset ([Table 4](#table-xeno-canto-dataset)). Therefore, we believe that the number of training samples has a positive effect on model performance and can support the models to learn even complex patterns. Still, for some species whose songs consist of a long sequence of different patterns, 1-second spectrograms may be too short to recognize the species from a single spectorgram. To overcome this problem, either longer spectrograms could be used or recurrent model architectures that receive a sequence of spectrograms as input.
 
-### 5.2 Hyperparameter Tuning
+### 5.3 Additional Data
+
+In the previous section, we described and discussed model performance on our baseline dataset. It was shown that the ResNet18 architecture performs well on the the clean and filtered Xeno-Canto data, but performs poorly on the more realistic NIPS4BPlus dataset. Increasing the size of the training dataset and including noisier audio recordings mitigated this issue: As shown in Figure ..., both the models trained on the "noisy data" and the "more data" datasets performed slightly worse on the Xeno-Canto data than the baseline models. However, on the NIPS4BPlus dataset, both achieved higher macro F<sub>1</sub>-scores than the baseline models (Figure... and ...). This demonstrates that both the size of the training data and its quality affect the models' generalizability. As our results show, it may be useful to reduce the quality of the training data to increase the robustness of the models on realistic datasets with background noise.
+
+![plot](./plots/xeno_canto_model_comparison.png)
+
+**Figure X:** Average macro F<sub>1</sub>-scores on the Xeno-Canto test set of models trained on datasets of different size and quality.
+
+of the models trained on the baseline, the "more data" and the "noisy data" datasets.
+
+![plot](./plots/nips4bplus_data_comparison.png)
+
+**Figure X:** Average macro F<sub>1</sub>-scores on the NIPS4BPlus dataset of models trained on datasets of different size and quality.
+
+![plot](./plots/nips4bplus_filtered_data_comparison.png)
+
+Figure X: Average macro F<sub>1</sub>-scores on the filtered NIPS4BPlus dataset of models trained on datasets of different size and quality.
+
+### 5.3 Hyperparameter Tuning
 
 To further improve the performance of our models compared to the baseline setting, we tuned several model hyperparameters. [Figure 6](#fig-tuning-batch-learning-rate) visualizes the results of the paired tuning of batch size and learning rate as a two-dimensional slice of the hyperparameter space. As can be seen there, batch size has little impact on model performance, with lower batch sizes tending to produce slightly better results. For all tested batch sizes, a learning rate of 10<sup>-4</sup> yields the highest F<sub>1</sub>-scores. At a learning rate of 10<sup>-6</sup>, performance drops sharply. In contrast to the results of ..., we did not find a strong linear dependency between batch size and learning rate. Possibly, these different results are due to the different training datasets. Nevertheless, our results also demonstrate that exhaustive testing of all combinations of batch size and learning rate is not necessary in hyperparameter tuning: According to our results, batch size and learning rate can be tuned independently, with the learning rate having a substantially larger impact on model performance.
 
@@ -525,30 +543,15 @@ Table ...: Performance of ResNet18 models trained with different degrees of L<su
 | Maximum class-wise F<sub>1</sub>-score | 0.857 ± 0.003 | 0.853 ± 0.013 | 0.839 ± 0.011 | 0.781 ± 0.021 |
 | Minimum class-wise F<sub>1</sub>-score | 0.631 ± 0.009 | 0.661 ± 0.015 | 0.614 ± 0.022 | 0.449 ± 0.068 |
 
-### 5.3 Additional Data
-
-In the previous sections, we descrobed and discussed model performance on our baseline dataset. It was shown that the ResNet18 architecture performs well on the the clean and filtered Xeno-Canto data, but performs poorly on the more realistic NIPS4BPlus dataset. Increasing the size of the training dataset and including noisier audio mitigated this issue: As shown in Figure ..., both the models trained on the "noisy data" and the "more data" datasets performed slightly worse on the Xeno-Canto data. However, on the NIPS4BPlus dataset, both achieved higher F<sub>1</sub>-scores than the baseline models (Figure... and ...). This demonstrates that both the size of the training data and its quality affect the models' robustness on hard data sets. In order to achieve a better performance on realistic data sets, it can be reasonable to reduce the quality of the training data.
-
-![plot](./plots/xeno_canto_model_comparison.png)
-![plot](./plots/nips4bplus_data_comparison.png)
-
-Figure X: Model F<sub>1</sub>-score on Xeno-Canto test set &nbsp;&nbsp;&nbsp; Figure X: Model F<sub>1</sub>-score on NIPS4BPlus test data
-
-![plot](./plots/nips4bplus_filtered_data_comparison.png)
-
-Figure X: Model F<sub>1</sub>-score on NIPS4BPlus data with
-
 ### Final Model
 
-Our final model was trained by combining the hyperparameter settings that performed best in hyperparameter tuning: Since this performed best in our experiments, the ResNet18 architecture was used and all model layers were unfrozen for fine-tuning. An Adam optimizer was used combined with a learning rate of 0.0001 and a cosine annealing learning rate scheduler. To reduce overfitting, L<sub>2</sub>-regularization (weight decay) with a weight factor λ = 0.001 and dropout before the fully-connected layer with a probability of 0.2 were applied. The final model was trained on the larger, noisier data set from the "More Data" experiment (100 audio samples per class, minimum quality "E", up to ten background species), as we found this led to better generalizing models.
+Our final model was trained by combining the hyperparameter settings that performed best in hyperparameter tuning: Since this performed best in our experiments, the ResNet18 architecture was used and all model layers were unfrozen for fine-tuning. An Adam optimizer was used combined with a learning rate of 0.0001 and a cosine annealing learning rate scheduler. To reduce overfitting, L<sub>2</sub>-regularization (weight decay) with a weight factor λ = 0.001 and dropout before the fully-connected layer with a probability of 0.2 were applied. The final model was trained on the larger, noisier data set from the "more data" experiment (500 audio samples per class, minimum quality "E", up to ten background species), as we found this led to better generalizing models.
 
-On the Xeno-Canto validation set, the final model achieved a macro F<sub>1</sub>-score of 0.721. On the test set the macro F<sub>1</sub>-score was 0.726. On the NIPS4BPlus dataset a macro F<sub>1</sub>-score of 0.378 was obtained, and for the filtered version of the NIPS4BPlus dataset, the macro F<sub>1</sub>-score was 0.388. Figure ... shows the class-wise F<sub>1</sub>-scores of the final model.
+On the Xeno-Canto validation set, the final model achieved a macro F<sub>1</sub>-score of 0.721. On the Xeno-Canto test set, the macro F<sub>1</sub>-score was 0.726. On the NIPS4BPlus dataset a macro F<sub>1</sub>-score of 0.378 was obtained, and for the filtered version of the NIPS4BPlus dataset, the macro F<sub>1</sub>-score was 0.388. Figure ... shows the class-wise F<sub>1</sub>-scores of the final model. For the Xeno-Canto data, the final model did not improve over the baseline models. However, for the NIPS4BPlus dataset, the final model performs significantly than the baseline models and also better than the models from the "more data" experiment. This shows that both the adjustment of the quality and size of the training data and the tuning of the hyperparameters had a substantial impact on the performance and generalizability of the models.
 
 ![baseline](./plots/final-model.png)
 
 **Figure ..** Class-wise F<sub>1</sub>-scores of the final model on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown.
-
-For the Xeno-Canto data, the final model did not improve over the baseline models. However, for the NIPS4BPlus dataset, the final model performs significantly than the baseline models and also better than the models form the "More Data" experiment. This shows that both the quality and size of the training data and the tuning of the hyperparameters have a substantial impact on the performance and generalizability of the models.
 
 </div>
 
