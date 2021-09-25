@@ -469,11 +469,11 @@ In addition to hyperparameter tuning, we also studied how quality and size of th
 
 On the Xeno-Canto validation set, our three baseline runs achieved an average macro F<sub>1</sub>-score of 0.741 ± 0.003 (at a confidence threshold of 0.5). The performance on the Xeno-Canto test set was similar, with an average macro F<sub>1</sub>-score of 0.736 ± 0.001 (at a confidence threshold of 0.5). As shown in [Figure 6](#fig-baseline-overfitting), the training of our baseline models was characterized by overfitting, with all models reaching training F<sub>1</sub>-scores close to one after 15-20 epochs. The best performance on the validation set was achieved between the fourth and sixth training epoch in all baseline runs.
 
-![fig-baseline-overfitting](./plots/baseline-overfitting.png)
+![fig-baseline-overfitting](./plots/section-5/6-baseline-overfitting.png)
 
 **Figure <a name="fig-baseline-overfitting">6</a>:** Macro F<sub>1</sub>-scores of one of our three baseline runs on the training and test set.
 
-![fig-baseline-confidence](./plots/baseline-confidence-thresholding.png)
+![fig-baseline-confidence](./plots/section-5/7-baseline-confidence-thresholding.png)
 
 **Figure <a name="fig-baseline-confidence">7</a>:** Average macro F<sub>1</sub>-scores of the baseline models at different confidence thresholds.
 
@@ -481,7 +481,7 @@ On the NIPS4BPlus dataset, the performance of the baseline models was significan
 
 We presume that the poor performance on the NIPS4BPlus dataset is due to the following differences between the training data from Xeno-Canto and the NIPS4BPlus dataset: While the Xeno-Canto training dataset consists mainly of focal recordings directed to the vocalizations of a specific individual, the recordings of the NIPS4BPlus dataset were collected with field recorders that were not directed to a specific individual. Accordingly, some bird vocalizations in the NIPS4BPlus dataset are quieter than in the Xeno-Canto training dataset. Additionally, some recordings in the NIPS4BPlus dataset contain stronger background noise, such as wind. Apparently, the baseline models overfit to the features of the clean Xeno-Canto data and thus lack robustness in classifying the more difficult NIPS4BPlus data.
 
-![fig-baseline-class-scores](./plots/baseline.png)
+![fig-baseline-class-scores](./plots/section-5/8-baseline.png)
 
 **Figure <a name="fig-baseline-class-scores">8</a>:** Average class-wise F<sub>1</sub>-scores of the three baseline models on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown. The error bars show the standard deviation.
 
@@ -495,17 +495,17 @@ From our point of view, the differences in performance between classes are mainl
 
 In the previous section, we described and discussed model performance on our baseline dataset. It was shown that the ResNet18 architecture performs well on the the clean and filtered Xeno-Canto data, but performs poorly on the more realistic NIPS4BPlus dataset. Increasing the size of the training dataset and including noisier audio recordings mitigated this issue: As shown in Figure [9](#fig-additonal-data-xeno-canto), both the models trained on the "noisy data" and the "more data" datasets performed slightly worse on the Xeno-Canto data than the baseline models. However, on the NIPS4BPlus dataset, both achieved higher macro F<sub>1</sub>-scores than the baseline models (Figure [10](#fig-additonal-data-nips4bplus) and [11](#fig-additonal-data-nips4bplus-filtered)). This demonstrates that both the size of the training data and its quality affect the models' generalizability. As our results show, it may be useful to reduce the quality of the training data to increase the robustness of the models on realistic datasets with background noise.
 
-![plot](./plots/xeno_canto_model_comparison.png)
+![plot](./plots/section-5/9-xeno_canto_model_comparison.png)
 
 **Figure <a name="fig-additonal-data-xeno-canto">9</a>:** Average macro F<sub>1</sub>-scores on the Xeno-Canto test set of models trained on datasets of different size and quality.
 
 of the models trained on the baseline, the "more data" and the "noisy data" datasets.
 
-![plot](./plots/nips4bplus_data_comparison.png)
+![plot](./plots/section-5/10-nips4bplus_data_comparison.png)
 
 **Figure <a name="fig-additonal-data-nips4bplus">10</a>:** Average macro F<sub>1</sub>-scores on the NIPS4BPlus dataset of models trained on datasets of different size and quality.
 
-![plot](./plots/nips4bplus_filtered_data_comparison.png)
+![plot](./plots/section-5/11-nips4bplus_filtered_data_comparison.png)
 
 **Figure <a name="fig-additonal-data-nips4bplus-filtered">11</a>:** Average macro F<sub>1</sub>-scores on the filtered NIPS4BPlus dataset of models trained on datasets of different size and quality.
 
@@ -513,8 +513,8 @@ of the models trained on the baseline, the "more data" and the "noisy data" data
 
 To further improve the performance of our models compared to the baseline setting, we tuned several model hyperparameters. [Figure 12](#fig-tuning-batch-learning-rate) visualizes the results of the paired tuning of batch size and learning rate as a two-dimensional slice of the hyperparameter space. As can be seen there, batch size had less impact on model performance than learning rate, with lower batch sizes tending to produce slightly better results. Independent of the batch size, a learning rate of 0.0001 yielded the highest F<sub>1</sub>-scores. At a learning rate of 10<sup>-6</sup>, performance dropped sharply. For our training setting, we could not observe the linear scaling rule for batch size and learning rate described by some authors [[8](#goyal-linear-scaling), [11](#jastrzebski-linear-scaling), [27](#myrtle-hyperparameter)]. According to this rule, the model performance depends on the ratio between learning rate and batch size. Accordingly, optimal learning rates should be higher for larger batch sizes. However, as Smith et al. show that the linear scaling rule only applies in a "noise dominated" regime that occurs at small or medium batch sizes, but not in a "curvature-dominated" regime that occurs at large batch sizes. According to their results, in a curvature dominated regime, the optimal learning rate is independent of the batch size [[33](#smith2020hyperparameter), [32](#smith2019hyperparameter)]. Since our training setting seems to be mainly in a "curvature-dominated" regime, we conclude that batch size and learning rate can be tuned independently in our case, with the learning rate having a substantially larger impact on model performance. Our observation that small batch sizes perform slightly better than large batch sizes is consistent with the findings of Keskar et al. They found that smaller batch sizes produce wider minima that generalize better, whereas large batch sizes tend to produce sharp minima with low generalization [[16]
 
-![fig-tuning-batch-learning-rate-1](./plots/lr_batrch_mean.png)
-![fig-tuning-batch-learning-rate-2](./plots/lr_batch_mean_cut.png)
+![fig-tuning-batch-learning-rate-1](./plots/section-5/12-1-lr_batch_mean.png)
+![fig-tuning-batch-learning-rate-2](./plots/section-5/12-2-lr_batch_mean_cut.png)
 
 **Figure <a name="fig-tuning-batch-learning-rate">12</a>:** Results of the paired tuning of batch size and learning rate. The upper matrix shows the results of all runs. In the lower matrix, the training runs for learning rate 10<sup>-6</sup> are omitted to reveal differences between the other runs. The color of the matrix cells encodes the average macro F<sub>1</sub>-scores of the tuning runs on the validation set.
 
@@ -552,7 +552,7 @@ Our final model was trained by combining the hyperparameter settings that perfor
 
 On the Xeno-Canto validation set, the final model achieved a macro F<sub>1</sub>-score of 0.721. On the Xeno-Canto test set, the macro F<sub>1</sub>-score was 0.726. On the NIPS4BPlus dataset a macro F<sub>1</sub>-score of 0.378 was obtained, and for the filtered version of the NIPS4BPlus dataset, the macro F<sub>1</sub>-score was 0.388. Figure [13](#fig-final-model) shows the class-wise F<sub>1</sub>-scores of the final model. For the Xeno-Canto data, the final model did not improve over the baseline models. However, for the NIPS4BPlus dataset, the final model performs significantly than the baseline models and also better than the models from the "more data" experiment. This shows that both the adjustment of the quality and size of the training data and the tuning of the hyperparameters had a substantial impact on the performance and generalizability of the models.
 
-![baseline](./plots/final-model.png)
+![baseline](./plots/section-5/final-model.png)
 
 **Figure <a name="fig-final-model">13</a>:** Class-wise F<sub>1</sub>-scores of the final model on the Xeno-Canto training, validation, and test sets and the NIPS4BPlus dataset. For the Xeno-Canto data, classification results at a confidence threshold of 0.5 are shown. For the NIPS4BPlus dataset, classification results at a confidence threshold of 0.1 are shown.
 
@@ -1017,11 +1017,11 @@ python3 kubeflow_pipeline/compile_pipeline.py build_docker_image --docker_regist
 
 Now, open the Kubeflow UI of your cluster, go to the "Pipelines" section and click "Upload Pipeline". Upload the `birdsong_pipeline.yaml` file that you compiled before:
 
-![Kubeflow-1](https://drive.google.com/uc?id=1DSyp6En5aM5sLzxmGkG2NtiwsszHU94w)
+![Kubeflow-1](./plots/documentation/Kubeflow-1.png)
 
 After creating the pipeline, click the "Create run" button, to start a pipeline run:
 
-![Kubeflow-2](https://drive.google.com/uc?id=1NXqVRQgVpMI7tNCf-7xkDvv1WrstIhFl)
+![Kubeflow-2](./plots/documentation/Kubeflow-2.png)
 
 ## Implementing Custom Pipeline Components
 
