@@ -739,7 +739,7 @@ _Nature Conservation_ 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: [10.3897
 
 ## Running the Pipeline in a Jupyter Notebook
 
-The individual steps of our pipeline are implemented by Python classes. To run the pipeline in a Jupyter notebook, instances of the corresponding classes must be created and certain methods must be called on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in our repository as a Jupyter notebook named `demo.ipynb`. Additionally, we provide a notebook named `demo-google-colab.ipynb` that can be used to run the example pipeline in Google Colab.
+The individual steps of our pipeline are implemented by Python classes. To run the pipeline in a Jupyter notebook, instances of the corresponding classes must be created and certain methods must be called on them. In the following, we describe the setup of a typical notebook-based pipeline. The described pipeline is included in the `src` directory of our repository as a Jupyter notebook named `demo.ipynb`. Additionally, we provide a notebook named `demo-google-colab.ipynb` that can be used to run the example pipeline in Google Colab.
 
 ### Local Installation of Dependencies
 
@@ -761,13 +761,13 @@ On Unix or MacOS, run:
 source ./env/bin/activate
 ```
 
-To install the dependencies, run:
+To install the dependencies, run (inside the `src` directory of the repository):
 
 ```bash
 python3 -m pip install -r requirements-notebook.txt
 ```
 
-To be able to import the modules from the repository, run:
+To be able to import the modules from the repository, run (inside the `src` directory of the repository):
 
 ```bash
 python3 -m pip install -e .
@@ -786,7 +786,7 @@ Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.co
 To install the dependencies, run:
 
 ```bash
-%cd /content/BirdSongIdentification/
+%cd /content/BirdSongIdentification/src
 !python3 -m pip install -r requirements-colab.txt
 ```
 
@@ -797,7 +797,7 @@ To be able to import the modules from the repository, run:
 ```python
 import sys
 
-sys.path.append('/content/BirdSongIdentification')
+sys.path.append('/content/BirdSongIdentification/src')
 ```
 
 ### Setting Up the File Manager
