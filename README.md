@@ -59,7 +59,7 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 <div align="justify">
 
-![figure](./plots/section-3/1-pipeline.jpg)
+![Architecture of our machine learning pipeline for bird sound recognition](./plots/section-3/1-pipeline.jpg)
 
 **Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
 
@@ -145,46 +145,46 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     <div>
         <div style="display: flex;">
         <img src="plots/section-3/2-1_original.png" width="150" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1jK6ccjBxzIlIBxUJbbjRXU8kAnZv2o2z" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="https://drive.google.com/uc?id=1qz1Pi_8xF7db6J8zwCDxh9ZP6yE_Gq-0" width="150" style="border: 1px solid black;"/>
+        <img src="plots/section-3/2-2_original.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-3/2-3_original.png" width="150" style="border: 1px solid black;"/>
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-a">(a)</a> Original spectrograms.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="plots/section-3/2-1_median_blurring.png" width="150" style="border: 1px solid black;" />
-        <img src="https://drive.google.com/uc?id=1n2sks2tmGlEGf1Otwq7ljlKlZFaGwofL" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="https://drive.google.com/uc?id=15_oIqICXk0e0dQqNEQV0kQkz3k70rAXT" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-2_median_blurring.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-3/2-3_median_blurring.png" width="150" style="border: 1px solid black;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-b">(b)</a> Spectrograms after median blurring.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="plots/section-3/2-1_median_filter.png" width="150" style="border: 1px solid black;" />
-        <img src="https://drive.google.com/uc?id=1ooS0Re-MQo3oPkGa8ije4pwnJaPdZuX9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="https://drive.google.com/uc?id=1H3307qKdmWgSaDpfs8qMhAgxmfLkYbmx" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-2_median_filter.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-3/2-3_median_filter.png" width="150" style="border: 1px solid black;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-c">(c)</a> Spectrograms after median filtering.</p>
     </div>
     <div>
         <div style="display: flex;">
         <img src="plots/section-3/2-1_spot_removal.png" width="150" style="border: 1px solid black;" />
-        <img src="https://drive.google.com/uc?id=1QOICjC7DMsoYZwORyMUYYLlHGY2l_ux9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="https://drive.google.com/uc?id=19OCBhuoAHL5fnJhyIlGL1xguDAeZqhV6" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-2_spot_removal.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-3/2-3_spot_removal.png" width="150" style="border: 1px solid black;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-d">(d)</a> Spectrograms after spot removal.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="plots/section-3/2-1_closing" width="150" style="border: 1px solid black;" />
-        <img src="https://drive.google.com/uc?id=1kz41gi2szgQJycvVg5Dse3svAa3t4FzO" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="https://drive.google.com/uc?id=1IeZZrl_kCJ9okjuze2CVuuiXVwcopq-Y" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-1_closing.png" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-2_closing.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-3/2-3_closing.png" width="150" style="border: 1px solid black;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-e">(e)</a> Spectrograms after morphological closing.</p>
     </div>
 </div>
 
-**<a name="fig-noise-filtering">Figure 2</a>**: Steps of the noise filtering algorithm described by Kahl et al. [[12](#kahl-2017)] shown by three example spectrograms.
+**<a name="fig-noise-filtering">Figure 2</a>:** Steps of the noise filtering algorithm described by Kahl et al. [[12](#kahl-2017)] shown by three example spectrograms.
 
 <sup>5</sup> https://librosa.org
 
@@ -317,7 +317,7 @@ To evaluate the performance of our pipeline, we use a sample dataset with ten cl
 
 For the model testing, the NIPS4BPlus dataset was used in addition to the Xeno-Canto data. The NIPS4Bplus dataset was used in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in [Table 5](#table-nips4bplus-dataset).
 
-Table <a name="table-xeno-canto-dataset">4</a>: Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
+**Table <a name="table-xeno-canto-dataset">4</a>:** Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
 
 | Class name                    | No. recordings in training set | No. spectrograms in training set | No. recordings in validation set | No. spectrograms in validation set | No. recordings in test set | No. spectrograms in test set |
 | ----------------------------- | ------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------- | -------------------------- | ---------------------------- |
@@ -334,7 +334,7 @@ Table <a name="table-xeno-canto-dataset">4</a>: Class distribution of the Xeno-C
 | Noise                         | -                              | 22,291                           | -                                | 6,901                              | -                          | 6,995                        |
 | **Total**                     | **2,762**                      | **145,548**                      | **921**                          | **46,444**                         | **923**                    | **47,506**                   |
 
-Table <a name="table-nips4bplus-dataset">5</a>: Class distribution of the NIPS4BPlus dataset used for model evaluation.
+**Table <a name="table-nips4bplus-dataset">5</a>:** Class distribution of the NIPS4BPlus dataset used for model evaluation.
 
 | Class name                                   | No. recordings in NIPS4BPlus dataset | No. spectrograms in NIPS4BPlus dataset |
 | -------------------------------------------- | ------------------------------------ | -------------------------------------- |
@@ -352,82 +352,82 @@ Table <a name="table-nips4bplus-dataset">5</a>: Class distribution of the NIPS4B
 | Noise (filtered NIPS4BPlus dataset)          | 87                                   | 333                                    |
 | **Total (filtered NIPS4BPlus / NIPS4BPlus)** | **107 / 569**                        | **486 / 2,300**                        |
 
-![plot](./plots/class_distribution_recordings.png)
+![plot](./plots/section-4/3-class_distribution_recordings.png)
 
 **Figure <a name="fig-class-distribution-audio-files">3</a>:** Number of audio recordings per class for the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
 
-![plot](./plots/class_distribution_spectrograms.png)
+![plot](./plots/section-4/4-class_distribution_spectrograms.png)
 
 **Figure <a name="fig-class-distribution-spectrograms">4</a>:** Number of spectrograms per class for the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
 
 <div style="display: flex; flex-direction: column;">
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1VSnSiRpylTvqmGD1g2nO4liBGcb0fOQH" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1ydpr_RxlND9nClHLYUDWIXfMZn9geLsE" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Cyanistes_caeruleus_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Cyanistes_caeruleus_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-a">(a)</a> <i>Cyanistes caeruleus</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1UR402ZN_LwFAQOvxtIg8aj_ttRNQ0R81" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1IhhU-oed-5ELCyl0KGCc4B1bJ9mZ-Dun" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Erithacus_rubecula_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Erithacus_rubecula_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-b">(b)</a> <i>Erithacus rubecula</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1epw7tlJPZIH6l15seimgwfWEybLRUvuM" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1UEFjhiM8uYrCB_u1Ec0ZjPZs7VWc0isj" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Fringilla_coelebs_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Fringilla_coelebs_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-c">(c)</a> <i>Fringilla coelebs</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1r3FSk1na1Llk5uYZ_Fnsu1Dh29R0Zow3" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1Q6UQ8t5VRuxa3JOEkJhLi98bJo2S-a92" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Luscinia_megarhynchos_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Luscinia_megarhynchos_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-d">(d)</a> <i>Luscinia megarhynchos</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1YdW7FaWsJbnXo21Svj0MEr1uDnYtj_k8" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1aXEXf44HTnHyJXP_LNrbqOq3ejOq7wlO" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Parus_major_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Parus_major_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-e">(e)</a> <i>Parus major</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1ZRylQHpivA8q3CACIOw2_l3-Swym-LC4" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1s0oXh9pUzQPokoxcAogLOfoEi6hAvvbe" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Phylloscopus_collybita_call-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Phylloscopus_collybita_call-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-f">(f)</a> <i>Phylloscopus collybita</i>, call.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1ueqA3IRdZATVrlAr_nKPWrK2PIw4ymzp" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1-eHr6rmaWiWAnNpngyM_mp1gQ7EW4Qik" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Phylloscopus_collybita_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Phylloscopus_collybita_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-g">(g)</a> <i>Phylloscopus collybita</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1OouGhMC96kqVz-a8kq-4A6BPBjfNP_T-" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1PphCul0l4qFOSOc3X9jpQwp2IlHJD-uh" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Sylvia_atricapilla_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Sylvia_atricapilla_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-h">(h)</a> <i>Sylvia atricapilla</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1ErJJ6rkVcVO_k6s6VBqW8gR5xagJh9Q6" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=18WBSFopg7uzybfTw3jMt2K7DhkBIAbFl" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Troglodytes_troglodytes_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Troglodytes_troglodytes_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-i">(i)</a> <i>Troglodytes troglodytes</i>, song.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1DDzmx8-mH57tnYW6rIxQ4kdAecl02mjl" width="200" style="border: 1px solid black;"/>
-        <img src="https://drive.google.com/uc?id=1X-Qav5m5v5Rw8yY7BngK5J0sfhJ3RKtx" width="200" style="border: 1px solid black; margin: 0px 10px;" />
+        <img src="plots/section-4/5-Turdus_philomelos_song-1.png" width="200" style="border: 1px solid black;"/>
+        <img src="plots/section-4/5-Turdus_philomelos_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-j">(j)</a> <i>Turdus philomelos</i>, song.</p>
     </div>
