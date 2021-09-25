@@ -58,21 +58,21 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 <div align="justify">
 
-![Architecture of our machine learning pipeline for bird sound recognition](./figures/section-3/1-pipeline.jpg)
-
-**Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
-
 Conceptually, our machine learning pipeline consists of the following four stages ([Figure 1](#fig-pipeline)):
 
 1. Download of audio data and labels
 
-2. Conversion of audio files into spectrogram images and separation of spectrograms into "signal" spectrograms containing bird vocalizations and "noise" spectrograms
+2. Conversion of audio files into spectrogram images and separation of spectrograms into "signal" spectrograms containing bird vocalizations and "noise" spectrograms containing only background sounds
 
 3. Training of DCNN image classification models on the spectrograms and tuning of model hyperparameters
 
 4. Model evaluation on test datasets
 
-All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook<sup>1</sup> and a Kubeflow pipeline.<sup>2</sup> Both variants use the same Python implementation, with the definition of our Kubeflow pipeline providing a wrapper for the interface of our Python classes.
+All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook<sup>1</sup> and a Kubeflow pipeline.<sup>2</sup> Both variants use the same Python implementation, with the user interface of our Kubeflow pipeline mapping directly to the interfaces of our Python classes.
+
+![Architecture of our machine learning pipeline for bird sound recognition](./figures/section-3/1-pipeline.jpg)
+
+**Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
 
 <sup>1</sup> https://jupyter.org
 
