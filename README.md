@@ -59,7 +59,7 @@ To demonstrate and evaluate the capability of our pipeline, we consider the foll
 
 <div align="justify">
 
-![figure](./plots/pipeline.jpg)
+![figure](./plots/section-3/1-pipeline.jpg)
 
 **Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
 
@@ -144,7 +144,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
 <div style="display: flex; flex-direction: column;">
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1wD_RyvBCkvVM9y8sKFEz3-HS4IVZ1gvv" width="150" style="border: 1px solid black;"/>
+        <img src="plots/section-3/2-1_original.png" width="150" style="border: 1px solid black;"/>
         <img src="https://drive.google.com/uc?id=1jK6ccjBxzIlIBxUJbbjRXU8kAnZv2o2z" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1qz1Pi_8xF7db6J8zwCDxh9ZP6yE_Gq-0" width="150" style="border: 1px solid black;"/>
         </div>
@@ -152,7 +152,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1I2yeGT_EaSoPrl4YJ35RroxMPIykzeh5" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-1_median_blurring.png" width="150" style="border: 1px solid black;" />
         <img src="https://drive.google.com/uc?id=1n2sks2tmGlEGf1Otwq7ljlKlZFaGwofL" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=15_oIqICXk0e0dQqNEQV0kQkz3k70rAXT" width="150" style="border: 1px solid black;" />
         </div>
@@ -160,7 +160,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=1VgE8r4UMHB2zECLYk_mXfqki7qZgOKrc" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-1_median_filter.png" width="150" style="border: 1px solid black;" />
         <img src="https://drive.google.com/uc?id=1ooS0Re-MQo3oPkGa8ije4pwnJaPdZuX9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1H3307qKdmWgSaDpfs8qMhAgxmfLkYbmx" width="150" style="border: 1px solid black;" />
         </div>
@@ -168,7 +168,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=14fgZc7GkJmAE6ikHNg6bI2ceHWrI9MEl" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-1_spot_removal.png" width="150" style="border: 1px solid black;" />
         <img src="https://drive.google.com/uc?id=1QOICjC7DMsoYZwORyMUYYLlHGY2l_ux9" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=19OCBhuoAHL5fnJhyIlGL1xguDAeZqhV6" width="150" style="border: 1px solid black;" />
         </div>
@@ -176,7 +176,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
     </div>
     <div>
         <div style="display: flex;">
-        <img src="https://drive.google.com/uc?id=15eVBJ_02WjxShwo_N2RPPpnw_E45Xg2_" width="150" style="border: 1px solid black;" />
+        <img src="plots/section-3/2-1_closing" width="150" style="border: 1px solid black;" />
         <img src="https://drive.google.com/uc?id=1kz41gi2szgQJycvVg5Dse3svAa3t4FzO" width="150" style="border: 1px solid black; margin: 0px 10px;" />
         <img src="https://drive.google.com/uc?id=1IeZZrl_kCJ9okjuze2CVuuiXVwcopq-Y" width="150" style="border: 1px solid black;" />
         </div>
