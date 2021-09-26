@@ -120,9 +120,9 @@ As mentioned above, we use audio data from the Xeno-Canto database (for model tr
 
 To speed up the download phase, local caching of files is used in addition to multithreading. This way, successive pipeline runs do not have to download the same files more than once. When the pipeline is run as a Jupyter notebook, a regular directory on the local disk is used for caching. When the pipeline is run as a Kubeflow pipeline, a _Google Cloud Storage_[<sup>4</sup>](#footnote-4) bucket is used for file caching.
 
-<sup><a name="footnote-3">3</a></sup> https://www.xeno-canto.org/explore/api
+<a name="footnote-3"><sup>3</sup></a> https://www.xeno-canto.org/explore/api
 
-<sup><a name="footnote-4">4</a></sup> https://cloud.google.com/products/storage
+<a name="footnote-4"><sup>4</sup></a> https://cloud.google.com/products/storage
 
 ### Stage 2: Spectrogram Creation
 
@@ -185,9 +185,9 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
 
 **<a name="fig-noise-filtering">Figure 2</a>:** Steps of the noise filtering algorithm described by Kahl et al. [[14](#cite-kahl-2017)] shown by three example spectrograms.
 
-<sup><a name="footnote-5">5</a></sup> https://librosa.org
+<a name="footnote-5"><sup>5</sup></a> https://librosa.org
 
-<sup><a name="footnote-6">6</a></sup> https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L131
+<a name="footnote-6"><sup>6<</sup>/a> https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L131
 
 ### Stage 3: Model Training
 
