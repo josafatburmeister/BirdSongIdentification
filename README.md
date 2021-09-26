@@ -143,41 +143,41 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
 <div style="display: flex; flex-direction: column;">
     <div>
         <div style="display: flex;">
-        <img src="figures/section-3/2-1_original.png" width="150" style="border: 1px solid black;"/>
-        <img src="figures/section-3/2-2_original.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="figures/section-3/2-3_original.png" width="150" style="border: 1px solid black;"/>
+        <img src="figures/section-3/2-1_original.png" width="150"/>
+        <img src="figures/section-3/2-2_original.png" width="150" margin: 0px 10px;" />
+        <img src="figures/section-3/2-3_original.png" width="150"/>
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-a">(a)</a> Original spectrograms.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="figures/section-3/2-1_median_blurring.png" width="150" style="border: 1px solid black;" />
-        <img src="figures/section-3/2-2_median_blurring.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="figures/section-3/2-3_median_blurring.png" width="150" style="border: 1px solid black;" />
+        <img src="figures/section-3/2-1_median_blurring.png" width="150" />
+        <img src="figures/section-3/2-2_median_blurring.png" width="150" margin: 0px 10px;" />
+        <img src="figures/section-3/2-3_median_blurring.png" width="150" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-b">(b)</a> Spectrograms after median blurring.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="figures/section-3/2-1_median_filter.png" width="150" style="border: 1px solid black;" />
-        <img src="figures/section-3/2-2_median_filter.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="figures/section-3/2-3_median_filter.png" width="150" style="border: 1px solid black;" />
-        </div>
+        <img src="figures/section-3/2-1_median_filter.png" width="150" />
+        <img src="figures/section-3/2-2_median_filter.png" width="150" margin: 0px 10px;" />
+        <img src="figures/section-3/2-3_median_filter.png" width="150" />
+        </div
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-c">(c)</a> Spectrograms after median filtering.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="figures/section-3/2-1_spot_removal.png" width="150" style="border: 1px solid black;" />
-        <img src="figures/section-3/2-2_spot_removal.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="figures/section-3/2-3_spot_removal.png" width="150" style="border: 1px solid black;" />
+        <img src="figures/section-3/2-1_spot_removal.png" width="150" />
+        <img src="figures/section-3/2-2_spot_removal.png" width="150" margin: 0px 10px;" />
+        <img src="figures/section-3/2-3_spot_removal.png" width="150" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-d">(d)</a> Spectrograms after spot removal.</p>
     </div>
     <div>
         <div style="display: flex;">
-        <img src="figures/section-3/2-1_closing.png" width="150" style="border: 1px solid black;" />
-        <img src="figures/section-3/2-2_closing.png" width="150" style="border: 1px solid black; margin: 0px 10px;" />
-        <img src="figures/section-3/2-3_closing.png" width="150" style="border: 1px solid black;" />
+        <img src="figures/section-3/2-1_closing.png" width="150" />
+        <img src="figures/section-3/2-2_closing.png" width="150" margin: 0px 10px;" />
+        <img src="figures/section-3/2-3_closing.png" width="150" />
         </div>
         <p style="text-align: center; margin: 10px 0px;"><a name="fig-noise-filtering-e">(e)</a> Spectrograms after morphological closing.</p>
     </div>
