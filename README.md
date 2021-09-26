@@ -128,7 +128,7 @@ To speed up the download phase, local caching of files is used in addition to mu
 
 For spectrogram creation, we largely follow the approach described by Kot et al. [[19](#cite-koh2019)]. As in the work of Koh et al., we divide the audio files into non-overlapping 1-second chunks and create one mel-scale log-amplitude spectrogram for each chunk. The spectrogram creation is based on a short-time Fourier transform (STFT) of the amplitude signal, for which we use the Python sound processing library _Librosa_.[<sup>5</sup>](#footnote-5) We choose the parameters of the STFT such that the resulting spectrograms have a size of approximately 224 x 112 pixels. [Table 1](#table-spectrogram-parameters) provides an overview of our STFT parameter settings, which are largely consistent with those of Koh et al. [[19](#cite-koh2019)]. The resulting spectrogram images are normalized and stored as inverted grayscale images, so that high amplitudes are represented by dark pixels.
 
-**Table <a name="table-spectrogram-parameters">1</a>**: Parameter settings of the short-time Fourier transform used for spectrogram creation.
+**Table <a name="table-spectrogram-parameters">1</a>:** Parameter settings of the short-time Fourier transform used for spectrogram creation.
 
 | Parameter         | Value     |
 | ----------------- | --------- |
@@ -138,7 +138,7 @@ For spectrogram creation, we largely follow the approach described by Kot et al.
 | Minimum frequency | 500 Hz    |
 | Maximum frequency | 15,000 Hz |
 
-Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we employ the noise filtering algorithm described by Kahl et al. [[14](#cite-kahl-2017)].[<sup>6</sup>](#footnote-6) This algorithm is based on the works of Sprengel et al. [[37](#cite-sprengel-2016)] and Lassek [[21](#cite-lasseck2013)] and has been used in a similar form in many other works [[4](#cite-fazekas-2017), [20](#cite-lasseck2018), [19](#cite-koh2019), [2](#cite-bai-2019), [1](#cite-bai-2020)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 ([Figure 2b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this step, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white ([Figure 2c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied ([Figures 2d](#fig-noise-filtering-d), [2e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide an option to include noise spectrograms for training as a separate class.
+Since the audio files from Xeno-Canto are only annotated at file level, it is uncertain which parts of the audio recordings contain bird vocalizations. To separate spectrograms that contain bird vocalizations from spectrograms that contain only noise, we employ the noise filtering algorithm described by Kahl et al. [[14](#cite-kahl-2017)].[<sup>6</sup>](#footnote-6) This algorithm is based on the works of Sprengel et al. [[37](#cite-sprengel-2016)] and Lassek [[21](#cite-lasseck2013)] and has been used in a similar form in many other works [[5](#cite-fazekas-2017), [20](#cite-lasseck2018), [19](#cite-koh2019), [2](#cite-bai-2019), [1](#cite-bai-2020)]. In this algorithm, multiple image filters are applied to each spectrogram to extract the signal pixels of the spectrogram, and then the number of rows containing signal pixels is compared to a threshold value: First, the image is blurred with a median blur kernel of size 5 ([Figure 2b](#fig-noise-filtering-b)). Next, a binary image is created by median filtering. In this step, all pixel values that are 1.5 times larger than the row and the column median are set to black and all other pixels are set to white ([Figure 2c](#fig-noise-filtering-c)). To remove isolated black pixels, spot removal and morphological closing operations are applied ([Figures 2d](#fig-noise-filtering-d), [2e](#fig-noise-filtering-e)). Finally, the number of rows containing signal pixels (black pixels) is compared to a predefined threshold, the _signal threshold_. If the number of signal rows is larger than the signal threshold, the spectrogram is assumed to contain bird vocalizations. If the number of signal rows is below a second threshold, the _noise threshold_, the spectrogram is considered to contain only noise. To have a decision margin, the noise threshold is usually chosen smaller than the signal threshold. To increase the robustness of the models, we do not discard the noise spectrograms, but provide an option to include noise spectrograms for training as a separate class.
 
 <div style="display: flex; flex-direction: column;">
     <div>
@@ -227,15 +227,15 @@ In Kubeflow pipelines, all outputs of the pipeline stages are stored as files an
 
 [Listing 2](#listing-directory-structure-downloader) shows an example of the directory structure that is used to pass data between the data download and the spectrogram creation stage. As shown, the data download stage is required to create a file named "categories.txt" as well as a number of subdirectories, representing different datasets or different parts of a dataset (e.g., training, validation, and test set). The file "categories.txt" contains a line-by-line listing of all possible class names that may be used as labels for the audio files ([Listing 3](#listing-categories-file)). Each of the subdirectories representing different datasets has to contain a subdirectory named "audio" and a label file named "audio.csv". The subdirectory "audio" contains the audio files of the respective dataset, which can be grouped in further subdirectories. The label file "audio.csv" contains one line per annotated sound event, i.e., per annotated bird vocalization. An example of such a label file is shown in [Table 2](#table-audio-label-file). As shown, the label files must contain at least the following columns:
 
-**id**: Identifier of the audio file that is unique across all datasets.
+**id:** Identifier of the audio file that is unique across all datasets.
 
-**file_path**: Path of the audio file relative to the subdirectory containing the dataset.
+**file_path:** Path of the audio file relative to the subdirectory containing the dataset.
 
-**start**: Start time of the annotated sound event, specified in milliseconds after the beginning of the audio file.
+**start:** Start time of the annotated sound event, specified in milliseconds after the beginning of the audio file.
 
-**end**: End time of the annotated sound event, specified in milliseconds after the beginning of the audio file.
+**end:** End time of the annotated sound event, specified in milliseconds after the beginning of the audio file.
 
-**label**: Class label of the annotated sound event (must be one of the classes listed in the "categories.txt" file).
+**label:** Class label of the annotated sound event (must be one of the classes listed in the "categories.txt" file).
 
 This label format can be used to support both single-label and multi-label classification tasks. In addition, both temporally annotated and file-level annotated datasets can be processed. In the latter case, only one label is created per file, with the start time set to 0 and the end time set to the length of the audio file in milliseconds.
 
@@ -257,7 +257,7 @@ This label format can be used to support both single-label and multi-label class
     └── audio.csv
 ```
 
-**Listing <a name="listing-directory-structure-downloader">2</a>**: Example of the directory structure that is used to pass data between the data download and the spectrogram creation stage of our pipeline.
+**Listing <a name="listing-directory-structure-downloader">2</a>:** Example of the directory structure that is used to pass data between the data download and the spectrogram creation stage of our pipeline.
 
 ```
 Turdus_merula_song
@@ -266,9 +266,9 @@ Erithacus_rubecula_song
 Erithacus_rubecula_call
 ```
 
-**Listing <a name="listing-categories-file">3</a>**: Example of a "categories.txt" file used in our pipeline to list the class names used in a dataset.
+**Listing <a name="listing-categories-file">3</a>:** Example of a "categories.txt" file used in our pipeline to list the class names used in a dataset.
 
-**Table <a name="table-audio-label-file">2</a>**: Example of a label file in CSV format used for audio file labeling in our pipeline.
+**Table <a name="table-audio-label-file">2</a>:** Example of a label file in CSV format used for audio file labeling in our pipeline.
 
 | id     | file_path  | start | end    | label                   |
 | ------ | ---------- | ----- | ------ | ----------------------- |
@@ -298,9 +298,9 @@ Erithacus_rubecula_call
     └── spectrograms.csv
 ```
 
-**Listing <a name="listing-directory-structure-spectrogram-creation">4</a>**: Example of the directory structure that is used to pass data between the spectrogram creation and the model training stage of our pipeline.
+**Listing <a name="listing-directory-structure-spectrogram-creation">4</a>:** Example of the directory structure that is used to pass data between the spectrogram creation and the model training stage of our pipeline.
 
-**Table <a name="table-spectrogram-label-file">3</a>**: Example of a label file in CSV format used for spectrogram labeling in our pipeline.
+**Table <a name="table-spectrogram-label-file">3</a>:** Example of a label file in CSV format used for spectrogram labeling in our pipeline.
 
 | id     | file_path    | Turdus_merula_song | Turdus_merula_call | Erithacus_rubecula_song | Erithacus_rubecula_call |
 | ------ | ------------ | ------------------ | ------------------ | ----------------------- | ----------------------- |
@@ -316,7 +316,7 @@ Erithacus_rubecula_call
 
 To evaluate the performance of our pipeline, we used both data from the Xeno-Canto database (for model training, validation, and testing) and the NIPS4BPlus dataset (for model testing). From these, we compiled several sample datasets, each containing ten classes of bird vocalizations. The ten classes are those classes of the NIPS4BPlus dataset for which most recordings exist in Xeno-Canto.
 
-When compiling training and evaluation data from Xeno-Canto, we used different filtering criteria depending on the experiment. For our baseline experiment and hyperparameter tuning, we only used recordings that did not contain background species, had audio quality "A", and a duration of at most 180 seconds. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all datasets is shown in [Table 4](#table-xeno-canto-dataset) and Figure [3](#fig-class-distribution-audio-files). The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set (Figure [4](#fig-class-distribution-spectrograms)). To avoid strong imbalances, the number of noise spectrograms included in the datasets was limited to the number of spectrograms of the most frequent bird vocalization class. Figure [5](#fig-example-spectrograms) shows examples of spectrograms of all ten classes. For our "Additional Data" experiment, we used different filter criteria to compile larger and noisier datasets. The exact filter criteria used for this experiment are described in section [4.3](#43-additional-data).
+When compiling training and evaluation data from Xeno-Canto, we used different filtering criteria depending on the experiment. For our baseline experiment and hyperparameter tuning, we only used recordings that did not contain background species, had audio quality "A", and a duration of at most 180 seconds. A maximum of 500 audio recordings were used per class, with 60% of the recordings used for model training and 20% each for model validation and testing. The class distribution of all datasets is shown in [Table 4](#table-xeno-canto-dataset) and [Figure 3](#fig-class-distribution-audio-files). The number of spectrograms per class depends on the number and length of audio recordings and ranges from 5,374 to 22,291 spectrograms per class in the training set ([Figure 4](#fig-class-distribution-spectrograms)). To avoid strong imbalances, the number of noise spectrograms included in the datasets was limited to the number of spectrograms of the most frequent bird vocalization class. [Figure 5](#fig-example-spectrograms) shows examples of spectrograms of all ten classes. For our "Additional Data" experiment, we used different filter criteria to compile larger and noisier datasets. The exact filter criteria used for this experiment are described in section [4.3](#43-additional-data).
 
 The NIPS4Bplus dataset was used for model testing in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in [Table 5](#table-nips4bplus-dataset).
 
