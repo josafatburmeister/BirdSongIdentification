@@ -640,7 +640,7 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- keskar-batch-size -->
 
-<a name="keskar-batch-size">[18]</a> Nitish Shirish Keskar et al. "On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima". In: _CoRR_ 1609.04836 (Sept. 15, 2016). arXiv: 1609.04836. URL: https://arxiv.org/abs/1609.04836.
+<a name="cite-keskar-batch-size">[18]</a> Nitish Shirish Keskar et al. "On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima". In: _CoRR_ 1609.04836 (Sept. 15, 2016). arXiv: 1609.04836. URL: https://arxiv.org/abs/1609.04836.
 
 <!-- koh2019 -->
 
