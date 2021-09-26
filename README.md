@@ -320,7 +320,7 @@ When compiling training and evaluation data from Xeno-Canto, we used different f
 
 The NIPS4Bplus dataset was used for model testing in two different forms, which we call "NIPS4BPlus" and "filtered NIPS4BPlus". While the first form contains all audio recordings of the NIPS4BPlus dataset, the second form contains only recordings that contain at least one of the ten classes of our dataset. The class distribution of both variants is given in [Table 5](#table-nips4bplus-dataset).
 
-**Table <a name="table-xeno-canto-dataset">4</a>:** Class distribution of the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
+**Table <a name="table-xeno-canto-dataset">4</a>:** Class distribution of the Xeno-Canto datasets used for the baseline experiment and for hyperparameter tuning.
 
 | Class name                    | No. recordings in training set | No. spectrograms in training set | No. recordings in validation set | No. spectrograms in validation set | No. recordings in test set | No. spectrograms in test set |
 | ----------------------------- | ------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------- | -------------------------- | ---------------------------- |
@@ -336,6 +336,89 @@ The NIPS4Bplus dataset was used for model testing in two different forms, which 
 | Turdus philomelos, song       | 300                            | 22,291                           | 100                              | 6,901                              | 100                        | 6,995                        |
 | Noise                         | -                              | 22,291                           | -                                | 6,901                              | -                          | 6,995                        |
 | **Total**                     | **2,762**                      | **145,548**                      | **921**                          | **46,444**                         | **923**                    | **47,506**                   |
+
+![plot](./figures/section-4/3-class_distribution_recordings.png)
+
+**Figure <a name="fig-class-distribution-audio-files">3</a>:** Number of audio recordings per class for the Xeno-Canto datasets used for the baseline experiment and for hyperparameter tuning.
+
+![plot](./figures/section-4/4-class_distribution_spectrograms.png)
+
+**Figure <a name="fig-class-distribution-spectrograms">4</a>:** Number of spectrograms per class for the Xeno-Canto datasets used for the baseline experiment and for hyperparameter tuning.
+
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Cyanistes_caeruleus_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Cyanistes_caeruleus_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-a">(a)</a> <i>Cyanistes caeruleus</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Erithacus_rubecula_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Erithacus_rubecula_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-b">(b)</a> <i>Erithacus rubecula</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Fringilla_coelebs_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Fringilla_coelebs_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-c">(c)</a> <i>Fringilla coelebs</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Luscinia_megarhynchos_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Luscinia_megarhynchos_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-d">(d)</a> <i>Luscinia megarhynchos</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Parus_major_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Parus_major_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-e">(e)</a> <i>Parus major</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Phylloscopus_collybita_call-1.png" width="200"/>
+        <img src="figures/section-4/5-Phylloscopus_collybita_call-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-f">(f)</a> <i>Phylloscopus collybita</i>, call.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Phylloscopus_collybita_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Phylloscopus_collybita_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-g">(g)</a> <i>Phylloscopus collybita</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Sylvia_atricapilla_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Sylvia_atricapilla_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-h">(h)</a> <i>Sylvia atricapilla</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Troglodytes_troglodytes_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Troglodytes_troglodytes_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-i">(i)</a> <i>Troglodytes troglodytes</i>, song.</p>
+    </div>
+    <div>
+        <div style="display: flex;">
+        <img src="figures/section-4/5-Turdus_philomelos_song-1.png" width="200"/>
+        <img src="figures/section-4/5-Turdus_philomelos_song-2.png" width="200" style="margin: 0px 10px;" />
+        </div>
+        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-j">(j)</a> <i>Turdus philomelos</i>, song.</p>
+    </div>
+</div>
+
+**Figure <a name="fig-example-spectrograms">5</a>:** Examples of spectrograms for the ten classes of our datasets.
 
 **Table <a name="table-nips4bplus-dataset">5</a>:** Class distribution of the NIPS4BPlus dataset used for model evaluation.
 
@@ -354,89 +437,6 @@ The NIPS4Bplus dataset was used for model testing in two different forms, which 
 | Noise (whole NIPS4BPlus dataset)             | 549                                  | 2147                                   |
 | Noise (filtered NIPS4BPlus dataset)          | 87                                   | 333                                    |
 | **Total (filtered NIPS4BPlus / NIPS4BPlus)** | **107 / 569**                        | **486 / 2,300**                        |
-
-![plot](./figures/section-4/3-class_distribution_recordings.png)
-
-**Figure <a name="fig-class-distribution-audio-files">3</a>:** Number of audio recordings per class for the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
-
-![plot](./figures/section-4/4-class_distribution_spectrograms.png)
-
-**Figure <a name="fig-class-distribution-spectrograms">4</a>:** Number of spectrograms per class for the Xeno-Canto dataset used for training the baseline models and for tuning hyperparameters.
-
-<div style="display: flex; flex-direction: column;">
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Cyanistes_caeruleus_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Cyanistes_caeruleus_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-a">(a)</a> <i>Cyanistes caeruleus</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Erithacus_rubecula_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Erithacus_rubecula_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-b">(b)</a> <i>Erithacus rubecula</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Fringilla_coelebs_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Fringilla_coelebs_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-c">(c)</a> <i>Fringilla coelebs</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Luscinia_megarhynchos_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Luscinia_megarhynchos_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-d">(d)</a> <i>Luscinia megarhynchos</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Parus_major_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Parus_major_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-e">(e)</a> <i>Parus major</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Phylloscopus_collybita_call-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Phylloscopus_collybita_call-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-f">(f)</a> <i>Phylloscopus collybita</i>, call.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Phylloscopus_collybita_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Phylloscopus_collybita_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-g">(g)</a> <i>Phylloscopus collybita</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Sylvia_atricapilla_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Sylvia_atricapilla_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-h">(h)</a> <i>Sylvia atricapilla</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Troglodytes_troglodytes_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Troglodytes_troglodytes_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-i">(i)</a> <i>Troglodytes troglodytes</i>, song.</p>
-    </div>
-    <div>
-        <div style="display: flex;">
-        <img src="figures/section-4/5-Turdus_philomelos_song-1.png" width="200" style="border: 1px solid black;"/>
-        <img src="figures/section-4/5-Turdus_philomelos_song-2.png" width="200" style="border: 1px solid black; margin: 0px 10px;" />
-        </div>
-        <p style="text-align: center; margin: 10px 0px;"><a name="fig-example-spectrograms-j">(j)</a> <i>Turdus philomelos</i>, song.</p>
-    </div>
-</div>
-
-**Figure <a name="fig-example-spectrograms">5</a>:** Examples of spectrograms of the ten classes of our data set.
 
 ### 4.1 Baseline Setting
 
