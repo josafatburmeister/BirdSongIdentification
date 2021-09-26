@@ -767,13 +767,13 @@ On Unix or MacOS, run:
 source ./env/bin/activate
 ```
 
-To install the dependencies, run (inside the `src` directory of the repository):
+To install the dependencies, run the following command inside the `src` directory of the repository:
 
 ```bash
 python3 -m pip install -r requirements-notebook.txt
 ```
 
-To be able to import the modules from the repository, run (inside the `src` directory of the repository):
+To be able to import the modules from the repository, run the following command inside the `src` directory of the repository:
 
 ```bash
 python3 -m pip install -e .
@@ -808,7 +808,7 @@ sys.path.append('/content/BirdSongIdentification/src')
 
 ### Setting Up the File Manager
 
-As described in the section ["Data Exchange Between Pipeline Components"](#Data Exchange Between Pipeline Components), our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directory structures is implemented by the _FileManager_ class. The following code snippet creates an instance of this class:
+As described in the section ["Data Exchange Between Pipeline Components"](#data-exchange-between-pipeline-stages), our pipeline uses specific directory structures to exchange data between pipeline stages. The management of these directory structures is implemented by the _FileManager_ class. The following code snippet creates an instance of this class:
 
 ```python
 from general import FileManager
