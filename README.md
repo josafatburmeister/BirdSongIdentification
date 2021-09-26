@@ -187,7 +187,7 @@ Since the audio files from Xeno-Canto are only annotated at file level, it is un
 
 <a name="footnote-5"><sup>5</sup></a> https://librosa.org
 
-<a name="footnote-6"><sup>6<</sup>/a> https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L131
+<a name="footnote-6"><sup>6</sup></a> https://github.com/kahst/BirdCLEF2017/blob/f485a3f9083b35bdd7a276dcd1c14da3a9568d85/birdCLEF_spec.py#L131
 
 ### Stage 3: Model Training
 
