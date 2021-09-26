@@ -225,7 +225,7 @@ In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to 
 
 In Kubeflow pipelines, all outputs of the pipeline stages are stored as files and can be used as inputs for subsequent pipeline stages. Persisting the outputs increases the pipeline's robustness and facilitates failure recovery. Therefore, we follow this approach and use purely file-based interfaces to exchange data between the different stages of our pipeline. In the following, we describe these file-based interfaces in detail.
 
-[Listing 2](#listing-directory-structure-downloader) shows an example of the directory structure that is used to pass data between the data download and the spectrogram creation stage. As shown, the data download stage is required to create a file named "categories.txt" as well as a number of subdirectories, representing different datasets or different parts of a dataset (e.g., training, validation, and test set). The file "categories.txt" contains a line-by-line listing of all possible class names that may be used as labels for the audio files ([Listing 3](#listing-categories-file)). Each of the subdirectories (representing different datasets) has to contain a subdirectory named "audio" and a label file named "audio.csv". The subdirectory "audio" contains the audio files of the respective dataset, which can be grouped in further subdirectories. The label file "audio.csv" contains one line per annotated sound event, i.e., per annotated bird vocalization. An example of such a label file is shown in [Table 2](#table-audio-label-file). As shown, the label files must contain at least the following columns:
+[Listing 2](#listing-directory-structure-downloader) shows an example of the directory structure that is used to pass data between the data download and the spectrogram creation stage. As shown, the data download stage is required to create a file named "categories.txt" as well as a number of subdirectories, representing different datasets or different parts of a dataset (e.g., training, validation, and test set). The file "categories.txt" contains a line-by-line listing of all possible class names that may be used as labels for the audio files ([Listing 3](#listing-categories-file)). Each of the subdirectories representing different datasets has to contain a subdirectory named "audio" and a label file named "audio.csv". The subdirectory "audio" contains the audio files of the respective dataset, which can be grouped in further subdirectories. The label file "audio.csv" contains one line per annotated sound event, i.e., per annotated bird vocalization. An example of such a label file is shown in [Table 2](#table-audio-label-file). As shown, the label files must contain at least the following columns:
 
 **id**: Identifier of the audio file that is unique across all datasets.
 
@@ -266,7 +266,7 @@ Erithacus_rubecula_song
 Erithacus_rubecula_call
 ```
 
-**Listing <a name="listing-categories-file">3</a>**: Example of a "categories.txt" file used in our pipeline to list the labels used in a dataset.
+**Listing <a name="listing-categories-file">3</a>**: Example of a "categories.txt" file used in our pipeline to list the class names used in a dataset.
 
 **Table <a name="table-audio-label-file">2</a>**: Example of a label file in CSV format used for audio file labeling in our pipeline.
 
