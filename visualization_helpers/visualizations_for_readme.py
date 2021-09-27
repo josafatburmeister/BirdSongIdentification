@@ -178,7 +178,7 @@ def visualize_additional_data():
     ind = np.arange(9) * 1.5
     width = 0.35
 
-    #Xeno-Canto
+    # Xeno-Canto
     plt.barh(ind - width, baseline, width, label='Baseline')
     plt.barh(ind, noisy, width, label='Noisy Data')
     plt.barh(ind + width, more_data, width, label='More Data')
