@@ -652,7 +652,7 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- lasseck2013 -->
 
-<a name="cite-lasseck2013">[21]</a> Mario Lasseck. "Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition". In: _Proceedings of the Workshop on Neural Information Processing Scaled for Bioinformatics_ (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: https://www.tierstimmenarchiv.de/RefSys/Nips4b2013NotesAndSourceCode/WorkingNotes_Mario.pdf.
+<a name="cite-lasseck2013">[21]</a> Mario Lasseck. "Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition". In: _Proceedings of the Workshop on Neural Information Processing Scaled for Bioinformatics_ (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: [https://www.tierstimmenarchiv.de/&#8203;RefSys/Nips4b2013&#8203;NotesAndSourceCode/&#8203;WorkingNotes_Mario.pdf](https://www.tierstimmenarchiv.de/RefSys/Nips4b2013NotesAndSourceCode/WorkingNotes_Mario.pdf).
 
 <!-- lasseck2019 -->
 
@@ -664,7 +664,7 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- lasseck2014 -->
 
-<a name="cite-lasseck2014">[24]</a> Mario Lasseck. "Large-Scale Identification of Birds in Audio Recordings". In: _Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum_ (Sheffield, United Kingdom). Ed. by Linda Cap- pellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 585–597. URL: http://ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
+<a name="cite-lasseck2014">[24]</a> Mario Lasseck. "Large-Scale Identification of Birds in Audio Recordings". In: _Working Notes of CLEF 2014 - Conference and Labs of the Evaluation Forum_ (Sheffield, United Kingdom). Ed. by Linda Cappellato et al. Vol. 1180. CEUR Workshop Proceedings. CEUR, Sept. 2014, pp. 643-653. URL: http://ceur-ws.org/Vol-1180/CLEF2014wn-Life-Lasseck2014.pdf.
 
 <!-- birdvox -->
 
@@ -694,7 +694,7 @@ Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum_ (Avignon, Fran
 
 <!-- poland-nfc -->
 
-<a name="cite-poland-nfc">[31]</a> Hanna Pamuła et al. "Adaptation of deep learning methods to nocturnal bird audio monitoring". In: _Archives of Acoustics_ 42.3 (Sept. 30, 2017), p. 550. ISSN: 0137-5075. URL: http://c4dm.eecs.qmul.ac.uk/papers/2017/OSA_article_HPamula_etal_04082017.pdf.
+<a name="cite-poland-nfc">[31]</a> Hanna Pamuła et al. "Adaptation of deep learning methods to nocturnal bird audio monitoring". In: _Archives of Acoustics_ 42.3 (Sept. 30, 2017), p. 149-158. ISSN: 0137-5075. URL: [http://c4dm.eecs.qmul.ac.uk/&#8203;papers/&#8203;2017/&#8203;OSA*article_HPamula_etal*&#8203;04082017.pdf](#http://c4dm.eecs.qmul.ac.uk/papers/2017/OSA_article_HPamula_etal_04082017.pdf).
 
 <!-- monitoring-overview -->
 
