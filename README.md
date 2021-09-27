@@ -28,9 +28,9 @@ Since different monitoring projects focus on different bird species and research
 
 <div align="justify">
 
-An important stimulus for research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [[5](#cite-bird-clef-2014), [6](#cite-bird-clef-2015), [7](#cite-bird-clef-2016), [8](#cite-bird-clef-2017), [9](#cite-bird-clef-2018), [15](#cite-bird-clef-2019), [17](#cite-bird-clef-2020)]. The objective of this challenge is to recognize bird vocalizations in so-called _soundscape_ recordings, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [[7](#cite-bird-clef-2016)]. However, the provided training data in the BirdCLEF challenge consists mainly of so-called _focal_ recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species at a time [[7](#cite-bird-clef-2016)]. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. These recordings are usually a few minutes long and are typically focused on the vocalizations of a single individual. The Xeno-Canto database provides various metadata about the recordings, such as the recording location, recording quality, and the age and sex of the recorded bird [[41](#cite-xeno-canto)].
+An important stimulus for research in automatic bird sound recognition is the _BirdCLEF_ challenge, which has been held annually since 2014 [[5](#cite-bird-clef-2014), [6](#cite-bird-clef-2015), [7](#cite-bird-clef-2016), [8](#cite-bird-clef-2017), [9](#cite-bird-clef-2018), [15](#cite-bird-clef-2019), [16](#cite-bird-clef-2020)]. The objective of this challenge is to recognize bird vocalizations in so-called _soundscape_ recordings, which are longer, omnidirectional audio recordings that usually contain a variety of bird vocalizations [[7](#cite-bird-clef-2016)]. However, the provided training data in the BirdCLEF challenge consists mainly of so-called _focal_ recordings from the _Xeno-Canto_ database, which usually contain vocalizations of only one species at a time [[7](#cite-bird-clef-2016)]. The Xeno-Canto database is a public database that collects audio recordings of bird vocalizations worldwide. These recordings are usually a few minutes long and are typically focused on the vocalizations of a single individual. The Xeno-Canto database provides various metadata about the recordings, such as the recording location, recording quality, and the age and sex of the recorded bird [[41](#cite-xeno-canto)].
 
-Besides the Xeno-Canto database, several other datasets that include recordings of bird vocalizations are publicly available. These include the _Chernobyl_ dataset [[16](#cite-chernobyl)], the _Warblr_ dataset [[40](#cite-warblr)], the _freefield1010_ dataset [[39](#cite-freefield1010)], the _PolandNFC_ dataset [[31](#cite-poland-nfc), [40](#cite-warblr)], the _Birdvox-Full-Night_ dataset [[25](#cite-birdvox)], and the _NIPS4B_ dataset [[26](#cite-nips4bplus)]. While the other datasets mentioned before only include presence-absence tags for bird vocalizations, the NIPS4B dataset also provides species tags [[26](#cite-nips4bplus)]. The _NIPS4BPlus_ dataset provides time-precise annotations of bird vocalizations for a subset of the recordings in the NIPS4B dataset [[26](#cite-nips4bplus)].
+Besides the Xeno-Canto database, several other datasets that include recordings of bird vocalizations are publicly available. These include the _Chernobyl_ dataset [[17](#cite-chernobyl)], the _Warblr_ dataset [[40](#cite-warblr)], the _freefield1010_ dataset [[39](#cite-freefield1010)], the _PolandNFC_ dataset [[31](#cite-poland-nfc), [40](#cite-warblr)], the _Birdvox-Full-Night_ dataset [[25](#cite-birdvox)], and the _NIPS4B_ dataset [[26](#cite-nips4bplus)]. While the other datasets mentioned before only include presence-absence tags for bird vocalizations, the NIPS4B dataset also provides species tags [[26](#cite-nips4bplus)]. The _NIPS4BPlus_ dataset provides time-precise annotations of bird vocalizations for a subset of the recordings in the NIPS4B dataset [[26](#cite-nips4bplus)].
 
 Over the last years, various approaches to automated bird sound recognition have been investigated. Lassek approached the problem with random forests trained on low-level features of audio files and statistical features of spectrograms [[21](#cite-lasseck2013), [23](#cite-lasseck2015), [24](#cite-lasseck2014)]. Müller and Marti employed recurrent neural networks (RNNs) for bird sound recognition, namely an LSTM architecture [[28](#cite-muller2018)]. However, deep convolutional neural networks (DCNNs) have emerged as the most promising approach. In order to use convolutional neural networks for audio classification, spectrogram images are generated from the audio data, turning the audio classification task into an image classification task. In recent years, this approach has produced very good results in the BirdCLEF challenge [[1](#cite-bai-2020), [19](#cite-koh2019), [20](#cite-lasseck2018), [22](#cite-lasseck2019), [27](#cite-muehling2020), [33](#cite-sevilla-2017), [37](#cite-sprengel-2016)].
 
@@ -620,7 +620,7 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- jastrzebski-linear-scaling -->
 
-<a name="cite-jastrzebski-linear-scaling">[13]</a> Stanisław Jastrzebski et al. "Three Factors Influencing Minima in SGD". In: _CoRR_ 1711.04623 (Nov. 13, 2017). arXiv: 1711.04623. URL: https://arxiv.org/abs/1711.04623.
+<a name="cite-jastrzebski-linear-scaling">[13]</a> Stanisław Jastrzebski et al. "Three Factors Influencing Minima in SGD". In: _CoRR_ 1711.04623 (Sep. 13, 2018). arXiv: 1711.04623. URL: https://arxiv.org/abs/1711.04623.
 
 <!-- kahl-2017 -->
 
@@ -630,17 +630,17 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <a name="cite-bird-clef-2019">[15]</a> Stefan Kahl et al. "Overview of BirdCLEF 2019: Large-Scale Bird Recognition in Soundscapes". In: _Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum_ (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_256.pdf.
 
-<!-- chernobyl -->
-
-<a name="cite-chernobyl">[16]</a> Paul Kendrick et al. _Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone_. 2018. DOI: [10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591](https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591).
-
 <!-- bird-clef-2020 -->
 
-<a name="cite-bird-clef-2020">[17]</a> Stefan Kahl et al. "Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments". In: _Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum_ (Thessa- loniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper_262.pdf.
+<a name="cite-bird-clef-2020">[16]</a> Stefan Kahl et al. "Overview of BirdCLEF 2020: Bird Sound Recognition in Complex Acoustic Environments". In: _Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum_ (Thessaloniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–14. URL: http://ceur-ws.org/Vol-2696/paper_262.pdf.
+
+<!-- chernobyl -->
+
+<a name="cite-chernobyl">[17]</a> Paul Kendrick et al. _Bird Vocalisation Activity (BiVA) database: annotated soundscapes from the Chernobyl Exclusion Zone_. Sept. 10, 2018. DOI: [10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591](https://doi.org/10.5285/be5639e9-75e9-4aa3-afdd-65ba80352591).
 
 <!-- keskar-batch-size -->
 
-<a name="cite-keskar-batch-size">[18]</a> Nitish Shirish Keskar et al. "On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima". In: _CoRR_ 1609.04836 (Sept. 15, 2016). arXiv: 1609.04836. URL: https://arxiv.org/abs/1609.04836.
+<a name="cite-keskar-batch-size">[18]</a> Nitish Shirish Keskar et al. "On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima". In: _CoRR_ 1609.04836 (Feb. 9, 2017). arXiv: 1609.04836. URL: https://arxiv.org/abs/1609.04836.
 
 <!-- koh2019 -->
 
@@ -652,7 +652,7 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- lasseck2013 -->
 
-<a name="cite-lasseck2013">[21]</a> Mario Lasseck. "Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition". In: _Proceedings of the Workshop on Neural Information Processing Scaled for Bioinformatics_ (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: http://sabiod.lis-lab.fr/nips4b/.
+<a name="cite-lasseck2013">[21]</a> Mario Lasseck. "Bird Song Classification in Field Recordings: Winning Solution for NIPS4B 2013 Competition". In: _Proceedings of the Workshop on Neural Information Processing Scaled for Bioinformatics_ (Lake Tahoe, USA). Ed. by Hervé Glotin et al. Jan. 2013, pp. 176–181. URL: https://www.tierstimmenarchiv.de/RefSys/Nips4b2013NotesAndSourceCode/WorkingNotes_Mario.pdf.
 
 <!-- lasseck2019 -->
 
