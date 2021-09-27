@@ -703,7 +703,7 @@ _Nature Conservation_ 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: [10.3897
 
 <!-- sevilla-2017 -->
 
-<a name="cite-sevilla-2017">[33]</a> Antoine Sevilla and Hervé Glotin. "Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms". In: \*Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum\* (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_177.pdf.
+<a name="cite-sevilla-2017">[33]</a> Antoine Sevilla and Hervé Glotin. "Audio Bird Classification with Inception-v4 extended with Time and Time-Frequency Attention Mechanisms". In: _Working Notes of CLEF 2017 - Conference and Labs of the Evaluation Forum_ (Dublin, Ireland). Ed. by Linda Cappellato et al. Vol. 1866. CEUR Workshop Proceedings. CEUR, Sept. 2017, pp. 1–8. URL: http://ceur-ws.org/Vol-1866/paper_177.pdf.
 
 <!-- smith2019hyperparameter -->
 
@@ -711,7 +711,7 @@ _Nature Conservation_ 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: [10.3897
 
 <!-- smith2020hyperparameter -->
 
-<a name="cite-smith2020hyperparameter">[35]</a> Samuel L. Smith, Erich Elsen, and Soham De. "On the Generalization Benefit of Noise in Stochastic Gradient Descent". In: _CoRR_ 2006.15081 (June 26, 2020). arXiv: 2006.150817. URL: https: //arxiv.org/abs/2006.15081.
+<a name="cite-smith2020hyperparameter">[35]</a> Samuel L. Smith, Erich Elsen, and Soham De. "On the Generalization Benefit of Noise in Stochastic Gradient Descent". In: _CoRR_ 2006.15081 (June 26, 2020). arXiv: 2006.150817. URL: https://arxiv.org/abs/2006.15081.
 
 <!-- rcnn -->
 
@@ -723,15 +723,15 @@ _Nature Conservation_ 2 (Aug. 2012), pp. 41–57. ISSN: 1314-6947. DOI: [10.3897
 
 <!-- dropout -->
 
-<a name="cite-dropout">[38]</a> Nitish Srivastava et al. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting". In: _Journal of Machine Learning Research_ 15.1 (Jan. 2014), pp. 1929–1958. ISSN: 1533-7928. URL: http://jmlr.org/papers/v15/srivastava14a.html.
+<a name="cite-dropout">[38]</a> Nitish Srivastava et al. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting". In: _Journal of Machine Learning Research_ 15.1 (Jan. 2014), pp. 1929–1958. ISSN: 1533-7928. URL: [http://jmlr.org/&#8203;papers/v15/&#8203;srivastava14a.html](http://jmlr.org/papers/v15/srivastava14a.html).
 
 <!-- freefield1010” -->
 
-<a name="cite-freefield1010">[39]</a> Dan Stowell and Mark D. Plumbley. "An open dataset for research on audio field recording archives: freefield1010". In: _CoRR_ 1309.5275 (Sept. 20, 2013), pp. 1–10. URL: http://arxiv.org/abs/1309.5275.
+<a name="cite-freefield1010">[39]</a> Dan Stowell and Mark D. Plumbley. "An open dataset for research on audio field recording archives: freefield1010". In: _CoRR_ 1309.5275 (Oct. 1, 2013), pp. 1–10. URL: http://arxiv.org/abs/1309.5275.
 
 <!-- warblr -->
 
-<a name="cite-warblr">[40]</a> Dan Stowell et al. "Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge". In: _Methods in Ecology and Evolution_ 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: [10.1111/2041-210X.13103](10.1111/2041-210X.13103).
+<a name="cite-warblr">[40]</a> Dan Stowell et al. "Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge". In: _Methods in Ecology and Evolution_ 10.3 (Mar. 2019), pp. 368–380. ISSN: 2041-210X. DOI: [10.1111/2041-210X.13103](https://doi.org/10.1111/2041-210X.13103).
 
 <!-- xeno-canto -->
 
