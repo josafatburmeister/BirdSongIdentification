@@ -339,7 +339,7 @@ def build_docker_image(docker_registry: str, cwd: str = ".", rebuild_prebuild_im
                         "PREBUILD_IMAGE=bird-song-prebuild", "."], cwd=cwd, check=True)
         subprocess.run(["docker", "push", f"{docker_registry}/bird-song-identification:latest"], cwd=cwd, check=True)
     except subprocess.CalledProcessError:
-        raise NameError(f"Could build docker image")
+        raise NameError(f"Could not build docker image")
 
 
 if __name__ == "__main__":
