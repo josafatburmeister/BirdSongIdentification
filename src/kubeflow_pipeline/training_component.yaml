@@ -157,7 +157,7 @@ outputs:
   - { name: Pipeline Metrics, type: Metrics }
 implementation:
   container:
-    image: us.gcr.io/gcp-bakdata-kubeflow-cluster/bird-song-identification:latest
+    image: bird-song-identification:latest
     command:
       [
         python,
