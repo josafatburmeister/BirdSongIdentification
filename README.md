@@ -694,7 +694,7 @@ Notes of CLEF 2018 - Conference and Labs of the Evaluation Forum_ (Avignon, Fran
 
 <!-- poland-nfc -->
 
-<a name="cite-poland-nfc">[31]</a> Hanna Pamuła et al. "Adaptation of deep learning methods to nocturnal bird audio monitoring". In: _Archives of Acoustics_ 42.3 (Sept. 30, 2017), p. 149-158. ISSN: 0137-5075. URL: [http://c4dm.eecs.qmul.ac.uk/&#8203;papers/&#8203;2017/&#8203;OSA*article_HPamula_etal*&#8203;04082017.pdf](#http://c4dm.eecs.qmul.ac.uk/papers/2017/OSA_article_HPamula_etal_04082017.pdf).
+<a name="cite-poland-nfc">[31]</a> Hanna Pamuła et al. "Adaptation of deep learning methods to nocturnal bird audio monitoring". In: _Archives of Acoustics_ 42.3 (Sept. 30, 2017), p. 149-158. ISSN: 0137-5075. URL: [http://c4dm.eecs.qmul.ac.uk/&#8203;papers/&#8203;2017/&#8203;OSA*article_HPamula_etal*&#8203;04082017.pdf](http://c4dm.eecs.qmul.ac.uk/papers/2017/OSA_article_HPamula_etal_04082017.pdf).
 
 <!-- monitoring-overview -->
 
