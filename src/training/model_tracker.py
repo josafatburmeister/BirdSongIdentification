@@ -133,7 +133,7 @@ class ModelTracker:
         model_path = os.path.join(self.path.model_dir(), self.experiment_name, model_name)
         if run_id:
             model_path.replace(".pt", f"_{run_id}.pt")
-        self.__save_model(model, model_path)
+        self.__save_model(model.state_dict(), model_path)
 
     def save_best_models(self, run_id: str) -> None:
         """
