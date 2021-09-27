@@ -574,11 +574,11 @@ In this work, we successfully implemented an end-to-end machine learning pipelin
 
 <!-- bai-2020 -->
 
-<a name="cite-bai-2020">[1]</a> Jisheng Bai, Chen Chen, and Jianfeng Chen. "Xception Based Method for Bird Sound Recognition of BirdCLEF 2020". In: Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum (Thessaloniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–9. URL: http://ceur-ws.org/Vol-2696/paper_127.pdf.
+<a name="cite-bai-2020">[1]</a> Jisheng Bai, Chen Chen, and Jianfeng Chen. "Xception Based Method for Bird Sound Recognition of BirdCLEF 2020". In: _Working Notes of CLEF 2020 - Conference and Labs of the Evaluation Forum_ (Thessaloniki, Greece). Ed. by Linda Cappellato et al. Vol. 2696. CEUR Workshop Proceedings. CEUR, Sept. 2020, pp. 1–9. URL: http://ceur-ws.org/Vol-2696/paper_127.pdf.
 
 <!-- bai-2019 -->
 
-<a name="cite-bai-2019">[2]</a> Jisheng Bai et al. "Inception-v3 Based Method of LifeCLEF 2019 Bird Recognition". In: _Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum_ (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–9. URL: http://ceur-ws.org/Vol-2380/paper_52.pdf.
+<a name="cite-bai-2019">[2]</a> Jisheng Bai et al. "Inception-v3 Based Method of LifeCLEF 2019 Bird Recognition". In: _Working Notes of CLEF 2019 - Conference and Labs of the Evaluation Forum_ (Lugano, Switzerland). Ed. by Linda Cappellato et al. Vol. 2380. CEUR Workshop Proceedings. CEUR, July 2019, pp. 1–6. URL: http://ceur-ws.org/Vol-2380/paper_52.pdf.
 
 <!-- image-net -->
 
