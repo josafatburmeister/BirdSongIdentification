@@ -215,7 +215,7 @@ In the model evaluation stage, the best models from the training stage are evalu
 
 3. Models with the highest F<sub>1</sub>-scores for each class
 
-In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the models' performances. As in the training stage, the macro-average F<sub>1</sub>-score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
+In our use case, we use test data from Xeno-Canto and the NIPS4BPlus dataset to evaluate the performance of the models. As in the training stage, the macro-average F<sub>1</sub>-score is used as the primary evaluation metric. Although model evaluation is conceptually a separate pipeline stage, in our Kubeflow pipeline we have implemented model training and evaluation as a joint pipeline component for performance reasons.
 
 </div>
 
