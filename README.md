@@ -70,9 +70,9 @@ Conceptually, our machine learning pipeline consists of the following four stage
 
 All pipeline steps are implemented by Python classes, which are described in more detail in the following sections. To support a wide range of applications, our pipeline can be run as both a Jupyter notebook[<sup>1</sup>](#footnote-1) and a Kubeflow pipeline.[<sup>2</sup>](#footnote-2) Both variants use the same Python implementation, with the user interface of our Kubeflow pipeline mapping directly to the interfaces of our Python classes.
 
-![Architecture of our machine learning pipeline for bird sound recognition](./figures/section-3/1-pipeline.jpg)
+![Stages of our machine learning pipeline for bird sound recognition](./figures/section-3/1-pipeline.jpg)
 
-**Figure <a name="fig-pipeline">1</a>:** Architecture of our machine learning pipeline for bird sound recognition.
+**Figure <a name="fig-pipeline">1</a>:** Stages of our machine learning pipeline for bird sound recognition.
 
 <a name="footnote-1"><sup>1</sup></a> https://jupyter.org
 
