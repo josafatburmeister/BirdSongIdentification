@@ -749,7 +749,7 @@ The individual steps of our pipeline are implemented by Python classes. To run t
 
 ### Local Installation of Dependencies
 
-Our pipeline requires Python 3.7 or higher and Jupyter, please make sure that both are installed. We recommend installing the dependencies of our pipeline in a virtual environment. To create a virtual environment, run the `venv` module inside the directory where you want to create the virtual environment:
+Our pipeline requires Python 3.7 or higher and Jupyter, please make sure that both are installed. We recommend installing the dependencies of our pipeline in a virtual environment. To create a virtual environment, run the `venv` module inside the repository:
 
 ```bash
 python3 -m venv env
@@ -786,7 +786,7 @@ When running the pipeline, make sure that your Jupyter kernel uses the Python in
 Besides local Jupyter notebooks, [Google Colab](https://colab.research.google.com/) can also be used to run our pipeline. To set up the pipeline in Google Colab, create an empty Colab notebook and clone the repository:
 
 ```bash
-!git clone github.com/josafatburmeister/BirdSongIdentification
+!git clone https://github.com/josafatburmeister/BirdSongIdentification.git
 ```
 
 To install the dependencies, run:
@@ -999,7 +999,7 @@ for confidence_threshold in [0.3, 0.4, 0.5]:
 
 ## Running the Pipeline in Kubeflow
 
-To run the pipeline in Kubeflow, a Kubernetes cluster with a [Kubeflow](https://www.kubeflow.org/docs/started/installing-kubeflow/) installation is required. Currently, our pipeline supports Kubeflow version 1.0.0. If you have such a Kubeflow cluster available, the pipeline can be run on it as follows:
+To run the pipeline in Kubeflow, a Kubernetes cluster with a [Kubeflow](https://www.kubeflow.org/docs/started/installing-kubeflow/) installation is required. Currently, our pipeline supports Kubeflow version 1. If you have such a Kubeflow cluster available, the pipeline can be run on it as follows:
 
 First, the Kubeflow pipeline definition must be compiled. To compile a pipeline definition for a cluster with only CPU nodes, insert the name of your cluster's Docker registry in the following command and run it within the `src` directory of the repository:
 
@@ -1041,7 +1041,7 @@ To apply our machine learning pipeline to another dataset than Xeno-Canto or NIP
 
 3. A label file in CSV format must be placed under the path `/data/test/audio.csv`. This label file must have the format shown in [Table 2](#table-audio-label-file).
 
-To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the `/data` directory.
+To facilitate the implementation of custom downloaders, we provide a _Downloader_ class in the `downloader` module of our repository. This class provides several helper functions and can be used as base class for custom downloaders. The constructor of the Downloader class takes a FileManager object as an argument. The FileManager object must be initialized with the path of the directory where the dataset is to be created. In the above example, the FileManager would be initialized with the path "/data".
 
 By deriving custom downloader classes from the Downloader class, the following utility functions can be used:
 
@@ -1053,11 +1053,11 @@ By deriving custom downloader classes from the Downloader class, the following u
 
 ### Implementing Custom Spectrogram Creation Methods
 
-To implement custom spectrogram creation methods, we recommend creating a custom class that is derived from the SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectrogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
+To implement custom spectrogram creation methods, we recommend creating a custom class that is derived from our SpectrogramCreator class. The derived class should override the method `__get_spectrogram`. This method receives a Numpy ndarray as input containing the amplitude values of the audio chunk for which the spectrogram is to be created. General parameters of spectrogram creation, such as hop length, window length, minimum frequency, and maximum frequency can be accessed as instance attributes of the SpectrogramCreator class.
 
 ### Implementing Custom Model Architectures
 
-To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fulfil the following requirements:
+To integrate custom model architectures into the pipeline, a custom model class needs to be created in the `models` module of our repository and the model class needs to be registered in the `model_architectures` dictionary of the module's `__init__.py`. A custom model class needs to fulfil the following requirements:
 
 1. The model needs to be implemented in Pytorch and should be derived from the `torch.nn.Module` class.
 
