@@ -13,11 +13,12 @@ class DenseNet121TransferLearning(densenet.DenseNet):
     DenseNet121 pre-trained on the ImageNet dataset.
     """
 
-    def __init__(self, num_classes: int = 2, layers_to_unfreeze: Optional[Union[str, List[str]]] = None,
+    def __init__(self, architecture: str, num_classes: int = 2, layers_to_unfreeze: Optional[Union[str, List[str]]] = None,
                  logger: Optional[VerboseLogger] = None, p_dropout: float = 0) -> None:
         """
 
         Args:
+            architecture: Only needed for interface compatibility, should be set to "densenet121".
             num_classes: Number of classes in the dataset used to fine-tune the model.
             layers_to_unfreeze: List of model layer names to be unfrozen for fine-tuning; if set to "all", all model
                 layers will be fine-tuned.
