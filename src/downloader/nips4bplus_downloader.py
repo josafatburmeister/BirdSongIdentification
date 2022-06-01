@@ -159,9 +159,12 @@ class NIPS4BPlusDownloader(Downloader):
             if file.endswith(".csv"):
                 try:
                     labels = pd.read_csv(label_file_path, names=["start", "duration", "label"])
+                    if len(labels) == 0:
+                        raise(pd.errors.EmptyDataError) # in Colab this error is not thrown for empty CSV files
+
                     labels["label"] = labels.apply(map_class_names, axis=1)
                 except pd.errors.EmptyDataError:
-                    labels = pd.DataFrame([0, 5, "noise"], columns=["start", "duration", "label"])
+                    labels = pd.DataFrame([[0, 5, "noise"]], columns=["start", "duration", "label"])
 
                 file_id = file.lstrip("annotation_train").rstrip(".csv")
 
